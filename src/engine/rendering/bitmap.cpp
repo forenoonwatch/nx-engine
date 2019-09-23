@@ -2,7 +2,7 @@
 
 #include "stbi/stb_image.h"
 
-#include <cstring>
+#include "core/memory.hpp"
 
 Bitmap::Bitmap(int32 width, int32 height)
 		: width(width)
@@ -13,11 +13,11 @@ Bitmap::Bitmap(int32 width, int32 height, int32* inPixels)
 		: width(width)
 		, height(height)
 		, pixels(new int32[width * height]) {
-	std::memcpy(pixels, inPixels, calcPixelsSize());
+	Memory::memcpy(pixels, inPixels, calcPixelsSize());
 }
 
 void Bitmap::clear() {
-	std::memset(pixels, 0, calcPixelsSize());
+	Memory::memset(pixels, 0, calcPixelsSize());
 }
 
 bool Bitmap::load(const String& fileName) {
@@ -40,7 +40,7 @@ bool Bitmap::load(const String& fileName) {
 		pixels = new int32[width * height];
 	}
 
-	std::memcpy(pixels, data, calcPixelsSize());
+	Memory::memcpy(pixels, data, calcPixelsSize());
 	stbi_image_free(data);
 
 	return true;

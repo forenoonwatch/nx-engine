@@ -1,9 +1,10 @@
 #include "rendering/dds-texture.hpp"
 
+#include "core/memory.hpp"
+
 #include <GL/glew.h>
 
 #include <cstdio>
-#include <cstring>
 
 // caps1
 #define DDSCAPS_COMPLEX             0x00000008 

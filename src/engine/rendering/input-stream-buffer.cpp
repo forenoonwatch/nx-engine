@@ -1,6 +1,6 @@
 #include "rendering/input-stream-buffer.hpp"
 
-#include <cstring>
+#include "core/memory.hpp"
 
 InputStreamBuffer::InputStreamBuffer(RenderContext& context,
 			uint32 numAttribs, const uint32* attribSizes,
@@ -59,8 +59,8 @@ void InputStreamBuffer::update(const void* data, uintptr dataSize) {
 
 	void* buffer = glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
 
-	std::memcpy(buffer, data, dataSize);
-	std::memset((void*)((uintptr)buffer + dataSize), 0, bufferSize - dataSize);
+	Memory::memcpy(buffer, data, dataSize);
+	Memory::memset((void*)((uintptr)buffer + dataSize), 0, bufferSize - dataSize);
 
 	glUnmapBuffer(GL_ARRAY_BUFFER);
 

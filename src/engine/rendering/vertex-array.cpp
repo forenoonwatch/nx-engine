@@ -1,6 +1,6 @@
 #include "rendering/vertex-array.hpp"
 
-#include <cstring>
+#include "core/memory.hpp"
 
 VertexArray::VertexArray(RenderContext& context,
 			const IndexedModel& model, uint32 usage)
@@ -49,7 +49,7 @@ VertexArray::VertexArray(RenderContext& context,
 	glGenVertexArrays(1, &arrayID);
 	context.setVertexArray(arrayID);
 
-	std::memcpy(buffers, vertexArray.buffers, numBuffers * sizeof(GLuint));
+	Memory::memcpy(buffers, vertexArray.buffers, numBuffers * sizeof(GLuint));
 
 	glGenBuffers(numOwnedBuffers, buffers + instancedComponentStartIndex);
 
@@ -137,7 +137,7 @@ VertexArray::VertexArray(RenderContext& context,
 	glGenVertexArrays(1, &arrayID);
 	context.setVertexArray(arrayID);
 
-	std::memcpy(buffers, vertexArray.buffers,
+	Memory::memcpy(buffers, vertexArray.buffers,
 			model.getNumVertexComponents() * sizeof(GLuint));
 
 	buffers[numBuffers - 2] = tfb.getBuffer(bufferNum);

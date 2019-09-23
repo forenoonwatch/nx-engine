@@ -1,6 +1,6 @@
 #include "core/application.hpp"
 
-#include <cstring>
+#include "core/memory.hpp"
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -36,8 +36,8 @@ void Application::init() {
 }
 
 void Application::pollEvents() {
-	std::memcpy(lastKeys, keys, sizeof(keys));
-	std::memcpy(lastMouseButtons, mouseButtons, sizeof(mouseButtons));
+	Memory::memcpy(lastKeys, keys, sizeof(keys));
+	Memory::memcpy(lastMouseButtons, mouseButtons, sizeof(mouseButtons));
 	
 	glfwPollEvents();
 }

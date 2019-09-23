@@ -1,6 +1,6 @@
 #include "rendering/uniform-buffer.hpp"
 
-#include <cstring>
+#include "core/memory.hpp"
 
 UniformBuffer::UniformBuffer(RenderContext& context, uintptr dataSize,
 			uint32 usage, uint32 blockBinding, const void* data)
@@ -20,7 +20,7 @@ void UniformBuffer::update(const void* data, uintptr dataSize) {
 	glBindBuffer(GL_UNIFORM_BUFFER, bufferID);
 
 	void* dest = glMapBuffer(GL_UNIFORM_BUFFER, GL_WRITE_ONLY);
-	std::memcpy(dest, data, dataSize);
+	Memory::memcpy(dest, data, dataSize);
 	glUnmapBuffer(GL_UNIFORM_BUFFER);
 }
 
@@ -28,7 +28,7 @@ void UniformBuffer::update(const void* data, uintptr offset, uintptr dataSize) {
 	glBindBuffer(GL_UNIFORM_BUFFER, bufferID);
 
 	void* dest = glMapBuffer(GL_UNIFORM_BUFFER, GL_WRITE_ONLY);
-	std::memcpy((void*)((uintptr)dest + offset), data, dataSize);
+	Memory::memcpy((void*)((uintptr)dest + offset), data, dataSize);
 	glUnmapBuffer(GL_UNIFORM_BUFFER);
 }
 

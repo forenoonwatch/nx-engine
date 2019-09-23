@@ -1,6 +1,6 @@
 #include "rendering/shader-storage-buffer.hpp"
 
-#include <cstring>
+#include "core/memory.hpp"
 
 ShaderStorageBuffer::ShaderStorageBuffer(RenderContext& context, uintptr dataSize,
 			uint32 usage, uint32 blockBinding, const void* data)
@@ -20,7 +20,7 @@ void ShaderStorageBuffer::update(const void* data, uintptr dataSize) {
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, bufferID);
 
 	void* dest = glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_WRITE_ONLY);
-	std::memcpy(dest, data, dataSize);
+	Memory::memcpy(dest, data, dataSize);
 	glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
 }
 
@@ -28,7 +28,7 @@ void ShaderStorageBuffer::update(const void* data, uintptr offset, uintptr dataS
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, bufferID);
 
 	void* dest = glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_WRITE_ONLY);
-	std::memcpy((void*)((uintptr)dest + offset), data, dataSize);
+	Memory::memcpy((void*)((uintptr)dest + offset), data, dataSize);
 	glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
 }
 
