@@ -1,9 +1,9 @@
 #pragma once
 
-#include <GLM/glm.hpp>
-
 #include "engine/core/array-list.hpp"
 #include "engine/core/hash-map.hpp"
+
+#include "engine/math/matrix.hpp"
 
 #include "engine/rendering/uniform-buffer.hpp"
 #include "engine/rendering/shader-storage-buffer.hpp"
@@ -34,10 +34,10 @@ class Shader {
 		void setInt(const String& name, int32 value);
 		void setFloat(const String& name, float value);
 
-		void setVector2f(const String& name, const glm::vec2& value);
-		void setVector3f(const String& name, const glm::vec3& value);
+		void setVector2f(const String& name, const Vector2f& value);
+		void setVector3f(const String& name, const Vector3f& value);
 
-		void setMatrix4f(const String& name, const glm::mat4& value);
+		void setMatrix4f(const String& name, const Matrix4f& value);
 
 		inline int32 getUniform(const String& name) { return uniformMap[name]; }
 

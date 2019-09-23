@@ -1,7 +1,5 @@
 #include "rendering/shader.hpp"
 
-#include <GLM/gtc/type_ptr.hpp>
-
 #define SHADER_INFO_LOG_SIZE	1024
 
 static bool addShader(GLuint program, const String& text,
@@ -126,19 +124,19 @@ void Shader::setFloat(const String& name, float value) {
 	glUniform1f(uniformMap[name], value);
 }
 
-void Shader::setVector2f(const String& name, const glm::vec2& value) {
+void Shader::setVector2f(const String& name, const Vector2f& value) {
 	context->setShader(programID);
-	glUniform2fv(uniformMap[name], 1, glm::value_ptr(value));
+	glUniform2fv(uniformMap[name], 1, (const float*)&value);
 }
 
-void Shader::setVector3f(const String& name, const glm::vec3& value) {
+void Shader::setVector3f(const String& name, const Vector3f& value) {
 	context->setShader(programID);
-	glUniform3fv(uniformMap[name], 1, glm::value_ptr(value));
+	glUniform3fv(uniformMap[name], 1, (const float*)&value);
 }
 
-void Shader::setMatrix4f(const String& name, const glm::mat4& value) {
+void Shader::setMatrix4f(const String& name, const Matrix4f& value) {
 	context->setShader(programID);
-	glUniformMatrix4fv(uniformMap[name], 1, false, glm::value_ptr(value));
+	glUniformMatrix4fv(uniformMap[name], 1, false, (const float*)&value);
 }
 
 Shader::~Shader() {

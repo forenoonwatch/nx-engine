@@ -1,0 +1,27 @@
+#pragma once
+
+#include "engine/math/vector.hpp"
+
+#include <GLM/gtc/matrix_transform.hpp>
+
+#define Matrix4f glm::mat4
+
+namespace Math {
+	template <typename T>
+	FORCEINLINE T inverse(const T& matrix) {
+		return glm::inverse(matrix);
+	}
+
+	FORCEINLINE Matrix4f translate(const Matrix4f& matrix, const Vector3f& translation) {
+		return glm::translate(matrix, translation);
+	}
+
+	FORCEINLINE Matrix4f rotate(const Matrix4f& matrix, float angle,
+			const Vector3f& axis) {
+		return glm::rotate(matrix, angle, axis);
+	}
+
+	FORCEINLINE Matrix4f scale(const Matrix4f& matrix, const Vector3f& size) {
+		return glm::scale(matrix, size);
+	}
+};
