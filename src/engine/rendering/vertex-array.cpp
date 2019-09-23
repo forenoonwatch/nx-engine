@@ -20,7 +20,7 @@ VertexArray::VertexArray(RenderContext& context,
 
 	glGenBuffers(numBuffers, buffers);
 
-	std::vector<const float*> vertexData = model.getVertexData();
+	ArrayList<const float*> vertexData = model.getVertexData();
 	initVertexBuffers(model.getNumVertexComponents(), &vertexData[0],
 			model.getNumVertices(), model.getElementSizes(), true);
 
@@ -53,7 +53,7 @@ VertexArray::VertexArray(RenderContext& context,
 
 	glGenBuffers(numOwnedBuffers, buffers + instancedComponentStartIndex);
 
-	std::vector<const float*> vertexData = model.getVertexData();
+	ArrayList<const float*> vertexData = model.getVertexData();
 	initVertexBuffers(model.getNumVertexComponents(), &vertexData[0],
 			model.getNumVertices(), model.getElementSizes(), false);
 
@@ -105,7 +105,7 @@ VertexArray::VertexArray(RenderContext& context,
 
 	buffers[numBuffers - 2] = tfb.getBuffer(bufferNum);
 
-	std::vector<const float*> vertexData = model.getVertexData();
+	ArrayList<const float*> vertexData = model.getVertexData();
 	initSharedBuffers(model.getNumVertexComponents(), &vertexData[0],
 			model.getNumVertices(), model.getElementSizes(),
 			tfb.getNumAttribs(), tfb.getAttribSizes(),
@@ -143,7 +143,7 @@ VertexArray::VertexArray(RenderContext& context,
 	buffers[numBuffers - 2] = tfb.getBuffer(bufferNum);
 	buffers[numBuffers - 1] = vertexArray.buffers[vertexArray.numBuffers - 1];
 
-	std::vector<const float*> vertexData = model.getVertexData();
+	ArrayList<const float*> vertexData = model.getVertexData();
 	initSharedBuffers(model.getNumVertexComponents(), &vertexData[0],
 			model.getNumVertices(), model.getElementSizes(),
 			tfb.getNumAttribs(), tfb.getAttribSizes(),

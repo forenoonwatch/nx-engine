@@ -2,7 +2,7 @@
 
 #include "engine/core/common.hpp"
 
-#include <vector>
+#include "engine/core/array-list.hpp"
 
 class IndexedModel {
 	public:
@@ -27,7 +27,7 @@ class IndexedModel {
 		void addIndices3i(uint32 i0, uint32 i1, uint32 i2);
 		void addIndices4i(uint32 i0, uint32 i1, uint32 i2, uint32 i3);
 
-		inline std::vector<const float*> getVertexData() const;
+		inline ArrayList<const float*> getVertexData() const;
 		inline const uint32* getIndices() const;
 		inline const uint32* getElementSizes() const;
 
@@ -40,9 +40,9 @@ class IndexedModel {
 
 		inline float getElement(uint32 elementIndex, uint32 arrayIndex) const;
 	private:
-		std::vector<uint32> indices;
-		std::vector<uint32> elementSizes;
-		std::vector<std::vector<float>> elements;
+		ArrayList<uint32> indices;
+		ArrayList<uint32> elementSizes;
+		ArrayList<ArrayList<float>> elements;
 
 		uint32 instancedElementStartIndex;
 };

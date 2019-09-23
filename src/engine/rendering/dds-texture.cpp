@@ -20,7 +20,7 @@
 #define DDSCAPS2_CUBEMAP_NEGATIVEZ  0x00008000 
 #define DDSCAPS2_VOLUME             0x00200000 
 
-bool DDSTexture::load(const std::string& fileName) {
+bool DDSTexture::load(const String& fileName) {
 	FILE* file = fopen(fileName.c_str(), "rb");
 
 	if (file == nullptr) {

@@ -1,8 +1,8 @@
 #pragma once
 
 #include "engine/core/common.hpp"
+#include "engine/core/string.hpp"
 
-#include <string>
 #include <GL/glew.h>
 
 class Shader;
@@ -67,7 +67,7 @@ class RenderContext {
 		void setBlending(enum BlendFunc srcBlend, enum BlendFunc destBlend);
 
 		uint32 getVersion();
-		std::string getShaderVersion();
+		String getShaderVersion();
 
 		void setViewport(uint32, uint32);
 
@@ -84,7 +84,7 @@ class RenderContext {
 		VertexArray* screenQuad;
 
 		uint32 version;
-		std::string shaderVersion;
+		String shaderVersion;
 
 		uint32 viewportWidth;
 		uint32 viewportHeight;

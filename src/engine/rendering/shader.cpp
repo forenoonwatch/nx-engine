@@ -4,26 +4,26 @@
 
 #define SHADER_INFO_LOG_SIZE	1024
 
-static bool addShader(GLuint program, const std::string& text,
-		GLenum type, std::vector<uint32>& shaders);
+static bool addShader(GLuint program, const String& text,
+		GLenum type, ArrayList<uint32>& shaders);
 static bool checkShaderError(uint32 shader, GLenum flag,
-		bool isProgram, const std::string& errorMessage);
+		bool isProgram, const String& errorMessage);
 
 static void addShaderUniforms(GLuint program,
-		std::unordered_map<std::string, int32>& uniformBlockMap,
-		std::unordered_map<std::string, int32>& samplerMap,
-		std::unordered_map<std::string, int32>& uniformMap); 
+		HashMap<String, int32>& uniformBlockMap,
+		HashMap<String, int32>& samplerMap,
+		HashMap<String, int32>& uniformMap); 
 
-Shader::Shader(RenderContext& context, const std::string& text,
+Shader::Shader(RenderContext& context, const String& text,
 			const char** feedbackVaryings, uintptr numFeedbackVaryings,
 			uint32 varyingCaptureMode)
 		: context(&context)
 		, programID(glCreateProgram()) {
-	std::string version = "#version " + context.getShaderVersion()
+	String version = "#version " + context.getShaderVersion()
 		+ "\n#define GLSL_VERSION " + context.getShaderVersion();
 
-	if (text.find("CS_BUILD") != std::string::npos) {
-		std::string computeShaderText = version
+	if (text.find("CS_BUILD") != String::npos) {
+		String computeShaderText = version
 			+ "\n#define CS_BUILD\n" + text;
 
 		if (!addShader(programID, computeShaderText, GL_COMPUTE_SHADER, shaders)) {
@@ -31,9 +31,9 @@ Shader::Shader(RenderContext& context, const std::string& text,
 		}
 	}
 	else {
-		std::string vertexShaderText = version
+		String vertexShaderText = version
 			+ "\n#define VS_BUILD\n" + text;
-		std::string fragmentShaderText = version
+		String fragmentShaderText = version
 			+ "\n#define FS_BUILD\n" + text;
 
 		if (!addShader(programID, vertexShaderText, GL_VERTEX_SHADER, shaders)) {
@@ -44,8 +44,8 @@ Shader::Shader(RenderContext& context, const std::string& text,
 			throw std::runtime_error("Failed to load fragment shader");
 		}
 
-		if (text.find("GS_BUILD") != std::string::npos) {
-			std::string geomShaderText = version
+		if (text.find("GS_BUILD") != String::npos) {
+			String geomShaderText = version
 				+ "\n#define GS_BUILD\n" + text;
 
 			if (!addShader(programID, geomShaderText, GL_GEOMETRY_SHADER, shaders)) {
@@ -78,18 +78,18 @@ Shader::Shader(RenderContext& context, const std::string& text,
 			samplerMap, uniformMap);
 }
 
-void Shader::setUniformBuffer(const std::string& name, UniformBuffer& buffer) {
+void Shader::setUniformBuffer(const String& name, UniformBuffer& buffer) {
 	glUniformBlockBinding(programID, uniformBlockMap[name],
 			buffer.getBlockBinding());
 }
 
-void Shader::setShaderStorageBuffer(const std::string& name,
+void Shader::setShaderStorageBuffer(const String& name,
 		ShaderStorageBuffer& buffer) {
 	glUniformBlockBinding(programID, uniformBlockMap[name],
 			buffer.getBlockBinding());
 }
 
-void Shader::setSampler(const std::string& name, Texture& texture,
+void Shader::setSampler(const String& name, Texture& texture,
 		Sampler& sampler, uint32 textureUnit) {
 	context->setShader(programID);
 
@@ -99,7 +99,7 @@ void Shader::setSampler(const std::string& name, Texture& texture,
 	glUniform1i(samplerMap[name], textureUnit);
 }
 
-void Shader::setSampler(const std::string& name, CubeMap& cubeMap,
+void Shader::setSampler(const String& name, CubeMap& cubeMap,
 		Sampler& sampler, uint32 textureUnit) {
 	context->setShader(programID);
 
@@ -116,27 +116,27 @@ void Shader::bindComputeTexture(Texture& texture, uint32 unit,
 			access, internalFormat);
 }
 
-void Shader::setInt(const std::string& name, int32 value) {
+void Shader::setInt(const String& name, int32 value) {
 	context->setShader(programID);
 	glUniform1i(uniformMap[name], value);
 }
 
-void Shader::setFloat(const std::string& name, float value) {
+void Shader::setFloat(const String& name, float value) {
 	context->setShader(programID);
 	glUniform1f(uniformMap[name], value);
 }
 
-void Shader::setVector2f(const std::string& name, const glm::vec2& value) {
+void Shader::setVector2f(const String& name, const glm::vec2& value) {
 	context->setShader(programID);
 	glUniform2fv(uniformMap[name], 1, glm::value_ptr(value));
 }
 
-void Shader::setVector3f(const std::string& name, const glm::vec3& value) {
+void Shader::setVector3f(const String& name, const glm::vec3& value) {
 	context->setShader(programID);
 	glUniform3fv(uniformMap[name], 1, glm::value_ptr(value));
 }
 
-void Shader::setMatrix4f(const std::string& name, const glm::mat4& value) {
+void Shader::setMatrix4f(const String& name, const glm::mat4& value) {
 	context->setShader(programID);
 	glUniformMatrix4fv(uniformMap[name], 1, false, glm::value_ptr(value));
 }
@@ -152,8 +152,8 @@ Shader::~Shader() {
 	context->setShader(0);
 }
 
-static bool addShader(GLuint program, const std::string& text,
-		GLenum type, std::vector<uint32>& shaders) {
+static bool addShader(GLuint program, const String& text,
+		GLenum type, ArrayList<uint32>& shaders) {
 	uint32 shader = glCreateShader(type);
 
 	if (shader == 0) {
@@ -187,7 +187,7 @@ static bool addShader(GLuint program, const std::string& text,
 }
 
 static bool checkShaderError(uint32 shader, GLenum flag,
-		bool isProgram, const std::string& errorMessage) {
+		bool isProgram, const String& errorMessage) {
 	GLint status = 0;
 	GLchar error[SHADER_INFO_LOG_SIZE];
 
@@ -216,9 +216,9 @@ static bool checkShaderError(uint32 shader, GLenum flag,
 }
 
 static void addShaderUniforms(GLuint program,
-		std::unordered_map<std::string, int32>& uniformBlockMap,
-		std::unordered_map<std::string, int32>& samplerMap,
-		std::unordered_map<std::string, int32>& uniformMap) {
+		HashMap<String, int32>& uniformBlockMap,
+		HashMap<String, int32>& samplerMap,
+		HashMap<String, int32>& uniformMap) {
 	GLint numBlocks;
 	glGetProgramiv(program, GL_ACTIVE_UNIFORM_BLOCKS, &numBlocks);
 
@@ -227,18 +227,18 @@ static void addShaderUniforms(GLuint program,
 		glGetActiveUniformBlockiv(program, block,
 				GL_UNIFORM_BLOCK_NAME_LENGTH, &nameLen);
 
-		std::vector<GLchar> name(nameLen);
+		ArrayList<GLchar> name(nameLen);
 		glGetActiveUniformBlockName(program, block,
 				nameLen, nullptr, &name[0]);
 
-		std::string uniformBlockName((char*)&name[0], nameLen - 1);
+		String uniformBlockName((char*)&name[0], nameLen - 1);
 		uniformBlockMap[uniformBlockName] = glGetUniformBlockIndex(program, &name[0]);
 	}
 
 	GLint numUniforms = 0;
 	glGetProgramiv(program, GL_ACTIVE_UNIFORMS, &numUniforms);
 
-	std::vector<GLchar> uniformName(256);
+	ArrayList<GLchar> uniformName(256);
 
 	for (int32 uniform = 0; uniform < numUniforms; ++uniform) {
 		GLint arraySize = 0;
@@ -248,7 +248,7 @@ static void addShaderUniforms(GLuint program,
 		glGetActiveUniform(program, uniform, uniformName.size(),
 				&actualLength, &arraySize, &type, &uniformName[0]);
 
-		std::string name((char*)&uniformName[0], actualLength);
+		String name((char*)&uniformName[0], actualLength);
 
 		if (type == GL_SAMPLER_2D || type == GL_SAMPLER_CUBE) {
 			samplerMap[name] = glGetUniformLocation(program, (char*)&uniformName[0]);

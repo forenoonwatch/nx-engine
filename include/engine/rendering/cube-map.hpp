@@ -9,7 +9,7 @@ class CubeMap {
 	public:
 		CubeMap(RenderContext& context, Bitmap* bitmaps,
 				uint32 internalFormat = GL_RGB);
-		CubeMap(RenderContext& context, std::string* fileNames,
+		CubeMap(RenderContext& context, String* fileNames,
 				uint32 internalFormat = GL_RGB);
 		CubeMap(RenderContext& context, const DDSTexture& ddsTexture);
 

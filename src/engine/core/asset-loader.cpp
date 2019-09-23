@@ -6,8 +6,8 @@
 
 static void initStaticMesh(IndexedModel& newModel, const aiMesh* mesh);
 
-bool AssetLoader::loadAssets(const std::string& fileName,
-		std::vector<IndexedModel>& models) {
+bool AssetLoader::loadAssets(const String& fileName,
+		ArrayList<IndexedModel>& models) {
 	Assimp::Importer importer;
 
 	const aiScene* scene = importer.ReadFile(fileName.c_str(),

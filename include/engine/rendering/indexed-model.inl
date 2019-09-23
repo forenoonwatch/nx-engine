@@ -8,8 +8,8 @@ inline void IndexedModel::setInstancedElementStartIndex(uint32 elementIndex) {
 	instancedElementStartIndex = elementIndex;
 }
 
-inline std::vector<const float*> IndexedModel::getVertexData() const {
-	std::vector<const float*> vertexData;
+inline ArrayList<const float*> IndexedModel::getVertexData() const {
+	ArrayList<const float*> vertexData;
 
 	for (uint32 i = 0; i < getNumVertexComponents(); ++i) {
 		vertexData.push_back(&elements[i][0]);

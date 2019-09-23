@@ -2,7 +2,7 @@
 
 #include "engine/core/common.hpp"
 
-#include <string>
+#include "engine/core/string.hpp"
 
 class Bitmap {
 	public:
@@ -11,7 +11,7 @@ class Bitmap {
 
 		void clear();
 
-		bool load(const std::string& fileName);
+		bool load(const String& fileName);
 
 		inline void set(int32 x, int32 y, int32 abgr);
 

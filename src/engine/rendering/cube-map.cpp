@@ -9,7 +9,7 @@ CubeMap::CubeMap(RenderContext& context, Bitmap* bitmaps,
 	}
 }
 
-CubeMap::CubeMap(RenderContext& context, std::string* fileNames,
+CubeMap::CubeMap(RenderContext& context, String* fileNames,
 			uint32 internalFormat)
 		: CubeMap(context, internalFormat, false, false) {
 	Bitmap bmp;

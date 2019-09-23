@@ -2,7 +2,7 @@
 
 #include "engine/core/common.hpp"
 
-#include <string>
+#include "engine/core/string.hpp"
 
 #define MAKEFOURCC(a, b, c, d)                              \
                 ((uint32)(uint8)(a) | ((uint32)(uint8)(b) << 8) |       \
@@ -28,7 +28,7 @@ class DDSTexture {
 		inline DDSTexture()
 				: data(nullptr) {}
 
-		bool load(const std::string& fileName);
+		bool load(const String& fileName);
 
 		uint32 getInternalPixelFormat() const;
 		bool isCompressed() const;

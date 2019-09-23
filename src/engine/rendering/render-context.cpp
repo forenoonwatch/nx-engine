@@ -242,7 +242,7 @@ uint32 RenderContext::getVersion() {
 	return version;
 }
 
-std::string RenderContext::getShaderVersion() {
+String RenderContext::getShaderVersion() {
 	if (!shaderVersion.empty()) {
 		return shaderVersion;
 	}

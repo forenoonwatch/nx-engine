@@ -20,7 +20,7 @@ void Bitmap::clear() {
 	std::memset(pixels, 0, calcPixelsSize());
 }
 
-bool Bitmap::load(const std::string& fileName) {
+bool Bitmap::load(const String& fileName) {
 	int32 texWidth, texHeight, bytesPerPixel;
 
 	uint8* data = stbi_load(fileName.c_str(), &texWidth,
