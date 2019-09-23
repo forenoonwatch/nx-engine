@@ -1,9 +1,9 @@
 #pragma once
 
-#include "render-context.hpp"
+#include "engine/rendering/render-context.hpp"
 
-#include "bitmap.hpp"
-#include "dds-texture.hpp"
+#include "engine/rendering/bitmap.hpp"
+#include "engine/rendering/dds-texture.hpp"
 
 class Texture {
 	public:

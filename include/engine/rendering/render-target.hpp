@@ -1,7 +1,7 @@
 #pragma once
 
-#include "rendering/texture.hpp"
-#include "rendering/render-buffer.hpp"
+#include "engine/rendering/texture.hpp"
+#include "engine/rendering/render-buffer.hpp"
 
 class RenderTarget {
 	public:

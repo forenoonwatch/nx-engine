@@ -1,9 +1,9 @@
 #pragma once
 
-#include "rendering/render-context.hpp"
+#include "engine/rendering/render-context.hpp"
 
-#include "rendering/bitmap.hpp"
-#include "rendering/dds-texture.hpp"
+#include "engine/rendering/bitmap.hpp"
+#include "engine/rendering/dds-texture.hpp"
 
 class CubeMap {
 	public:

@@ -1,4 +1,4 @@
-#include "rendering/texture.hpp"
+#include "engine/rendering/texture.hpp"
 
 static uint32 calcInternalFormat(uint32 pixelFormat, bool compressed);
 

@@ -5,12 +5,12 @@
 
 #include <GLM/glm.hpp>
 
-#include "rendering/uniform-buffer.hpp"
-#include "rendering/shader-storage-buffer.hpp"
+#include "engine/rendering/uniform-buffer.hpp"
+#include "engine/rendering/shader-storage-buffer.hpp"
 
-#include "rendering/sampler.hpp"
-#include "rendering/texture.hpp"
-#include "rendering/cube-map.hpp"
+#include "engine/rendering/sampler.hpp"
+#include "engine/rendering/texture.hpp"
+#include "engine/rendering/cube-map.hpp"
 
 class Shader {
 	public:

@@ -1,16 +1,16 @@
-#include "rendering/render-context.hpp"
+#include "engine/rendering/render-context.hpp"
 
-#include "rendering/shader.hpp"
+#include "engine/rendering/shader.hpp"
 
-#include "rendering/vertex-array.hpp"
-#include "rendering/transform-feedback.hpp"
-#include "rendering/input-stream-buffer.hpp"
+#include "engine/rendering/vertex-array.hpp"
+#include "engine/rendering/transform-feedback.hpp"
+#include "engine/rendering/input-stream-buffer.hpp"
 
-#include "rendering/render-target.hpp"
+#include "engine/rendering/render-target.hpp"
 
-#include "rendering/render-query.hpp"
+#include "engine/rendering/render-query.hpp"
 
-#include "rendering/indexed-model.hpp"
+#include "engine/rendering/indexed-model.hpp"
 
 inline static void initScreenQuad(IndexedModel&);
 

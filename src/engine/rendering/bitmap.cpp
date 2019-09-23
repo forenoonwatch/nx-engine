@@ -1,4 +1,4 @@
-#include "rendering/bitmap.hpp"
+#include "engine/rendering/bitmap.hpp"
 
 #include "stbi/stb_image.h"
 

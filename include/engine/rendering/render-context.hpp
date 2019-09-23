@@ -1,6 +1,6 @@
 #pragma once
 
-#include "core/common.hpp"
+#include "engine/core/common.hpp"
 
 #include <string>
 #include <GL/glew.h>
