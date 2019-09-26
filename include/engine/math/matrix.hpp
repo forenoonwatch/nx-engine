@@ -24,4 +24,9 @@ namespace Math {
 	FORCEINLINE Matrix4f scale(const Matrix4f& matrix, const Vector3f& size) {
 		return glm::scale(matrix, size);
 	}
+
+	FORCEINLINE Matrix4f perspective(float fieldOfView, float aspectRatio,
+			float zNear, float zFar) {
+		return glm::perspective(fieldOfView, aspectRatio, zNear, zFar);
+	}
 };
