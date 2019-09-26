@@ -14,7 +14,7 @@ SRCS := $(call rwildcard, $(SRC_DIR)/, *.cpp)
 OBJS := $(SRCS:%=$(BUILD_DIR)/%.o)
 
 CPPFLAGS := -std=c++17 -g
-CXXFLAGS := -I$(CURDIR)/include/engine -I$(CURDIR)/include -I$(LIB_DIR)/Glew/include -I$(LIB_DIR)/GLFW/include -I$(LIB_DIR)/GLM/include -I$(LIB_DIR)/assimp/include -msse2 $(CXXFLAGS)
+CXXFLAGS := -I$(CURDIR)/include/engine -I$(CURDIR)/include -I$(LIB_DIR)/include -msse2 $(CXXFLAGS)
 
 all: $(BUILD_DIR)/$(TARGET)
 
