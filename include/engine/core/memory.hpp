@@ -5,13 +5,27 @@
 
 namespace Memory {
 	template <typename T>
-	using unique_ptr = std::unique_ptr<T>;
+	using UniquePointer = std::unique_ptr<T>;
 
 	template <typename T>
-	using shared_ptr = std::shared_ptr<T>;
+	using SharedPointer = std::shared_ptr<T>;
 
 	template <typename T>
-	using weak_ptr = std::weak_ptr<T>;
+	using WeakPointer = std::weak_ptr<T>;
+
+	template <typename T>
+	class SharedCounter : public SharedPointer<T> {
+		public:
+			inline explicit SharedCounter(T* t)
+				: SharedPointer<T>(t)
+				, id(counter++) {}
+
+			inline uint32 getID() const { return id; }
+		private:
+			static uint32 counter;
+			
+			const uint32 id;
+	};
 
 	FORCEINLINE void* memcpy(void* dest, const void* src, uintptr amt) {
 		return std::memcpy(dest, src, amt);
@@ -30,12 +44,15 @@ namespace Memory {
 	}
 
 	template <typename T, typename... Args>
-	FORCEINLINE unique_ptr<T> make_unique(Args&&... args) {
+	FORCEINLINE UniquePointer<T> make_unique(Args&&... args) {
 		return std::make_unique<T>(args...);
 	}
 
 	template <typename T, typename... Args>
-	FORCEINLINE shared_ptr<T> make_shared(Args&&... args) {
+	FORCEINLINE SharedPointer<T> make_shared(Args&&... args) {
 		return std::make_shared<T>(args...);
 	}
 };
+
+template <typename T>
+uint32 Memory::SharedCounter<T>::counter(0);
