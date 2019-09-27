@@ -3,5 +3,6 @@
 #include <entt/entt.hpp>
 
 namespace ECS {
-	using namespace entt;
+	using Registry = entt::registry;
+	using Entity = entt::entity;
 };
