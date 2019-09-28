@@ -7,6 +7,7 @@
 static void initStaticMesh(IndexedModel& newModel, const aiMesh* mesh);
 
 bool AssetLoader::loadAssets(const String& fileName,
+		const IndexedModel::AllocationHints& staticAllocHints,
 		ArrayList<IndexedModel>& models) {
 	Assimp::Importer importer;
 
@@ -22,7 +23,7 @@ bool AssetLoader::loadAssets(const String& fileName,
 
 	for (uint32 i = 0; i < scene->mNumMeshes; ++i) {
 		const aiMesh* mesh = scene->mMeshes[i];
-		IndexedModel newModel;
+		IndexedModel newModel(staticAllocHints);
 
 		initStaticMesh(newModel, mesh);
 

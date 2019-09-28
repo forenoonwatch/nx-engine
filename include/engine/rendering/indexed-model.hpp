@@ -6,8 +6,15 @@
 
 class IndexedModel {
 	public:
+		struct AllocationHints {
+			ArrayList<uint32> elementSizes;
+			uint32 instancedElementStartIndex = (uint32)-1;
+		};
+
 		inline IndexedModel()
-			: instancedElementStartIndex((uint32)-1) {}
+				: instancedElementStartIndex((uint32)-1) {}
+
+		IndexedModel(const AllocationHints& hints);
 
 		void initStaticMesh();
 

@@ -1,5 +1,11 @@
 #include "rendering/indexed-model.hpp"
 
+IndexedModel::IndexedModel(const AllocationHints& hints)
+		: instancedElementStartIndex(hints.instancedElementStartIndex) {
+	elementSizes.assign(hints.elementSizes.begin(), hints.elementSizes.end());
+	elements.resize(hints.elementSizes.size());
+}
+
 void IndexedModel::initStaticMesh() {
 	allocateElement(3); // Positions
 	allocateElement(2); // TexCoords

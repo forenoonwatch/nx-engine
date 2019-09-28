@@ -6,5 +6,6 @@
 
 namespace AssetLoader {
 	bool loadAssets(const String& fileName,
+			const IndexedModel::AllocationHints& staticAllocHints,
 			ArrayList<IndexedModel>& models);
 };
