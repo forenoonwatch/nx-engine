@@ -1,7 +1,5 @@
 #include "engine/rendering/texture.hpp"
 
-static uint32 calcInternalFormat(uint32 pixelFormat, bool compressed);
-
 Texture::Texture(RenderContext& context, uint32 width,
 			uint32 height, uint32 internalPixelFormat,
 			const void* data, uint32 pixelFormat, uint32 dataType,
@@ -10,7 +8,8 @@ Texture::Texture(RenderContext& context, uint32 width,
 		, textureID(-1)
 		, width(width)
 		, height(height)
-		, internalFormat(calcInternalFormat(internalPixelFormat, compressed))
+		, internalFormat(RenderContext::calcInternalFormat(internalPixelFormat,
+					compressed))
 		, compressed(compressed)
 		, mipMaps(mipMaps) {
 	glGenTextures(1, &textureID);
@@ -109,23 +108,3 @@ Texture::~Texture() {
 	glDeleteTextures(1, &textureID);
 }
 
-static uint32 calcInternalFormat(uint32 pixelFormat, bool compressed) {
-	switch (pixelFormat) {
-		case GL_RGB:
-			return compressed ? GL_COMPRESSED_SRGB_S3TC_DXT1_EXT
-					: GL_RGB;
-		case GL_RGBA:
-			return compressed ? GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT
-					: GL_RGBA;
-		case GL_RED:
-		case GL_RG:
-		case GL_RGBA32F:
-		case GL_DEPTH_COMPONENT:
-		case GL_DEPTH_STENCIL:
-			return pixelFormat;
-		default:
-			DEBUG_LOG(LOG_ERROR, "Texture",
-					"%d is not a valid pixel format", pixelFormat);
-			return 0;
-	}
-}

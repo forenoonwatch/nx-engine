@@ -7,11 +7,16 @@
 
 class CubeMap {
 	public:
+		inline CubeMap(RenderContext& context)
+				: context(&context)
+				, textureID(0) {}
+
 		CubeMap(RenderContext& context, Bitmap* bitmaps,
 				uint32 internalFormat = GL_RGB);
-		CubeMap(RenderContext& context, String* fileNames,
-				uint32 internalFormat = GL_RGB);
 		CubeMap(RenderContext& context, const DDSTexture& ddsTexture);
+
+		bool load(const String& fileName);
+		bool load(const String* fileNames);
 
 		inline uint32 getID() { return textureID; }
 
@@ -34,4 +39,7 @@ class CubeMap {
 		bool mipMaps;
 
 		CubeMap(RenderContext&, uint32, bool, bool);
+
+		void initTexture();
+		void initFromDDS(const DDSTexture&);
 };

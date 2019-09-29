@@ -78,6 +78,9 @@ class RenderContext {
 		void setRenderTarget(uint32 fbo, uint32 bufferType = GL_FRAMEBUFFER);
 
 		~RenderContext();
+
+		static uint32 calcInternalFormat(uint32 pixelFormat, bool compressed);
+		static uint32 calcBaseFormat(uint32 pixelFormat);
 	private:
 		NULL_COPY_AND_ASSIGN(RenderContext);
 

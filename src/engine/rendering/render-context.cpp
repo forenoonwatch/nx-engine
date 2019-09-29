@@ -335,6 +335,48 @@ RenderContext::~RenderContext() {
 	delete screenQuad;
 }
 
+uint32 RenderContext::calcInternalFormat(uint32 pixelFormat, bool compressed) {
+	switch (pixelFormat) {
+		case GL_RGB:
+			return compressed ? GL_COMPRESSED_SRGB_S3TC_DXT1_EXT
+					: GL_RGB;
+		case GL_RGBA:
+			return compressed ? GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT
+					: GL_RGBA;
+		case GL_RED:
+		case GL_RG:
+		case GL_RGBA32F:
+		case GL_DEPTH_COMPONENT:
+		case GL_DEPTH_STENCIL:
+			return pixelFormat;
+		default:
+			DEBUG_LOG(LOG_ERROR, "Texture",
+					"%d is not a valid pixel format", pixelFormat);
+			return 0;
+	}
+}
+
+uint32 RenderContext::calcBaseFormat(uint32 pixelFormat) {
+	switch (pixelFormat) {
+		case GL_COMPRESSED_SRGB_S3TC_DXT1_EXT:
+			return GL_RGB;
+		case GL_RGBA32F:
+		case GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT:
+			return GL_RGBA;
+		case GL_RED:
+		case GL_RG:
+		case GL_RGB:
+		case GL_RGBA:
+		case GL_DEPTH_COMPONENT:
+		case GL_DEPTH_STENCIL:
+			return pixelFormat;
+		default:
+			DEBUG_LOG(LOG_ERROR, "Texture",
+					"%d is not a valid pixel format", pixelFormat);
+			return 0;
+	}
+}
+
 inline static void initScreenQuad(IndexedModel& screenQuadModel) {
 	screenQuadModel.allocateElement(2); // position
 
