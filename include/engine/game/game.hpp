@@ -7,8 +7,9 @@
 
 #include <engine/core/window.hpp>
 
-#include <engine/game/game-render-context.hpp>
 #include <engine/game/asset-manager.hpp>
+
+#include <engine/rendering/render-context.hpp>
 
 #include <engine/ecs/ecs.hpp>
 
@@ -18,21 +19,24 @@ class Game {
 	public:
 		typedef void (*ECSSystemCallback)(Game&, float);
 
-		inline Game(Window& window, Memory::SharedPointer<Scene> initialScene,
+		inline Game(Window& window, RenderContext* renderContext,
+					Memory::SharedPointer<Scene> initialScene,
 					bool unlockFPS)
 				: window(&window)
-				, renderContext(*this)
+				, renderContext(renderContext)
 				, assetManager(renderContext)
 				, currentScene(nullptr)
 				, running(false)
 				, unlockFPS(unlockFPS)
 				, fps(0) {
+			renderContext->setGame(*this);
 			loadScene(initialScene);
 		}
 
 		void loadScene(Memory::SharedPointer<Scene> scene);
 
-		inline GameRenderContext& getRenderContext() { return renderContext; }
+		inline RenderContext* getRenderContext() { return renderContext; }
+		
 		inline ECS::Registry& getECS() { return ecs; }
 		inline AssetManager& getAssetManager() { return assetManager; }
 
@@ -42,7 +46,8 @@ class Game {
 
 		Window* window;
 
-		GameRenderContext renderContext;
+		RenderContext* renderContext;
+		
 		ECS::Registry ecs;
 		AssetManager assetManager;
 

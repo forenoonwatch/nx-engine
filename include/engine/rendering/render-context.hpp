@@ -5,6 +5,8 @@
 
 #include <GL/glew.h>
 
+class Game;
+
 class Shader;
 
 class VertexArray;
@@ -28,6 +30,9 @@ class RenderContext {
 		};
 
 		RenderContext();
+
+		virtual void flush() = 0;
+		virtual void setGame(Game& game) = 0;
 
 		void awaitFinish();
 
@@ -77,7 +82,7 @@ class RenderContext {
 
 		void setRenderTarget(uint32 fbo, uint32 bufferType = GL_FRAMEBUFFER);
 
-		~RenderContext();
+		virtual ~RenderContext();
 
 		static uint32 calcInternalFormat(uint32 pixelFormat, bool compressed);
 		static uint32 calcBaseFormat(uint32 pixelFormat);

@@ -62,12 +62,18 @@ void Game::run() {
 		if (shouldRender) {
 			currentScene->render(*this, frameTime);
 			
-			renderContext.flush();
+			renderContext->flush();
 			window->render();
 			
 			++fpsCounter;
 		}
 	}
+
+	if (currentScene) {
+		currentScene->unload(*this);
+	}
+
+	currentScene = nullptr;
 
 	running = false;
 }
