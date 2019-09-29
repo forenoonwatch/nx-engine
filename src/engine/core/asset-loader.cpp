@@ -41,8 +41,6 @@ bool AssetLoader::loadAssets(const String& fileName,
 }
 
 static void initStaticMesh(IndexedModel& newModel, const aiMesh* mesh) {
-	newModel.initStaticMesh();
-
 	const aiVector3D aiZeroVector(0.f, 0.f, 0.f);
 
 	for (uint32 i = 0; i < mesh->mNumVertices; ++i) {
