@@ -5,20 +5,7 @@
 #include "engine/core/string.hpp"
 #include "engine/core/array-list.hpp"
 
-#include <algorithm>
-
 namespace Util {
-	inline String toLower(const String& str) {
-		String res = str;
-		std::transform(res.begin(), res.end(), res.begin(), ::tolower);
-
-		return res;
-	}
-
-	inline bool startsWith(const String& s0, const String& s1) {
-		return s0.compare(0, s1.length(), s1);
-	}
-
 	void split(ArrayList<String>& elems, const String& s, char delim);
 	ArrayList<String> split(const String& s, char delim);
 
