@@ -47,27 +47,26 @@ class String : public std::string {
 		}
 };
 
-/*
- uint64_t hval = uint64_t(0xcbf29ce484222325ULL);
-            
-            const unsigned char *s = (const unsigned char *)str;
-
-            // FNV-1 hash each octet of the string
-            while (*s) {
-                // multiply by the 64 bit FNV magic prime mod 2^64
-                hval *= uint64_t(0x100000001b3ULL);
-
-                // xor the bottom with the current octet
-                hval ^= uint64_t(*s++);
-            }
-
-            return hval*/
-
 namespace std {
-	template <>
+	/*template <>
 	struct hash<String> {
 		inline size_t operator()(const String& str) const {
 			return std::hash<std::string>()((std::string)str);
+		}
+	};*/
+
+	template <>
+	struct hash<String> {
+		inline size_t operator()(const String& str) const {
+			uint64_t hval = (uint64_t)0xcbf29ce484222325ULL;
+            const unsigned char *s = (const unsigned char*)str.c_str();
+
+            while (*s) {
+                hval *= (uint64_t)0x100000001b3ULL;
+                hval ^= (uint64_t)(*s++);
+            }
+
+            return (size_t)hval;
 		}
 	};
 };
