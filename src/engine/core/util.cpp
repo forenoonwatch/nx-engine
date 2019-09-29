@@ -77,7 +77,7 @@ String Util::getFileExtension(const String& fileName) {
 	return "";
 }
 
-bool Util::resolveFileLinking(StringStream& out, const String& fileName,
+bool Util::loadFileWithLinking(StringStream& out, const String& fileName,
 		const String& linkKeyword) {
 	std::ifstream file;
 	file.open(fileName.c_str());
@@ -96,13 +96,16 @@ bool Util::resolveFileLinking(StringStream& out, const String& fileName,
 				String linkFileName = Util::split(line, ' ')[1];
 				linkFileName = linkFileName.substr(1, linkFileName.length() - 2);
 
-				resolveFileLinking(out, filePath + linkFileName,
+				loadFileWithLinking(out, filePath + linkFileName,
 						linkKeyword);
 				out << "\n";
 			}
 		}
 	}
 	else {
+		DEBUG_LOG(LOG_ERROR, "File IO", "Failed to load included file: %s",
+				fileName.c_str());
+
 		return false;
 	}
 

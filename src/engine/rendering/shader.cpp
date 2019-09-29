@@ -1,5 +1,7 @@
 #include "rendering/shader.hpp"
 
+#include "engine/core/util.hpp"
+
 #define SHADER_INFO_LOG_SIZE	1024
 
 static bool addShader(GLuint program, const String& text,
@@ -12,34 +14,58 @@ static void addShaderUniforms(GLuint program,
 		HashMap<String, int32>& samplerMap,
 		HashMap<String, int32>& uniformMap); 
 
-Shader::Shader(RenderContext& context, const String& text,
-			const char** feedbackVaryings, uintptr numFeedbackVaryings,
-			uint32 varyingCaptureMode)
-		: context(&context)
-		, programID(glCreateProgram()) {
-	String version = "#version " + context.getShaderVersion()
-		+ "\n#define GLSL_VERSION " + context.getShaderVersion();
+bool Shader::load(const String& fileName, const char** feedbackVaryings,
+		uintptr numFeedbackVaryings, uint32 varyingCaptureMode) {
+	StringStream ss;
+	
+	if (!Util::loadFileWithLinking(ss, fileName, "#include")) {
+		DEBUG_LOG(LOG_ERROR, "Shader",
+				"Failed to load shader file with includes: %s",
+				fileName.c_str());
+
+		return false;
+	}
+
+	const String text = ss.str();
+
+	if (programID != 0) {
+		cleanUp();
+	}
+
+	programID = glCreateProgram();
+
+	const String version = "#version " + context->getShaderVersion()
+		+ "\n#define GLSL_VERSION " + context->getShaderVersion();
 
 	if (text.find("CS_BUILD") != String::npos) {
-		String computeShaderText = version
+		const String computeShaderText = version
 			+ "\n#define CS_BUILD\n" + text;
 
 		if (!addShader(programID, computeShaderText, GL_COMPUTE_SHADER, shaders)) {
-			throw std::runtime_error("Failed to load compute shader");
+			DEBUG_LOG(LOG_ERROR, "Shader", "Failed to load compute shader: %s",
+					fileName.c_str());
+
+			return false;
 		}
 	}
 	else {
-		String vertexShaderText = version
+		const String vertexShaderText = version
 			+ "\n#define VS_BUILD\n" + text;
-		String fragmentShaderText = version
+		const String fragmentShaderText = version
 			+ "\n#define FS_BUILD\n" + text;
 
 		if (!addShader(programID, vertexShaderText, GL_VERTEX_SHADER, shaders)) {
-			throw std::runtime_error("Failed to load vertex shader");
+			DEBUG_LOG(LOG_ERROR, "Shader", "Failed to load vertex shader: %s",
+					fileName.c_str());
+
+			return false;
 		}
 
 		if (!addShader(programID, fragmentShaderText, GL_FRAGMENT_SHADER, shaders)) {
-			throw std::runtime_error("Failed to load fragment shader");
+			DEBUG_LOG(LOG_ERROR, "Shader", "Failed to load fragment shader: %s",
+					fileName.c_str());
+
+			return false;
 		}
 
 		if (text.find("GS_BUILD") != String::npos) {
@@ -47,7 +73,10 @@ Shader::Shader(RenderContext& context, const String& text,
 				+ "\n#define GS_BUILD\n" + text;
 
 			if (!addShader(programID, geomShaderText, GL_GEOMETRY_SHADER, shaders)) {
-				throw std::runtime_error("Failed to load geometry shader");
+				DEBUG_LOG(LOG_ERROR, "Shader", "Failed to load geometry shader: %s",
+						fileName.c_str());
+
+				return false;
 			}
 		}
 	}
@@ -61,19 +90,27 @@ Shader::Shader(RenderContext& context, const String& text,
 
 	if (checkShaderError(programID, GL_LINK_STATUS, true,
 				"Error linking shader program")) {
-		throw std::runtime_error("Error linking shader program");
+		DEBUG_LOG(LOG_ERROR, "Shader", "Error linking shader program: %s",
+				fileName.c_str());
+
+		return false;
 	}
 
 	glValidateProgram(programID);
 
 	if (checkShaderError(programID, GL_VALIDATE_STATUS, true,
 				"Invalid shader program")) {
-		throw std::runtime_error("Invalid shader program");
+		DEBUG_LOG(LOG_ERROR, "Shader", "Invalid shader program: %s",
+				fileName.c_str());
+
+		return false;
 	}
 
 	// TODO: add attributes
 	addShaderUniforms(programID, uniformBlockMap,
 			samplerMap, uniformMap);
+
+	return true;
 }
 
 void Shader::setUniformBuffer(const String& name, UniformBuffer& buffer) {
@@ -140,6 +177,10 @@ void Shader::setMatrix4f(const String& name, const Matrix4f& value) {
 }
 
 Shader::~Shader() {
+	cleanUp();
+}
+
+inline void Shader::cleanUp() {
 	for (auto it = std::begin(shaders), end = std::end(shaders);
 			it != end; ++it) {
 		glDetachShader(programID, *it);
@@ -148,6 +189,13 @@ Shader::~Shader() {
 
 	glDeleteProgram(programID);
 	context->setShader(0);
+
+	programID = 0;
+
+	shaders.clear();
+	uniformBlockMap.clear();
+	samplerMap.clear();
+	uniformMap.clear();
 }
 
 static bool addShader(GLuint program, const String& text,

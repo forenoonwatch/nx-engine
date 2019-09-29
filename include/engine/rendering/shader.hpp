@@ -14,8 +14,12 @@
 
 class Shader {
 	public:
-		Shader(RenderContext& context, const String& text,
-				const char** feedbackVaryings = nullptr, uintptr numFeedbackVaryings = 0,
+		inline Shader(RenderContext& context)
+				: context(&context)
+				, programID(0) {}
+
+		bool load(const String& fileName, const char** feedbackVaryings = nullptr,
+				uintptr numFeedbackVaryings = 0,
 				uint32 varyingCaptureMode = GL_INTERLEAVED_ATTRIBS);
 
 		void setUniformBuffer(const String& name, UniformBuffer& buffer);
@@ -55,5 +59,7 @@ class Shader {
 		HashMap<String, int32> uniformBlockMap;
 		HashMap<String, int32> samplerMap;
 		HashMap<String, int32> uniformMap;
+
+		void cleanUp();
 };
 

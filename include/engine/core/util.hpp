@@ -12,7 +12,7 @@ namespace Util {
 	String getFilePath(const String& fileName);
 	String getFileExtension(const String& fileName);
 
-	bool resolveFileLinking(StringStream& out, const String& fileName,
+	bool loadFileWithLinking(StringStream& out, const String& fileName,
 			const String& linkKeyword);
 
 	template <typename T>
