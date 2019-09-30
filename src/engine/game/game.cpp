@@ -62,7 +62,6 @@ void Game::run() {
 		if (shouldRender) {
 			currentScene->render(*this, frameTime);
 			
-			renderContext->flush();
 			window->render();
 			
 			++fpsCounter;

@@ -31,7 +31,6 @@ class RenderContext {
 
 		RenderContext();
 
-		virtual void flush() = 0;
 		virtual void setGame(Game& game) = 0;
 
 		void awaitFinish();
