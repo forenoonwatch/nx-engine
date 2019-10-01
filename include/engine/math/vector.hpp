@@ -19,6 +19,11 @@ namespace Math {
 		return glm::dot(a, b);
 	}
 
+	template <typename T>
+	FORCEINLINE T normalize(const T& v) {
+		return glm::normalize(v);
+	}
+
 	FORCEINLINE Vector3f cross(const Vector3f& a, const Vector3f& b) {
 		return glm::cross(a, b);
 	}
