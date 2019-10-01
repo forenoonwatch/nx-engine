@@ -25,6 +25,11 @@ void RenderTarget::clear(uint32 flags) {
 	glClear(flags);
 }
 
+void RenderTarget::setDrawBuffers(uint32 numBuffers) {
+	context->setRenderTarget(bufferID);
+	context->setDrawBuffers(numBuffers);
+}
+
 void RenderTarget::drawTo(RenderTarget& target, uint32 mask,
 		uint32 filter) {
 	context->setRenderTarget(bufferID, GL_READ_FRAMEBUFFER);

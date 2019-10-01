@@ -19,6 +19,8 @@ class RenderTarget {
 				uint32 attachmentType, uint32 attachmentNumber = 0);
 
 		void clear(uint32 flags);
+		void setDrawBuffers(uint32 numBuffers);
+
 		void drawTo(RenderTarget& target, uint32 mask = GL_COLOR_BUFFER_BIT,
 				uint32 filter = GL_NEAREST);
 
