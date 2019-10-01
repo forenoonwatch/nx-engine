@@ -90,20 +90,26 @@ bool AssetManager::loadTexture(const String& name, const String& fileName) {
 	}
 }
 
-bool AssetManager::loadCubeMap(const String& name, const String* fileNames,
-		bool singleFile) {
+bool AssetManager::loadCubeMap(const String& name, const String* fileNames) {
 	Memory::SharedPointer<CubeMap> cm = Memory::make_shared<CubeMap>(
 			*renderContext);
 
-	if (singleFile) {
-		if (!cm->load(fileNames[0])) {
-			return false;
-		}
+	if (!cm->load(fileNames)) {
+		return false;
 	}
-	else {
-		if (!cm->load(fileNames)) {
-			return false;
-		}
+
+	cubeMaps[name] = cm;
+	names[(uintptr)cm.get()] = String("CubeMap/") + name;
+
+	return true;
+}
+
+bool AssetManager::loadCubeMap(const String& name, const String& fileName) {
+	Memory::SharedPointer<CubeMap> cm = Memory::make_shared<CubeMap>(
+			*renderContext);
+
+	if (!cm->load(fileName)) {
+		return false;
 	}
 
 	cubeMaps[name] = cm;

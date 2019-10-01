@@ -27,7 +27,8 @@ class AssetManager {
 				const String& fileName, const IndexedModel::AllocationHints& hints);
 
 		bool loadTexture(const String& name, const String& fileName);
-		bool loadCubeMap(const String& name, const String* fileNames, bool singleFile);
+		bool loadCubeMap(const String& name, const String& fileName);
+		bool loadCubeMap(const String& name, const String* fileNames);
 		bool loadMaterial(const String& name, const String& diffuseFileName,
 				const String& normalFileName, const String& materialFileName);
 
