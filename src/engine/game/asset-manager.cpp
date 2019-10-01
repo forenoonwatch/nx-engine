@@ -2,6 +2,7 @@
 
 #include "engine/rendering/vertex-array.hpp"
 #include "engine/rendering/shader.hpp"
+#include "engine/rendering/material.hpp"
 
 #include "engine/core/util.hpp"
 #include "engine/core/asset-loader.hpp"
@@ -107,6 +108,31 @@ bool AssetManager::loadCubeMap(const String& name, const String* fileNames,
 
 	cubeMaps[name] = cm;
 	names[(uintptr)cm.get()] = String("CubeMap/") + name;
+
+	return true;
+}
+
+bool AssetManager::loadMaterial(const String& name, const String& diffuseFileName,
+		const String& normalFileName, const String& materialFileName) {
+	if (!loadTexture(name + "-diffuse", diffuseFileName)) {
+		return false;
+	}
+
+	if (!loadTexture(name + "-normal", normalFileName)) {
+		return false;
+	}
+
+	if (!loadTexture(name + "-material", materialFileName)) {
+		return false;
+	}
+
+	Memory::SharedPointer<Material> mt = Memory::make_shared<Material>();
+	mt->diffuse = &getTexture(name + "-diffuse");
+	mt->normalMap = &getTexture(name + "-normal");
+	mt->materialMap = &getTexture(name + "-material");
+
+	materials[name] = mt;
+	names[(uintptr)mt.get()] = String("Material/") + name;
 
 	return true;
 }

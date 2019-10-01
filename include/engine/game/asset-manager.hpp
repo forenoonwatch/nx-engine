@@ -12,6 +12,7 @@ class RenderContext;
 
 class Texture;
 class CubeMap;
+class Material;
 class VertexArray;
 class Shader;
 
@@ -27,11 +28,14 @@ class AssetManager {
 
 		bool loadTexture(const String& name, const String& fileName);
 		bool loadCubeMap(const String& name, const String* fileNames, bool singleFile);
+		bool loadMaterial(const String& name, const String& diffuseFileName,
+				const String& normalFileName, const String& materialFileName);
 
 		bool loadShader(const String& name, const String& fileName);
 
 		inline Texture& getTexture(const String& name) { return *textures[name]; }
 		inline CubeMap& getCubeMap(const String& name) { return *cubeMaps[name]; }
+		inline Material& getMaterial(const String& name) { return *materials[name]; }
 		
 		inline IndexedModel& getModel(const String& name) { return *models[name]; }
 		inline VertexArray& getVertexArray(const String& name) { return *vertexArrays[name]; }
@@ -46,7 +50,6 @@ class AssetManager {
 
 		//inline Rig& getRig(const String& name) { return *rigs[name]; }
 		//inline Animation& getAnimation(const String& name) { return *animations[name]; }
-		//inline Material& getMaterial(const String& name) { return *materials[name]; }
 		//inline Font& getFont(const String& name) { return *fonts[name]; }
 	private:
 		NULL_COPY_AND_ASSIGN(AssetManager);
@@ -58,6 +61,7 @@ class AssetManager {
 
 		HashMap<String, Memory::SharedPointer<Texture>> textures;
 		HashMap<String, Memory::SharedPointer<CubeMap>> cubeMaps;
+		HashMap<String, Memory::SharedPointer<Material>> materials;
 
 		HashMap<String, Memory::SharedPointer<Shader>> shaders;
 		
@@ -65,7 +69,6 @@ class AssetManager {
 
 		//void loadFont(const ArrayList<String>& tokens, FontLoader& fontLoader);
 		//HashMap<String, Memory::SharedPointer<Font>> fonts;
-		//HashMap<String, Memory::SharedPointer<Material>> materials;
 		
 		//HashMap<String, Memory::SharedPointer<Rig>> rigs;
 		//HashMap<String, Memory::SharedPointer<Animation>> animations;
