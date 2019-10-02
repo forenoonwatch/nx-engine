@@ -13,11 +13,13 @@
 
 #include <engine/ecs/ecs.hpp>
 
+#include <functional>
+
 class Scene;
 
 class Game {
 	public:
-		typedef void (*ECSSystemCallback)(Game&, float);
+		typedef std::function<void(Game&, float)> ECSSystemCallback;
 
 		inline Game(Window& window, RenderContext* renderContext,
 					Memory::SharedPointer<Scene> initialScene,
