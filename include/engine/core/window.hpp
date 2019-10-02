@@ -15,8 +15,13 @@ class Window {
 		bool isCloseRequested() const;
 		void render();
 
+		void resize(uint32 width, uint32 height);
+
 		void setFullscreen(bool fullscreen);
 		void setFullscreen(bool fullscreen, Monitor& monitor);
+
+		void setPosition(uint32 x, uint32 y);
+		void moveToCenter();
 
 		void setCursorMode(enum Input::CursorMode cursorMode);
 

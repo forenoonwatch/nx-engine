@@ -36,6 +36,13 @@ void Window::render() {
 	glfwSwapBuffers(handle);
 }
 
+void Window::resize(uint32 width, uint32 height) {
+	this->width = width;
+	this->height = height;
+
+	glfwSetWindowSize(handle, width, height);
+}
+
 void Window::setFullscreen(bool fullscreen) {
 	if (fullscreen == this->fullscreen) {
 		return;
@@ -83,6 +90,16 @@ void Window::setFullscreen(bool fullscreen, Monitor& monitor) {
 				currentMonitor->getY() + currentMonitor->getHeight() / 2 - height / 2,
 				width, height, GLFW_DONT_CARE);
 	}
+}
+
+void Window::setPosition(uint32 x, uint32 y) {
+	glfwSetWindowPos(handle, x, y);
+}
+
+void Window::moveToCenter() {
+	glfwSetWindowPos(handle,
+			currentMonitor->getX() + currentMonitor->getWidth() / 2 - width / 2,
+			currentMonitor->getY() + currentMonitor->getHeight() / 2 - height / 2);
 }
 
 void Window::setCursorMode(enum Input::CursorMode cursorMode) {
