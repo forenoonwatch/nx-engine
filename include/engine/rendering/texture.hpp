@@ -17,6 +17,8 @@ class Texture {
 				uint32 internalPixelFormat);
 		Texture(RenderContext& context, const DDSTexture& ddsTexture);
 
+		void resize(uint32 width, uint32 height);
+
 		inline uint32 getID() { return textureID; }
 
 		inline uint32 getWidth() const { return width; }
@@ -39,6 +41,8 @@ class Texture {
 		uint32 height;
 
 		uint32 internalFormat;
+		uint32 pixelFormat;
+		uint32 dataType;
 
 		bool compressed;
 		bool mipMaps;

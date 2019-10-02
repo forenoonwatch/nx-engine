@@ -5,11 +5,13 @@ Texture::Texture(RenderContext& context, uint32 width,
 			const void* data, uint32 pixelFormat, uint32 dataType,
 			bool compressed, bool mipMaps)
 		: context(&context)
-		, textureID(-1)
+		, textureID(0)
 		, width(width)
 		, height(height)
 		, internalFormat(RenderContext::calcInternalFormat(internalPixelFormat,
 					compressed))
+		, pixelFormat(pixelFormat)
+		, dataType(dataType)
 		, compressed(compressed)
 		, mipMaps(mipMaps) {
 	glGenTextures(1, &textureID);
@@ -39,7 +41,7 @@ Texture::Texture(RenderContext& context, const Bitmap& bitmap,
 
 Texture::Texture(RenderContext& context, const DDSTexture& ddsTexture)
 		: context(&context)
-		, textureID(-1)
+		, textureID(0)
 		, width(ddsTexture.getWidth())
 		, height(ddsTexture.getHeight())
 		, internalFormat(ddsTexture.getInternalPixelFormat())
@@ -102,6 +104,15 @@ Texture::Texture(RenderContext& context, const DDSTexture& ddsTexture)
 			h /= 2;
 		}
 	}
+}
+
+void Texture::resize(uint32 width, uint32 height) {
+	this->width = width;
+	this->height = height;
+
+	glBindTexture(GL_TEXTURE_2D, textureID);
+	glTexImage2D(GL_TEXTURE_2D, 0, internalFormat,
+			width, height, 0, pixelFormat, dataType, nullptr);
 }
 
 Texture::~Texture() {

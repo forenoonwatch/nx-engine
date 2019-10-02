@@ -29,6 +29,8 @@ class RenderTarget {
 		void addRenderBuffer(RenderBuffer& buffer, uint32 attachmentType,
 				uint32 attachmentNumber = 0);
 
+		inline void resize(uint32 width, uint32 height);
+
 		inline uint32 getID() { return bufferID; }
 
 		inline uint32 getWidth() const { return width; }
@@ -44,3 +46,8 @@ class RenderTarget {
 		uint32 width;
 		uint32 height;
 };
+
+inline void RenderTarget::resize(uint32 width, uint32 height) {
+	this->width = width;
+	this->height = height;
+}
