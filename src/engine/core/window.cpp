@@ -16,11 +16,13 @@ Window::Window(const char* title, uint32 width, uint32 height)
 	//glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
 	//glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	
-	glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+	//glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
 	handle = glfwCreateWindow(width, height, title, nullptr, nullptr);
-	glfwMakeContextCurrent(handle);
 
+	glfwSetWindowUserPointer(handle, this);
+
+	glfwMakeContextCurrent(handle);
 	glewInit();
 
 	Application::bindInputCallbacks(handle);

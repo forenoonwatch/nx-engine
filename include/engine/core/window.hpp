@@ -4,6 +4,7 @@
 #include "monitor.hpp"
 
 class GLFWwindow;
+class Application;
 
 typedef GLFWwindow* WindowHandle;
 
@@ -36,4 +37,6 @@ class Window {
 
 		bool fullscreen;
 		Monitor* currentMonitor;
+
+		friend class Application;
 };

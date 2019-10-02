@@ -1,10 +1,14 @@
 #pragma once
 
-#include "input.hpp"
-#include "window.hpp"
+#include <engine/core/input.hpp>
+#include <engine/core/window.hpp>
+
+#include <functional>
 
 class Application {
 	public:
+		typedef std::function<void(Window&, uint32, uint32)> ResizeCallback;
+
 		static void init();
 
 		static void pollEvents();
@@ -16,6 +20,8 @@ class Application {
 		static bool isMouseDown(enum Input::MouseButton mouseButton);
 		static bool getMousePressed(enum Input::MouseButton mouseButton);
 		static bool getMouseReleased(enum Input::MouseButton mouseButton);
+
+		inline static void setResizeCallback(ResizeCallback callback);
 
 		inline static Monitor& getPrimaryMonitor() { return monitors[0]; }
 		inline static Monitor& getMonitor(uint32 i) { return monitors[i]; }
@@ -43,7 +49,14 @@ class Application {
 		static double mouseX;
 		static double mouseY;
 
+		static ResizeCallback resizeCallback;
+
 		static void onKeyEvent(WindowHandle, int, int, int, int);
 		static void onMouseClickEvent(WindowHandle, int, int, int);
 		static void onMouseMoveEvent(WindowHandle, double, double);
+		static void onWindowResizeEvent(WindowHandle, int, int);
 };
+
+inline void Application::setResizeCallback(ResizeCallback callback) {
+	resizeCallback = callback;
+}
