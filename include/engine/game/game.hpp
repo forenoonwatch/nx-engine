@@ -22,7 +22,6 @@ class Game {
 		typedef std::function<void(Game&, float)> ECSSystemCallback;
 
 		inline Game(Window& window, RenderContext* renderContext,
-					Memory::SharedPointer<Scene> initialScene,
 					bool unlockFPS)
 				: window(&window)
 				, renderContext(renderContext)
@@ -32,7 +31,6 @@ class Game {
 				, unlockFPS(unlockFPS)
 				, fps(0) {
 			renderContext->setGame(*this);
-			loadScene(initialScene);
 		}
 
 		void loadScene(Memory::SharedPointer<Scene> scene);
