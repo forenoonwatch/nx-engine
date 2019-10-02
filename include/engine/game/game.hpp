@@ -35,6 +35,8 @@ class Game {
 
 		void loadScene(Memory::SharedPointer<Scene> scene);
 
+		inline Window& getWindow() { return *window; }
+
 		inline RenderContext* getRenderContext() { return renderContext; }
 		
 		inline ECS::Registry& getECS() { return ecs; }
