@@ -1,5 +1,7 @@
 #pragma once
 
+class Texture;
+
 class Material {
 	public:
 		Texture* diffuse;
@@ -7,3 +9,4 @@ class Material {
 		Texture* materialMap;
 	private:
 };
+
