@@ -8,6 +8,10 @@
 #define Vector3f glm::vec3
 #define Vector4f glm::vec4
 
+#define Vector2i glm::ivec2
+#define Vector3i glm::ivec3
+#define Vector4i glm::ivec4
+
 namespace Math {
 	template <typename T>
 	FORCEINLINE float length(const T& vector) {
