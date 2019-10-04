@@ -15,6 +15,11 @@ class Scene {
 		inline void addUpdateSystem(Game::ECSSystemCallback callback);
 		inline void addRenderSystem(Game::ECSSystemCallback callback);
 
+		inline void insertUpdateSystem(Game::ECSSystemCallback callback,
+				uint32 position);
+		inline void insertRenderSystem(Game::ECSSystemCallback callback,
+				uint32 position);
+
 		virtual ~Scene() {}
 	private:
 		NULL_COPY_AND_ASSIGN(Scene);
@@ -43,5 +48,15 @@ inline void Scene::addUpdateSystem(Game::ECSSystemCallback callback) {
 
 inline void Scene::addRenderSystem(Game::ECSSystemCallback callback) {
 	renderPipeline.push_back(callback);
+}
+
+inline void Scene::insertUpdateSystem(Game::ECSSystemCallback callback,
+		uint32 position) {
+	updatePipeline.insert(updatePipeline.begin() + position, callback);
+}
+
+inline void Scene::insertRenderSystem(Game::ECSSystemCallback callback,
+		uint32 position) {
+	renderPipeline.insert(renderPipeline.begin() + position, callback);
 }
 
