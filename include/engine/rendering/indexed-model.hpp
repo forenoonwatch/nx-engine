@@ -1,8 +1,9 @@
 #pragma once
 
-#include "engine/core/common.hpp"
+#include <engine/core/common.hpp>
+#include <engine/core/array-list.hpp>
 
-#include "engine/core/array-list.hpp"
+#include <engine/math/vector.hpp>
 
 class IndexedModel {
 	public:
@@ -15,6 +16,9 @@ class IndexedModel {
 				: instancedElementStartIndex((uint32)-1) {}
 
 		IndexedModel(const AllocationHints& hints);
+
+		bool intersectsRay(const Vector3f& pos, const Vector3f& dir,
+				Vector3f* intersectPos, Vector3f* normal) const;
 
 		void initStaticMesh();
 
@@ -55,3 +59,4 @@ class IndexedModel {
 };
 
 #include "indexed-model.inl"
+
