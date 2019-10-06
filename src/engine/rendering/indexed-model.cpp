@@ -13,6 +13,7 @@ IndexedModel::IndexedModel(const AllocationHints& hints)
 bool IndexedModel::intersectsRay(const Vector3f& pos, const Vector3f& dir,
 		Vector3f* intersectPos, Vector3f* normal) const {
 	uint32 i0, i1, i2;
+	uint32 minI0, minI1, minI2;
 
 	float t;
 	float minT = FLT_MAX;
@@ -31,15 +32,25 @@ bool IndexedModel::intersectsRay(const Vector3f& pos, const Vector3f& dir,
 		const Vector3f& v1 = *((Vector3f*)&elements[0][3 * i1]);
 		const Vector3f& v2 = *((Vector3f*)&elements[0][3 * i2]);
 
-		if (Intersects::intersectTriangle(pos, dir, v0, v1, v2, t, normal)
+		if (Intersects::intersectTriangle(pos, dir, v0, v1, v2, t)
 				&& t < minT) {
 			minT = t;
 			intersected = true;
+
+			minI0 = i0;
+			minI1 = i1;
+			minI2 = i2;
 		}
 	}
 
 	if (intersected) {
 		*intersectPos = pos + dir * minT;
+
+		const Vector3f& n0 = *((Vector3f*)&elements[2][3 * minI0]);
+		const Vector3f& n1 = *((Vector3f*)&elements[2][3 * minI1]);
+		const Vector3f& n2 = *((Vector3f*)&elements[2][3 * minI2]);
+
+		*normal = (n0 + n1 + n2) / 3.f;
 	}
 
 	return intersected;

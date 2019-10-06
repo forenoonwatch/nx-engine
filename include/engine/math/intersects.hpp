@@ -8,11 +8,11 @@ namespace Intersects {
 	static FORCEINLINE bool intersectTriangle(const Vector3f& pos, const Vector3f& dir,
 			const Vector3f& v0, const Vector3f& v1, const Vector3f& v2, Vector3f* intersectPos,
 			Vector3f* normal) {
-		Vector3f e1 = v1 - v0;
-		Vector3f e2 = v2 - v0;
+		const Vector3f e1 = v1 - v0;
+		const Vector3f e2 = v2 - v0;
 		
-		Vector3f h = Math::cross(dir, e2);
-		float a = Math::dot(e1, h);
+		const Vector3f h = Math::cross(dir, e2);
+		const float a = Math::dot(e1, h);
 
 		if (a > -0.00001f && a < 0.0001f) {
 			return false;
@@ -47,13 +47,12 @@ namespace Intersects {
 	}
 
 	static FORCEINLINE bool intersectTriangle(const Vector3f& pos, const Vector3f& dir,
-			const Vector3f& v0, const Vector3f& v1, const Vector3f& v2, float& f,
-			Vector3f* normal) {
-		Vector3f e1 = v1 - v0;
-		Vector3f e2 = v2 - v0;
+			const Vector3f& v0, const Vector3f& v1, const Vector3f& v2, float& f) {
+		const Vector3f e1 = v1 - v0;
+		const Vector3f e2 = v2 - v0;
 		
-		Vector3f h = Math::cross(dir, e2);
-		float a = Math::dot(e1, h);
+		const Vector3f h = Math::cross(dir, e2);
+		const float a = Math::dot(e1, h);
 
 		if (a > -0.00001f && a < 0.0001f) {
 			return false;
@@ -78,8 +77,6 @@ namespace Intersects {
 		f *= Math::dot(e2, q);
 
 		if (f > 0.00001f) {
-			*normal = Math::normalize(Math::cross(e1, e2));
-
 			return true;
 		}
 
