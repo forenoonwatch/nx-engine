@@ -28,6 +28,16 @@ namespace Math {
 		return glm::normalize(v);
 	}
 
+	template <typename T>
+	FORCEINLINE T floor(const T& v) {
+		return glm::floor(v);
+	}
+
+	template <typename T>
+	FORCEINLINE T ceil(const T& v) {
+		return glm::ceil(v);
+	}
+
 	FORCEINLINE Vector3f cross(const Vector3f& a, const Vector3f& b) {
 		return glm::cross(a, b);
 	}
