@@ -5,7 +5,8 @@
 #include <cfloat>
 
 IndexedModel::IndexedModel(const AllocationHints& hints)
-		: instancedElementStartIndex(hints.instancedElementStartIndex) {
+		: instancedElementStartIndex(hints.instancedElementStartIndex)
+		, flags(hints.flags) {
 	elementSizes.assign(hints.elementSizes.begin(), hints.elementSizes.end());
 	elements.resize(hints.elementSizes.size());
 }

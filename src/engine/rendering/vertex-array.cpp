@@ -21,8 +21,15 @@ VertexArray::VertexArray(RenderContext& context,
 	glGenBuffers(numBuffers, buffers);
 
 	ArrayList<const float*> vertexData = model.getVertexData();
-	initVertexBuffers(model.getNumVertexComponents(), &vertexData[0],
-			model.getNumVertices(), model.getElementSizes(), true);
+
+	if (model.getFlags() & IndexedModel::FLAG_INTERLEAVED_INSTANCES) {
+		initMultiVertexSingleInstance(model.getNumVertexComponents(), &vertexData[0],
+				model.getNumVertices(), model.getElementSizes(), true);
+	}
+	else {
+		initMultiVertexMultiInstance(model.getNumVertexComponents(), &vertexData[0],
+				model.getNumVertices(), model.getElementSizes(), true);
+	}
 
 	uintptr indicesSize = numElements * sizeof(uint32);
 	
@@ -54,7 +61,7 @@ VertexArray::VertexArray(RenderContext& context,
 	glGenBuffers(numOwnedBuffers, buffers + instancedComponentStartIndex);
 
 	ArrayList<const float*> vertexData = model.getVertexData();
-	initVertexBuffers(model.getNumVertexComponents(), &vertexData[0],
+	initMultiVertexMultiInstance(model.getNumVertexComponents(), &vertexData[0],
 			model.getNumVertices(), model.getElementSizes(), false);
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffers[numBuffers - 1]);
@@ -193,7 +200,7 @@ VertexArray::~VertexArray() {
 	delete[] bufferSizes;
 }
 
-void VertexArray::initVertexBuffers(uint32 numVertexComponents,
+void VertexArray::initMultiVertexMultiInstance(uint32 numVertexComponents,
 		const float** vertexData, uint32 numVertices, const uint32* vertexElementSizes,
 		bool writeData) {
 	for (uint32 i = 0, attribute = 0; i < numBuffers - 1; ++i) {
@@ -218,35 +225,43 @@ void VertexArray::initVertexBuffers(uint32 numVertexComponents,
 		
 		bufferSizes[i] = dataSize;
 
-		uint32 elementSizeDiv = elementSize / 4;
-		uint32 elementSizeRem = elementSize % 4;
-
-		for (uint32 j = 0; j < elementSizeDiv; ++j) {
-			glEnableVertexAttribArray(attribute);
-			glVertexAttribPointer(attribute, 4, GL_FLOAT, GL_FALSE,
-					elementSize * sizeof(float),
-					(const void*)(j * 4 * sizeof(float)));
-
-			if (instancedMode) {
-				glVertexAttribDivisor(attribute, 1);
-			}
-
-			++attribute;
-		}
-
-		if (elementSizeRem != 0) {
-			glEnableVertexAttribArray(attribute);
-			glVertexAttribPointer(attribute, elementSize, GL_FLOAT, GL_FALSE,
-					elementSize * sizeof(float),
-					(const void*)(elementSizeDiv * 4 * sizeof(float)));
-
-			if (instancedMode) {
-				glVertexAttribDivisor(attribute, 1);
-			}
-
-			++attribute;
-		}
+		initDistributedAttribute(elementSize, instancedMode, attribute);
 	}
+}
+
+void VertexArray::initMultiVertexSingleInstance(uint32 numVertexComponents,
+		const float** vertexData, uint32 numVertices, const uint32* vertexElementSizes,
+		bool writeData) {
+	uint32 attribute = 0;
+
+	for (uint32 i = 0; i < numVertexComponents; ++i) {
+		const uint32 elementSize = vertexElementSizes[i];
+		const uintptr dataSize = elementSize * sizeof(float) * numVertices;
+
+		glBindBuffer(GL_ARRAY_BUFFER, buffers[i]);
+
+		if (writeData) {
+			glBufferData(GL_ARRAY_BUFFER, dataSize, vertexData[i], usage);
+		}
+		
+		bufferSizes[i] = dataSize;
+
+		initDistributedAttribute(elementSize, false, attribute);
+	}
+
+	uint32 instancedDataSize = 0;
+
+	for (uint32 i = numVertexComponents; i < numBuffers - 1; ++i) {
+		instancedDataSize += vertexElementSizes[i] * sizeof(float);
+	}
+
+	glBindBuffer(GL_ARRAY_BUFFER, buffers[numVertexComponents]);
+	glBufferData(GL_ARRAY_BUFFER, instancedDataSize, nullptr, GL_DYNAMIC_DRAW);
+
+	bufferSizes[numVertexComponents] = instancedDataSize; 
+
+	initInterleavedAttributes(instancedDataSize, numBuffers - 1 - numVertexComponents,
+			vertexElementSizes + numVertexComponents, true, attribute);
 }
 
 void VertexArray::initEmptyArrayBuffers(uint32 numVertexComponents,
@@ -269,34 +284,7 @@ void VertexArray::initEmptyArrayBuffers(uint32 numVertexComponents,
 
 		bufferSizes[i] = dataSize;
 
-		uint32 elementSizeDiv = elementSize / 4;
-		uint32 elementSizeRem = elementSize % 4;
-
-		for (uint32 j = 0; j < elementSizeDiv; ++j) {
-			glEnableVertexAttribArray(attribute);
-			glVertexAttribPointer(attribute, 4, GL_FLOAT, GL_FALSE,
-					elementSize * sizeof(float),
-					(const void*)(j * 4 * sizeof(float)));
-
-			if (instancedMode) {
-				glVertexAttribDivisor(attribute, 1);
-			}
-
-			++attribute;
-		}
-
-		if (elementSizeRem != 0) {
-			glEnableVertexAttribArray(attribute);
-			glVertexAttribPointer(attribute, elementSize, GL_FLOAT, GL_FALSE,
-					elementSize * sizeof(float),
-					(const void*)(elementSizeDiv * 4 * sizeof(float)));
-
-			if (instancedMode) {
-				glVertexAttribDivisor(attribute, 1);
-			}
-
-			++attribute;
-		}
+		initDistributedAttribute(elementSize, instancedMode, attribute);
 	}
 }
 
@@ -318,42 +306,64 @@ void VertexArray::initSharedBuffers(uint32 numVertexComponents,
 
 		bufferSizes[i] = dataSize;
 
-		uint32 elementSizeDiv = elementSize / 4;
-		uint32 elementSizeRem = elementSize % 4;
-
-		for (uint32 j = 0; j < elementSizeDiv; ++j) {
-			glEnableVertexAttribArray(attribute);
-			glVertexAttribPointer(attribute, 4, GL_FLOAT, GL_FALSE,
-					elementSize * sizeof(float),
-					(const void*)(j * 4 * sizeof(float)));
-
-			++attribute;
-		}
-
-		if (elementSizeRem != 0) {
-			glEnableVertexAttribArray(attribute);
-			glVertexAttribPointer(attribute, elementSize, GL_FLOAT, GL_FALSE,
-					elementSize * sizeof(float),
-					(const void*)(elementSizeDiv * 4 * sizeof(float)));
-
-			++attribute;
-		}
+		initDistributedAttribute(elementSize, false, attribute);
 	}
 
 	glBindBuffer(GL_ARRAY_BUFFER, buffers[numVertexComponents]);
 	bufferSizes[numVertexComponents] = instanceBufferSize; 
 
-	for (uint32 i = 0, offset = 0; i < numInstanceComponents; ++i) {
-		const uint32 elementSize = instanceElementSizes[i];
+	initInterleavedAttributes(instanceDataSize, numInstanceComponents,
+			instanceElementSizes, true, attribute);
+}
 
-		uint32 elementSizeDiv = elementSize / 4;
-		uint32 elementSizeRem = elementSize % 4;
+inline void VertexArray::initDistributedAttribute(uint32 elementSize,
+		bool instancedMode, uint32& attribute) {
+	const uint32 elementSizeDiv = elementSize / 4;
+	const uint32 elementSizeRem = elementSize % 4;
+
+	for (uint32 j = 0; j < elementSizeDiv; ++j) {
+		glEnableVertexAttribArray(attribute);
+		glVertexAttribPointer(attribute, 4, GL_FLOAT, GL_FALSE,
+				elementSize * sizeof(float),
+				(const void*)(j * 4 * sizeof(float)));
+
+		if (instancedMode) {
+			glVertexAttribDivisor(attribute, 1);
+		}
+
+		++attribute;
+	}
+
+	if (elementSizeRem != 0) {
+		glEnableVertexAttribArray(attribute);
+		glVertexAttribPointer(attribute, elementSize, GL_FLOAT, GL_FALSE,
+				elementSize * sizeof(float),
+				(const void*)(elementSizeDiv * 4 * sizeof(float)));
+
+		if (instancedMode) {
+			glVertexAttribDivisor(attribute, 1);
+		}
+
+		++attribute;
+	}
+}
+
+inline void VertexArray::initInterleavedAttributes(uint32 blockSize,
+		uint32 numElements, const uint32* elementSizes, bool instancedMode,
+		uint32& attribute) {
+	for (uint32 i = 0, offset = 0; i < numElements; ++i) {
+		const uint32 elementSize = elementSizes[i];
+		const uint32 elementSizeDiv = elementSize / 4;
+		const uint32 elementSizeRem = elementSize % 4;
 
 		for (uint32 j = 0; j < elementSizeDiv; ++j) {
 			glEnableVertexAttribArray(attribute);
 			glVertexAttribPointer(attribute, 4, GL_FLOAT, GL_FALSE,
-					instanceDataSize, (const void*)(offset));
-			glVertexAttribDivisor(attribute, 1);
+					blockSize, (const void*)(offset));
+
+			if (instancedMode) {
+				glVertexAttribDivisor(attribute, 1);
+			}
 
 			offset += 4 * sizeof(float);
 			++attribute;
@@ -362,11 +372,15 @@ void VertexArray::initSharedBuffers(uint32 numVertexComponents,
 		if (elementSizeRem != 0) {
 			glEnableVertexAttribArray(attribute);
 			glVertexAttribPointer(attribute, elementSizeRem, GL_FLOAT, GL_FALSE,
-					instanceDataSize, (const void*)(offset));
-			glVertexAttribDivisor(attribute, 1);
+					blockSize, (const void*)(offset));
+			
+			if (instancedMode) {
+				glVertexAttribDivisor(attribute, 1);
+			}
 
 			offset += elementSizeRem * sizeof(float);
 			++attribute;
 		}
 	}
 }
+

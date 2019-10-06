@@ -7,13 +7,19 @@
 
 class IndexedModel {
 	public:
+		enum AllocationFlags {
+			FLAG_INTERLEAVED_INSTANCES = 0x1,
+		};
+
 		struct AllocationHints {
 			ArrayList<uint32> elementSizes;
 			uint32 instancedElementStartIndex = (uint32)-1;
+			uint32 flags = 0;
 		};
 
 		inline IndexedModel()
-				: instancedElementStartIndex((uint32)-1) {}
+				: instancedElementStartIndex((uint32)-1)
+				, flags(0) {}
 
 		IndexedModel(const AllocationHints& hints);
 
@@ -48,6 +54,7 @@ class IndexedModel {
 		inline uint32 getNumVertices() const;
 		inline uint32 getNumIndices() const;
 		inline uint32 getInstancedElementStartIndex() const;
+		inline uint32 getFlags() const;
 
 		inline float getElement(uint32 elementIndex, uint32 arrayIndex) const;
 	private:
@@ -56,6 +63,7 @@ class IndexedModel {
 		ArrayList<ArrayList<float>> elements;
 
 		uint32 instancedElementStartIndex;
+		uint32 flags;
 };
 
 #include "indexed-model.inl"

@@ -60,11 +60,17 @@ class VertexArray {
 
 		enum BufferOwnership bufferOwnership;
 
-		void initVertexBuffers(uint32, const float**, uint32,
+		void initMultiVertexMultiInstance(uint32, const float**, uint32,
 				const uint32*, bool);
+		void initMultiVertexSingleInstance(uint32, const float**, uint32,
+				const uint32*, bool);
+
 		void initEmptyArrayBuffers(uint32, uint32, const uint32*);
 		void initSharedBuffers(uint32, const float**, uint32, const uint32*,
 				uint32, const uint32*, uint32, uint32, bool);
+
+		void initDistributedAttribute(uint32, bool, uint32&);
+		void initInterleavedAttributes(uint32, uint32, const uint32*, bool, uint32&);
 };
 
 inline const uint32 VertexArray::getBuffer(uint32 bufferIndex) {

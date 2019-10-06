@@ -47,6 +47,10 @@ inline uint32 IndexedModel::getInstancedElementStartIndex() const {
 	return instancedElementStartIndex;
 }
 
+inline uint32 IndexedModel::getFlags() const {
+	return flags;
+}
+
 inline float IndexedModel::getElement(uint32 elementIndex,
 		uint32 arrayIndex) const {
 	return elements[elementIndex][arrayIndex];
