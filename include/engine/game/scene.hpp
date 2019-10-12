@@ -29,16 +29,14 @@ class Scene {
 };
 
 inline void Scene::update(Game& game, float deltaTime) {
-	for (auto it = std::begin(updatePipeline), end = std::end(updatePipeline);
-			it != end; ++it) {
-		(*it)(game, deltaTime);
+	for (auto& updateCallback : updatePipeline) {
+		updateCallback(game, deltaTime);
 	}
 }
 
 inline void Scene::render(Game& game, float deltaTime) {
-	for (auto it = std::begin(renderPipeline), end = std::end(renderPipeline);
-			it != end; ++it) {
-		(*it)(game, deltaTime);
+	for (auto& renderCallback : renderPipeline) {
+		renderCallback(game, deltaTime);
 	}
 }
 

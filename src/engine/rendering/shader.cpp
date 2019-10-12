@@ -181,10 +181,9 @@ Shader::~Shader() {
 }
 
 inline void Shader::cleanUp() {
-	for (auto it = std::begin(shaders), end = std::end(shaders);
-			it != end; ++it) {
-		glDetachShader(programID, *it);
-		glDeleteShader(*it);
+	for (auto& shader : shaders) {
+		glDetachShader(programID, shader);
+		glDeleteShader(shader);
 	}
 
 	glDeleteProgram(programID);
