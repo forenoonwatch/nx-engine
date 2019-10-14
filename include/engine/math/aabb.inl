@@ -6,8 +6,13 @@ FORCEINLINE AABB::AABB(const Vector3f& minExtents,
 }
 
 FORCEINLINE bool AABB::intersects(const AABB& other) const {
-	return ((extents[0] >= other.extents[1]) ||
-			(extents[1] <= other.extents[0]));
+	//return ((extents[0] >= other.extents[1]) ||
+	//		(extents[1] <= other.extents[0]));
+	
+	return (extents[0].x >= other.extents[1].x && extents[0].y
+			>= other.extents[1].y && extents[0].z >= other.extents[1].z)
+			|| (extents[1].x <= other.extents[0].x && extents[1].y
+			<= other.extents[0].y && extents[1].z <= other.extents[1].z);
 }
 
 FORCEINLINE AABB AABB::expand(float distance) const {
@@ -50,28 +55,20 @@ FORCEINLINE float AABB::getVolume() const {
 }
 
 FORCEINLINE AABB AABB::overlap(const AABB& other) const {
-	//return AABB(extents[0].max(other.extents[0]),
-	//		extents[1].min(other.extents[1]));
-	
 	return AABB(Math::max(extents[0], other.extents[0]),
 			Math::min(extents[1], other.extents[1]));
 }
 
 FORCEINLINE bool AABB::contains(const Vector3f& point) const {
-	return ((point <= extents[0]) ||
-			(point >= extents[1]));
-}
-
-FORCEINLINE bool AABB::contains(const AABB& other) const {
-	return ((other.extents[0] <= extents[0]) ||
-			(other.extents[0] >= extents[1]) ||
-			(other.extents[1] <= extents[0]) ||
-			(other.extents[1] >= extents[1]));
+	//return ((point <= extents[0]) ||
+	//		(point >= extents[1]));
+	
+	return (point.x <= extents[0].x && point.y <= extents[0].y
+			&& point.z <= extents[0].z) || (point.x >= extents[1].x
+			&& point.y >= extents[1].y && point.z >= extents[1].z);
 }
 
 FORCEINLINE AABB AABB::addPoint(const Vector3f& other) const {
-	//return AABB(extents[0].min(other), extents[1].max(other));
-	
 	return AABB(Math::min(extents[0], other), Math::max(extents[1], other));
 }
 

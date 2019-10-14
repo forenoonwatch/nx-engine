@@ -35,7 +35,6 @@ class AABB {
 		FORCEINLINE AABB overlap(const AABB& other) const;
 		
 		FORCEINLINE bool contains(const Vector3f& point) const;
-		FORCEINLINE bool contains(const AABB& other) const;
 
 		FORCEINLINE AABB translate(const Vector3f& amt) const;
 		
