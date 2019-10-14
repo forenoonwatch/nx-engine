@@ -1,6 +1,6 @@
 #pragma once
 
-#include "engine/core/common.hpp"
+#include <engine/core/common.hpp>
 
 #include <GLM/glm.hpp>
 
@@ -48,13 +48,27 @@ namespace Math {
 		return glm::max(v);
 	}
 
-	template <typename T>
-	FORCEINLINE T min(const T& a, const T& b) {
+	FORCEINLINE Vector2f min(const Vector2f& a, const Vector2f& b) {
 		return glm::min(a, b);
 	}
 
-	template <typename T>
-	FORCEINLINE T max(const T& a, const T& b) {
+	FORCEINLINE Vector2f max(const Vector2f& a, const Vector2f& b) {
+		return glm::max(a, b);
+	}
+
+	FORCEINLINE Vector3f min(const Vector3f& a, const Vector3f& b) {
+		return glm::min(a, b);
+	}
+
+	FORCEINLINE Vector3f max(const Vector3f& a, const Vector3f& b) {
+		return glm::max(a, b);
+	}
+
+	FORCEINLINE Vector4f min(const Vector4f& a, const Vector4f& b) {
+		return glm::min(a, b);
+	}
+
+	FORCEINLINE Vector4f max(const Vector4f& a, const Vector4f& b) {
 		return glm::max(a, b);
 	}
 
@@ -62,12 +76,4 @@ namespace Math {
 		return glm::cross(a, b);
 	}
 };
-
-bool operator<=(const Vector3f& a, const Vector3f& b) {
-	return a.x <= b.x && a.y <= b.y && a.z <= b.z;
-}
-
-bool operator>=(const Vector3f& a, const Vector3f& b) {
-	return a.x >= b.x && a.y >= b.y && a.z >= b.z;
-}
 
