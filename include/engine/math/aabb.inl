@@ -60,12 +60,12 @@ FORCEINLINE AABB AABB::overlap(const AABB& other) const {
 }
 
 FORCEINLINE bool AABB::contains(const Vector3f& point) const {
-	//return ((point <= extents[0]) ||
-	//		(point >= extents[1]));
+	//return ((point >= extents[0]) ||
+	//		(point <= extents[1]));
 	
-	return (point.x <= extents[0].x && point.y <= extents[0].y
-			&& point.z <= extents[0].z) || (point.x >= extents[1].x
-			&& point.y >= extents[1].y && point.z >= extents[1].z);
+	return (point.x >= extents[0].x && point.y >= extents[0].y
+			&& point.z >= extents[0].z) && (point.x <= extents[1].x
+			&& point.y <= extents[1].y && point.z <= extents[1].z);
 }
 
 FORCEINLINE AABB AABB::addPoint(const Vector3f& other) const {
