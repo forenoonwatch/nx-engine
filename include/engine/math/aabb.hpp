@@ -19,6 +19,8 @@ class AABB {
 
 		bool intersectsPlane(const Vector3f& position,
 				const Vector3f& normal) const;
+		bool belowPlane(const Vector3f& position,
+				const Vector3f& normal, float& r, float& s) const;
 
 		FORCEINLINE bool intersects(const AABB& other) const;
 
