@@ -1,6 +1,6 @@
 #pragma once
 
-#include "engine/math/vector.hpp"
+#include <engine/math/vector.hpp>
 
 #include <GLM/gtc/matrix_transform.hpp>
 
@@ -12,7 +12,8 @@ namespace Math {
 		return glm::inverse(matrix);
 	}
 
-	FORCEINLINE Matrix4f translate(const Matrix4f& matrix, const Vector3f& translation) {
+	FORCEINLINE Matrix4f translate(const Matrix4f& matrix,
+			const Vector3f& translation) {
 		return glm::translate(matrix, translation);
 	}
 
