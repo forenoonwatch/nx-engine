@@ -73,7 +73,7 @@ AABB AABB::transform(const Matrix4f& transform) const {
 	return AABB(newMin, newMax);
 }
 
-bool AABB::intersectRay(const Vector3f& start, const Vector3f& rayDir,
+bool AABB::intersectsRay(const Vector3f& start, const Vector3f& rayDir,
 		float& point1, float& point2) const {
 	const Vector3f rdirVec = 1.f / rayDir;
 
@@ -113,7 +113,7 @@ bool AABB::intersectRay(const Vector3f& start, const Vector3f& rayDir,
 	return true;
 }
 
-bool AABB::intersectLine(const Vector3f& start, const Vector3f& end) const {
+bool AABB::intersectsLine(const Vector3f& start, const Vector3f& end) const {
 	const Vector3f dir = end - start;
 	float p1, p2;
 	

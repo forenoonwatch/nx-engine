@@ -12,11 +12,13 @@ class AABB {
 		AABB(Vector3f* points, uint32 amt);
 		AABB(float* points, uint32 amt, uint32 stride = 0);
 
-		bool intersectRay(const Vector3f& start,
+		bool intersectsRay(const Vector3f& start,
 				const Vector3f& rayDir, float& point1, float& point2) const;
-		bool intersectLine(const Vector3f& start,
+		bool intersectsLine(const Vector3f& start,
 				const Vector3f& end) const;
+
 		FORCEINLINE bool intersects(const AABB& other) const;
+
 		AABB transform(const Matrix4f& transform) const;
 
 		FORCEINLINE AABB expand(float distance) const;
