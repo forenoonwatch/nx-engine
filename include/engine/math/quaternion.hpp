@@ -16,11 +16,28 @@ namespace Math {
 		return glm::rotate(q, angle, axis);
 	}
 
+	FORCEINLINE Quaternion normalize(const Quaternion& q) {
+		return glm::normalize(q);
+	}
+
+	FORCEINLINE float length(const Quaternion& q) {
+		return glm::length(q);
+	}
+
+	FORCEINLINE float dot(const Quaternion& a, const Quaternion& b) {
+		return glm::dot(a, b);
+	}
+
+	FORCEINLINE Quaternion mix(const Quaternion& a, const Quaternion& b,
+			float c) {
+		return glm::mix(a, b, c);
+	}
+
 	FORCEINLINE Matrix4f quatToMat4(const Quaternion& q) {
 		return glm::mat4_cast(q);
 	}
 
-	FORCEINLINE Quaternion mat4ToQuad(const Matrix4f& mat) {
+	FORCEINLINE Quaternion mat4ToQuat(const Matrix4f& mat) {
 		return glm::quat_cast(mat);
 	}
 };
