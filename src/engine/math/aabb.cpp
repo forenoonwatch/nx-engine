@@ -2,6 +2,8 @@
 
 #include "engine/core/memory.hpp"
 
+#include "engine/math/math.hpp"
+
 #include <cfloat>
 
 AABB::AABB(Vector3f* points, uint32 amt) {
@@ -117,6 +119,19 @@ bool AABB::intersectsLine(const Vector3f& start, const Vector3f& end) const {
 	const Vector3f dir = end - start;
 	float p1, p2;
 	
-	bool intersect = intersectRay(start, Math::normalize(dir), p1, p2);
+	bool intersect = intersectsRay(start, Math::normalize(dir), p1, p2);
 	return intersect && p1 * p1 < Math::dot(dir, dir);
-} 
+}
+
+bool AABB::intersectsPlane(const Vector3f& position,
+		const Vector3f& normal) const {
+	const Vector3f c = (extents[1] + extents[0]) * 0.5f;
+	const Vector3f e = extents[1] - c;
+
+	const float r = Math::dot(e, glm::abs(normal)); // TODO: make better abs
+	const float s = Math::dot(normal, c) + Math::dot(normal, position);
+	// d = -dot(normal, position) for ax + by + cz + d = 0 form
+
+	return s >= -r && s <= r;
+}
+

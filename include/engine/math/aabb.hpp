@@ -17,6 +17,9 @@ class AABB {
 		bool intersectsLine(const Vector3f& start,
 				const Vector3f& end) const;
 
+		bool intersectsPlane(const Vector3f& position,
+				const Vector3f& normal) const;
+
 		FORCEINLINE bool intersects(const AABB& other) const;
 
 		AABB transform(const Matrix4f& transform) const;
