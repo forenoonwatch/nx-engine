@@ -29,6 +29,11 @@ namespace Math {
 	}
 
 	template <typename T>
+	FORCEINLINE T mix(const T& a, const T&b, float c) {
+		return glm::mix(a, b, c);
+	}
+
+	template <typename T>
 	FORCEINLINE T floor(const T& v) {
 		return glm::floor(v);
 	}

@@ -4,6 +4,7 @@
 
 #include <GLM/gtc/matrix_transform.hpp>
 
+#define Matrix3f glm::mat3
 #define Matrix4f glm::mat4
 
 namespace Math {
