@@ -13,6 +13,15 @@ namespace Math {
 		return glm::inverse(matrix);
 	}
 
+	template <typename T>
+	FORCEINLINE T transpose(const T& matrix) {
+		return glm::transpose(matrix);
+	}
+
+	FORCEINLINE Matrix3f outerProduct(const Vector3f& a, const Vector3f& b) {
+		return glm::outerProduct(a, b);
+	}
+
 	FORCEINLINE Matrix4f translate(const Matrix4f& matrix,
 			const Vector3f& translation) {
 		return glm::translate(matrix, translation);

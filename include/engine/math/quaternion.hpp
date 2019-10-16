@@ -33,6 +33,14 @@ namespace Math {
 		return glm::mix(a, b, c);
 	}
 
+	FORCEINLINE Matrix3f quatToMat3(const Quaternion& q) {
+		return glm::mat3_cast(q);
+	}
+
+	FORCEINLINE Quaternion mat3ToQuat(const Matrix3f& mat) {
+		return glm::quat_cast(mat);
+	}
+
 	FORCEINLINE Matrix4f quatToMat4(const Quaternion& q) {
 		return glm::mat4_cast(q);
 	}
