@@ -1,5 +1,7 @@
 #pragma once
 
+#include <engine/core/common.hpp>
+
 #include <memory>
 #include <cstring>
 
