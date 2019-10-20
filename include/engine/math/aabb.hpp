@@ -18,7 +18,7 @@ class AABB {
 				const Vector3f& end) const;
 
 		bool intersectsPlane(const Vector3f& position,
-				const Vector3f& normal) const;
+				const Vector3f& normal, float& r, float& s) const;
 		bool belowPlane(const Vector3f& position,
 				const Vector3f& normal, float& r, float& s) const;
 

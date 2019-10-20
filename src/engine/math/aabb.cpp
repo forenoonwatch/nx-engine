@@ -124,12 +124,12 @@ bool AABB::intersectsLine(const Vector3f& start, const Vector3f& end) const {
 }
 
 bool AABB::intersectsPlane(const Vector3f& position,
-		const Vector3f& normal) const {
+		const Vector3f& normal, float& r, float& s) const {
 	const Vector3f c = (extents[1] + extents[0]) * 0.5f;
 	const Vector3f e = extents[1] - c;
 
-	const float r = Math::dot(e, glm::abs(normal)); // TODO: make better abs
-	const float s = Math::dot(normal, c) + Math::dot(normal, position);
+	r = Math::dot(e, glm::abs(normal)); // TODO: make better abs
+	s = Math::dot(normal, c) + Math::dot(normal, position);
 	// d = -dot(normal, position) for ax + by + cz + d = 0 form
 
 	return s >= -r && s <= r;
@@ -141,9 +141,8 @@ bool AABB::belowPlane(const Vector3f& position,
 	const Vector3f e = extents[1] - c;
 
 	r = Math::dot(e, glm::abs(normal)); // TODO: make better abs
-	s = Math::dot(normal, c) + Math::dot(normal, position);
-	// d = -dot(normal, position) for ax + by + cz + d = 0 form
+	s = Math::dot(normal, c - position);
 
-	return -s <= -r || s >= -r;
+	return s <= r;
 }
 
