@@ -24,7 +24,7 @@ class IndexedModel {
 		IndexedModel(const AllocationHints& hints);
 
 		bool intersectsRay(const Vector3f& pos, const Vector3f& dir,
-				Vector3f* intersectPos, Vector3f* normal) const;
+				Vector3f& intersectPos, Vector3f& normal) const;
 
 		void initStaticMesh();
 

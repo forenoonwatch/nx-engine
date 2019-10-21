@@ -12,7 +12,7 @@ IndexedModel::IndexedModel(const AllocationHints& hints)
 }
 
 bool IndexedModel::intersectsRay(const Vector3f& pos, const Vector3f& dir,
-		Vector3f* intersectPos, Vector3f* normal) const {
+		Vector3f& intersectPos, Vector3f& normal) const {
 	uint32 i0, i1, i2;
 	uint32 minI0, minI1, minI2;
 
@@ -45,13 +45,13 @@ bool IndexedModel::intersectsRay(const Vector3f& pos, const Vector3f& dir,
 	}
 
 	if (intersected) {
-		*intersectPos = pos + dir * minT;
+		intersectPos = pos + dir * minT;
 
 		const Vector3f& n0 = *((Vector3f*)&elements[2][3 * minI0]);
 		const Vector3f& n1 = *((Vector3f*)&elements[2][3 * minI1]);
 		const Vector3f& n2 = *((Vector3f*)&elements[2][3 * minI2]);
 
-		*normal = (n0 + n1 + n2) / 3.f;
+		normal = (n0 + n1 + n2) / 3.f;
 	}
 
 	return intersected;
