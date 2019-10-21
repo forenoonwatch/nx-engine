@@ -26,6 +26,9 @@ class IndexedModel {
 		bool intersectsRay(const Vector3f& pos, const Vector3f& dir,
 				Vector3f& intersectPos, Vector3f& normal) const;
 
+		float calcSubmergedVolume(const Vector3f& planePosition,
+				const Vector3f& planeNormal, Vector3f& centroidSum) const;
+
 		void initStaticMesh();
 
 		inline void allocateElement(uint32 elementSize);
@@ -34,7 +37,8 @@ class IndexedModel {
 		void addElement1f(uint32 elementIndex, float e0);
 		void addElement2f(uint32 elementIndex, float e0, float e1);
 		void addElement3f(uint32 elementIndex, float e0, float e1, float e2);
-		void addElement4f(uint32 elementIndex, float e0, float e1, float e2, float e3);
+		void addElement4f(uint32 elementIndex, float e0, float e1, float e2,
+				float e3);
 
 		void setElement4f(uint32 elementIndex, uint32 arrayIndex,
 				float e0, float e1, float e2, float e3);
