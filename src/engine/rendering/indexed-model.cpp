@@ -132,7 +132,7 @@ float IndexedModel::calcSubmergedVolume(const Vector3f& planePosition,
 		return 0;
 	}
 
-	centroidSum /= volume;
+	//centroidSum /= volume;
 
 	delete[] ds;
 	return volume;
