@@ -29,9 +29,7 @@ class Game {
 				, currentScene(nullptr)
 				, running(false)
 				, unlockFPS(unlockFPS)
-				, fps(0) {
-			renderContext->setGame(*this);
-		}
+				, fps(0) {}
 
 		void loadScene(Memory::SharedPointer<Scene> scene);
 

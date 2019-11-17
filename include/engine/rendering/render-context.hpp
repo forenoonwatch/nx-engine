@@ -31,8 +31,6 @@ class RenderContext {
 
 		RenderContext();
 
-		virtual void setGame(Game& game) = 0;
-
 		void awaitFinish();
 
 		void draw(RenderTarget& target, Shader& shader, VertexArray& vertexArray,
