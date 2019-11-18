@@ -13,14 +13,10 @@
 
 #include <engine/ecs/ecs.hpp>
 
-#include <functional>
-
 class Scene;
 
 class Game {
 	public:
-		typedef std::function<void(Game&, float)> ECSSystemCallback;
-
 		inline Game(Window& window, RenderContext* renderContext,
 					bool unlockFPS)
 				: window(&window)

@@ -1,6 +1,9 @@
 #pragma once
 
-#include <engine/game/game.hpp>
+#include <engine/core/array-list.hpp>
+#include <engine/core/memory.hpp>
+
+#include <engine/ecs/ecs-system.hpp>
 
 class Scene {
 	public:
@@ -12,49 +15,47 @@ class Scene {
 		inline void update(Game& game, float deltaTime);
 		inline void render(Game& game, float deltaTime);
 
-		inline void addUpdateSystem(Game::ECSSystemCallback callback);
-		inline void addRenderSystem(Game::ECSSystemCallback callback);
+		inline void addUpdateSystem(ECS::System* callback);
+		inline void addRenderSystem(ECS::System* callback);
 
-		inline void insertUpdateSystem(Game::ECSSystemCallback callback,
-				uint32 position);
-		inline void insertRenderSystem(Game::ECSSystemCallback callback,
-				uint32 position);
+		inline void insertUpdateSystem(ECS::System* callback, uint32 position);
+		inline void insertRenderSystem(ECS::System* callback, uint32 position);
 
 		virtual ~Scene() {}
 	private:
 		NULL_COPY_AND_ASSIGN(Scene);
 
-		ArrayList<Game::ECSSystemCallback> updatePipeline;
-		ArrayList<Game::ECSSystemCallback> renderPipeline;
+		ArrayList<Memory::SharedPointer<ECS::System>> updatePipeline;
+		ArrayList<Memory::SharedPointer<ECS::System>> renderPipeline;
 };
 
 inline void Scene::update(Game& game, float deltaTime) {
 	for (auto& updateCallback : updatePipeline) {
-		updateCallback(game, deltaTime);
+		(*updateCallback)(game, deltaTime);
 	}
 }
 
 inline void Scene::render(Game& game, float deltaTime) {
 	for (auto& renderCallback : renderPipeline) {
-		renderCallback(game, deltaTime);
+		(*renderCallback)(game, deltaTime);
 	}
 }
 
-inline void Scene::addUpdateSystem(Game::ECSSystemCallback callback) {
-	updatePipeline.push_back(callback);
+inline void Scene::addUpdateSystem(ECS::System* callback) {
+	updatePipeline.emplace_back(callback);
 }
 
-inline void Scene::addRenderSystem(Game::ECSSystemCallback callback) {
-	renderPipeline.push_back(callback);
+inline void Scene::addRenderSystem(ECS::System* callback) {
+	renderPipeline.emplace_back(callback);
 }
 
-inline void Scene::insertUpdateSystem(Game::ECSSystemCallback callback,
+inline void Scene::insertUpdateSystem(ECS::System* callback,
 		uint32 position) {
-	updatePipeline.insert(updatePipeline.begin() + position, callback);
+	updatePipeline.emplace(updatePipeline.begin() + position, callback);
 }
 
-inline void Scene::insertRenderSystem(Game::ECSSystemCallback callback,
+inline void Scene::insertRenderSystem(ECS::System* callback,
 		uint32 position) {
-	renderPipeline.insert(renderPipeline.begin() + position, callback);
+	renderPipeline.emplace(renderPipeline.begin() + position, callback);
 }
 
