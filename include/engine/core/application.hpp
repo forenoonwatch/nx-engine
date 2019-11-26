@@ -29,6 +29,9 @@ class Application {
 		inline static double getMouseX() { return mouseX; }
 		inline static double getMouseY() { return mouseY; }
 
+		inline static double getScrollX() { return scrollX; }
+		inline static double getScrollY() { return scrollY; }
+
 		static void destroy();
 	protected:
 		static void bindInputCallbacks(WindowHandle windowHandle);
@@ -49,12 +52,16 @@ class Application {
 		static double mouseX;
 		static double mouseY;
 
+		static double scrollX;
+		static double scrollY;
+
 		static ResizeCallback resizeCallback;
 
 		static void onKeyEvent(WindowHandle, int, int, int, int);
 		static void onMouseClickEvent(WindowHandle, int, int, int);
 		static void onMouseMoveEvent(WindowHandle, double, double);
 		static void onWindowResizeEvent(WindowHandle, int, int);
+		static void onScrollEvent(WindowHandle, double, double);
 };
 
 inline void Application::setResizeCallback(ResizeCallback callback) {

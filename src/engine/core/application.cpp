@@ -16,6 +16,9 @@ bool Application::lastMouseButtons[] = {0};
 double Application::mouseX = 0.0;
 double Application::mouseY = 0.0;
 
+double Application::scrollX = 0.0;
+double Application::scrollY = 0.0;
+
 Application::ResizeCallback Application::resizeCallback(nullptr);
 
 void Application::init() {
@@ -80,6 +83,7 @@ void Application::bindInputCallbacks(WindowHandle windowHandle) {
 	glfwSetCursorPosCallback(windowHandle, Application::onMouseMoveEvent);
 	glfwSetFramebufferSizeCallback(windowHandle,
 			Application::onWindowResizeEvent);
+	glfwSetScrollCallback(windowHandle, Application::onScrollEvent);
 
 	const Window* window = (Window*)glfwGetWindowUserPointer(windowHandle);
 
@@ -114,3 +118,10 @@ void Application::onWindowResizeEvent(WindowHandle windowHandle,
 		resizeCallback(*window, (uint32)width, (uint32)height);
 	}
 }
+
+void Application::onScrollEvent(WindowHandle windowHandle, double xOffset,
+		double yOffset) {
+	Application::scrollX += xOffset;
+	Application::scrollY += yOffset;
+}
+
