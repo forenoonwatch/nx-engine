@@ -16,6 +16,15 @@ namespace Math {
 		return glm::rotate(q, angle, axis);
 	}
 
+	FORCEINLINE Quaternion rotateBy(const Quaternion& a, const Quaternion& b) {
+		return glm::normalize(b * a);
+	}
+
+	FORCEINLINE Vector3f rotateBy(const Quaternion& q, const Vector3f& v) {
+		Quaternion w = q * v * glm::conjugate(q);
+		return Vector3f(w.x, w.y, w.z);	
+	}
+
 	FORCEINLINE Quaternion normalize(const Quaternion& q) {
 		return glm::normalize(q);
 	}
