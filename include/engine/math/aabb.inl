@@ -51,7 +51,7 @@ FORCEINLINE float AABB::getVolume() const {
 	return lengths[0] * lengths[1] * lengths[2];
 }
 
-FORCEINLINE float AABB::getVolume() const {
+FORCEINLINE float AABB::getSurfaceArea() const {
 	Vector3f lengths = extents[1] - extents[0];
 
 	return 2.f * (lengths[0] * lengths[1] + lengths[0] * lengths[2]
