@@ -38,6 +38,7 @@ class AABB {
 		FORCEINLINE void getCenterAndExtents(Vector3f& center,
 				Vector3f& extents) const;
 		FORCEINLINE float getVolume() const;
+		FORCEINLINE float getSurfaceArea() const;
 
 		FORCEINLINE AABB overlap(const AABB& other) const;
 		

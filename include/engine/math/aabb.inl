@@ -51,6 +51,13 @@ FORCEINLINE float AABB::getVolume() const {
 	return lengths[0] * lengths[1] * lengths[2];
 }
 
+FORCEINLINE float AABB::getVolume() const {
+	Vector3f lengths = extents[1] - extents[0];
+
+	return 2.f * (lengths[0] * lengths[1] + lengths[0] * lengths[2]
+			+ lengths[1] * lengths[2]);
+}
+
 FORCEINLINE AABB AABB::overlap(const AABB& other) const {
 	return AABB(Math::max(extents[0], other.extents[0]),
 			Math::min(extents[1], other.extents[1]));
