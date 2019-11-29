@@ -13,7 +13,8 @@ bool AssetLoader::loadAssets(const String& fileName,
 
 	const aiScene* scene = importer.ReadFile(fileName.c_str(),
 			aiProcess_Triangulate | aiProcess_GenSmoothNormals
-			| aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
+			| aiProcess_FlipUVs | aiProcess_CalcTangentSpace
+			| aiProcess_JoinIdenticalVertices);
 
 	if (!scene) {
 		DEBUG_LOG("Asset Loader", LOG_ERROR,
