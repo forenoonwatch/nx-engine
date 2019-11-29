@@ -6,7 +6,7 @@
 
 #include <cfloat>
 
-AABB::AABB(Vector3f* points, uint32 amt) {
+AABB::AABB(const Vector3f* points, uint32 amt) {
 	if (amt == 0) {
 		extents[0] = Vector3f(0.f, 0.f, 0.f);
 		extents[1] = Vector3f(0.f, 0.f, 0.f);

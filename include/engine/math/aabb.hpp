@@ -9,7 +9,7 @@ class AABB {
 		FORCEINLINE AABB(const Vector3f& minExtents,
 				const Vector3f& maxExtents);
 		
-		AABB(Vector3f* points, uint32 amt);
+		AABB(const Vector3f* points, uint32 amt);
 		AABB(float* points, uint32 amt, uint32 stride = 0);
 
 		bool intersectsRay(const Vector3f& start,
