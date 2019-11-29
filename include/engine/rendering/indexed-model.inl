@@ -26,6 +26,10 @@ inline const uint32* IndexedModel::getElementSizes() const {
 	return &elementSizes[0];
 }
 
+inline uint32 IndexedModel::getElementArraySize(uint32 elementIndex) const {
+	return elements[elementIndex].size();
+}
+
 inline uint32 IndexedModel::getNumVertexComponents() const {
 	return elementSizes.size() - getNumInstanceComponents();
 }
@@ -51,7 +55,29 @@ inline uint32 IndexedModel::getFlags() const {
 	return flags;
 }
 
-inline float IndexedModel::getElement(uint32 elementIndex,
+inline float IndexedModel::getElement1f(uint32 elementIndex,
 		uint32 arrayIndex) const {
 	return elements[elementIndex][arrayIndex];
 }
+
+inline Vector2f IndexedModel::getElement2f(uint32 elementIndex,
+		uint32 arrayIndex) const {
+	return Vector2f(elements[elementIndex][arrayIndex],
+			elements[elementIndex][arrayIndex + 1]);
+}
+
+inline Vector3f IndexedModel::getElement3f(uint32 elementIndex,
+		uint32 arrayIndex) const {
+	return Vector3f(elements[elementIndex][arrayIndex],
+			elements[elementIndex][arrayIndex + 1],
+			elements[elementIndex][arrayIndex + 2]);
+}
+
+inline Vector4f IndexedModel::getElement4f(uint32 elementIndex,
+		uint32 arrayIndex) const {
+	return Vector4f(elements[elementIndex][arrayIndex],
+			elements[elementIndex][arrayIndex + 1],
+			elements[elementIndex][arrayIndex + 2],
+			elements[elementIndex][arrayIndex + 3]);
+}
+

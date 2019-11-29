@@ -51,6 +51,7 @@ class IndexedModel {
 		inline ArrayList<const float*> getVertexData() const;
 		inline const uint32* getIndices() const;
 		inline const uint32* getElementSizes() const;
+		inline uint32 getElementArraySize(uint32 elementIndex) const;
 
 		inline uint32 getNumVertexComponents() const;
 		inline uint32 getNumInstanceComponents() const;
@@ -60,7 +61,14 @@ class IndexedModel {
 		inline uint32 getInstancedElementStartIndex() const;
 		inline uint32 getFlags() const;
 
-		inline float getElement(uint32 elementIndex, uint32 arrayIndex) const;
+		inline float getElement1f(uint32 elementIndex,
+				uint32 arrayIndex) const;
+		inline Vector2f getElement2f(uint32 elementIndex,
+				uint32 arrayIndex) const;
+		inline Vector3f getElement3f(uint32 elementIndex,
+				uint32 arrayIndex) const;
+		inline Vector4f getElement4f(uint32 elementIndex,
+				uint32 arrayIndex) const;
 	private:
 		ArrayList<uint32> indices;
 		ArrayList<uint32> elementSizes;
