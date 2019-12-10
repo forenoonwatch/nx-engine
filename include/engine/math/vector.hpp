@@ -80,5 +80,25 @@ namespace Math {
 	FORCEINLINE Vector3f cross(const Vector3f& a, const Vector3f& b) {
 		return glm::cross(a, b);
 	}
+
+	inline void computeBasis(const Vector3f& normal, Vector3f& tangent0,
+			Vector3f& tangent1);
 };
+
+inline void Math::computeBasis(const Vector3f& normal, Vector3f& tangent0,
+		Vector3f& tangent1) {
+	if (normal.x >= 0.57735027f || normal.x <= -0.57735027f) {
+		tangent0.x = normal.y;
+		tangent0.y = -normal.x;
+		tangent0.z = 0.f;
+	}
+	else {
+		tangent0.x = 0.f;
+		tangent0.y = normal.z;
+		tangent0.z = -normal.y;
+	}
+
+	tangent0 = Math::normalize(tangent0);
+	tangent1 = Math::cross(normal, tangent0);
+}
 
