@@ -3,6 +3,7 @@
 #include <engine/core/common.hpp>
 
 #include <GLM/glm.hpp>
+#include <GLM/gtc/type_ptr.hpp>
 
 #define Vector2f glm::vec2
 #define Vector3f glm::vec3
@@ -79,6 +80,11 @@ namespace Math {
 
 	FORCEINLINE Vector3f cross(const Vector3f& a, const Vector3f& b) {
 		return glm::cross(a, b);
+	}
+
+	template <typename T>
+	FORCEINLINE const T* value_ptr(const T& v) {
+		return (const T*)glm::value_ptr(v);
 	}
 
 	inline void computeBasis(const Vector3f& normal, Vector3f& tangent0,
