@@ -34,6 +34,8 @@ class Transform {
 		FORCEINLINE Vector3f inverseTransform(const Vector3f& vector,
 				float w) const;
 
+		FORCEINLINE Transform transform(const Transform& other) const;
+
 		FORCEINLINE Matrix4f toMatrix() const;
 		Matrix4f inverse() const;
 

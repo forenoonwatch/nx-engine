@@ -71,6 +71,11 @@ FORCEINLINE Vector4f Transform::inverseTransform(
 	return inverse() * vector;
 }
 
+FORCEINLINE Transform Transform::transform(const Transform& other) const {
+	return Transform(position + Math::rotateBy(rotation, other.position),
+			Math::rotateBy(other.rotation, rotation), scale * other.scale);
+}
+
 FORCEINLINE Vector3f Transform::getPosition() const {
 	return position;
 }
