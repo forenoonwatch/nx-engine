@@ -21,8 +21,16 @@ namespace Math {
 	}
 
 	FORCEINLINE Vector3f rotateBy(const Quaternion& q, const Vector3f& v) {
-		Quaternion w = q * v * glm::conjugate(q);
-		return Vector3f(w.x, w.y, w.z);	
+		// NOTE:
+		// Active Rotation: q^-1 * v * q
+		// Passive Rotation: q * v * q^-1
+		// For rotation quats: conj(q) == q^-1
+		
+		Quaternion w = q * Quaternion(0.f, v.x, v.y, v.z) * glm::conjugate(q);
+		return Vector3f(w.x, w.y, w.z);
+
+		///Quaternion w = glm::conjugate(q) * v * q;
+		//return Vector3f(w.x, w.y, w.z);
 	}
 
 	FORCEINLINE Quaternion normalize(const Quaternion& q) {
