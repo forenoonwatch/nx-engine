@@ -35,7 +35,7 @@ InputStreamBuffer::InputStreamBuffer(RenderContext& context,
 			for (uint32 k = 0; k < elementSizeDiv; ++k) {
 				glEnableVertexAttribArray(attribute);
 				glVertexAttribPointer(attribute, 4, GL_FLOAT, GL_FALSE,
-						dataBlockSize, (const void*)(offset));
+						dataBlockSize, reinterpret_cast<const void*>(offset));
 
 				offset += 4 * sizeof(float);
 				++attribute;
@@ -43,8 +43,9 @@ InputStreamBuffer::InputStreamBuffer(RenderContext& context,
 
 			if (elementSizeRem != 0) {
 				glEnableVertexAttribArray(attribute);
-				glVertexAttribPointer(attribute, elementSizeRem, GL_FLOAT, GL_FALSE,
-						dataBlockSize, (const void*)(offset));
+				glVertexAttribPointer(attribute, elementSizeRem, GL_FLOAT,
+						GL_FALSE, dataBlockSize,
+						reinterpret_cast<const void*>(offset));
 
 				offset += elementSizeRem * sizeof(float);
 				++attribute;
@@ -60,7 +61,8 @@ void InputStreamBuffer::update(const void* data, uintptr dataSize) {
 	void* buffer = glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
 
 	Memory::memcpy(buffer, data, dataSize);
-	Memory::memset((void*)((uintptr)buffer + dataSize), 0, bufferSize - dataSize);
+	Memory::memset(reinterpret_cast<void*>((uintptr)buffer + dataSize), 0,
+			bufferSize - dataSize);
 
 	glUnmapBuffer(GL_ARRAY_BUFFER);
 

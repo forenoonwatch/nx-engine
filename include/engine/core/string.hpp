@@ -41,10 +41,6 @@ class String : public std::string {
 		inline bool starts_with(const String& prefix) {
 			return compare(0, prefix.length(), prefix) == 0;
 		}
-
-		inline operator std::string() {
-			return *((std::string*)this);
-		}
 };
 
 namespace std {

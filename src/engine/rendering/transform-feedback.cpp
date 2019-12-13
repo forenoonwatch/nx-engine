@@ -1,7 +1,8 @@
 #include "rendering/transform-feedback.hpp"
 
 TransformFeedback::TransformFeedback(RenderContext& context,
-			uint32 numAttribsIn, const uint32* attribSizesIn, uint32 numElements)
+			uint32 numAttribsIn, const uint32* attribSizesIn,
+			uint32 numElements)
 		: context(&context)
 		, numAttribs(numAttribsIn)
 		, attribSizes(new uint32[numAttribsIn])
@@ -37,7 +38,7 @@ TransformFeedback::TransformFeedback(RenderContext& context,
 			for (uint32 k = 0; k < elementSizeDiv; ++k) {
 				glEnableVertexAttribArray(attribute);
 				glVertexAttribPointer(attribute, 4, GL_FLOAT, GL_FALSE,
-						dataBlockSize, (const void*)(offset));
+						dataBlockSize, reinterpret_cast<const void*>(offset));
 
 				offset += 4 * sizeof(float);
 				++attribute;
@@ -45,8 +46,9 @@ TransformFeedback::TransformFeedback(RenderContext& context,
 
 			if (elementSizeRem != 0) {
 				glEnableVertexAttribArray(attribute);
-				glVertexAttribPointer(attribute, elementSizeRem, GL_FLOAT, GL_FALSE,
-						dataBlockSize, (const void*)(offset));
+				glVertexAttribPointer(attribute, elementSizeRem, GL_FLOAT,
+						GL_FALSE, dataBlockSize,
+						reinterpret_cast<const void*>(offset));
 
 				offset += elementSizeRem * sizeof(float);
 				++attribute;
