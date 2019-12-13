@@ -13,8 +13,16 @@ MKDIR_P := mkdir -p
 SRCS := $(call rwildcard, $(SRC_DIR)/, *.cpp)
 OBJS := $(SRCS:%=$(BUILD_DIR)/%.o)
 
+
+UNAME := $(shell uname -s)
+
+ifeq ($(UNAME), Linux)
+	CXXFLAGS := -I$(CURDIR)/include/engine -I$(CURDIR)/include -msse2 $(CXXFLAGS)
+else
+	CXXFLAGS := -I$(CURDIR)/include/engine -I$(CURDIR)/include -I$(LIB_DIR)/include -msse2 $(CXXFLAGS)
+endif
+
 CPPFLAGS := -std=c++17 -g
-CXXFLAGS := -I$(CURDIR)/include/engine -I$(CURDIR)/include -I$(LIB_DIR)/include -msse2 $(CXXFLAGS)
 
 all: $(BUILD_DIR)/$(TARGET)
 
