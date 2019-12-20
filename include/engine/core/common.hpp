@@ -55,3 +55,8 @@ typedef uintptr_t uintptr;
 
 #define ARRAY_SIZE_IN_ELEMENTS(a) (sizeof(a) / sizeof(a[0]))
 
+template <typename T, size_t N>
+constexpr size_t countof(const T(&)[N]) {
+	return N;
+}
+

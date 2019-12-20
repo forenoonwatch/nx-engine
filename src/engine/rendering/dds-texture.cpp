@@ -42,7 +42,7 @@ bool DDSTexture::load(const String& fileName) {
 	}
 
 	uint8 header[124];
-	fread(&header, ARRAY_SIZE_IN_ELEMENTS(header), 1, file);
+	fread(&header, countof(header), 1, file);
 
 	height = *((uint32*)&header[8]);
 	width = *((uint32*)&header[12]);
