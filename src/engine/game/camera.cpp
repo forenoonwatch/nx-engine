@@ -18,9 +18,9 @@ void UpdateCameraSystem::operator()(Game& game, float deltaTime) {
 		camera.iViewProjection = camera.view * iProjection;
 
 		// mouse ray
-		const float ndcX = (2.f * Application::getMouseX())
+		const float ndcX = (2.f * game.getApplication().getMouseX())
 				/ (float)game.getWindow().getWidth() - 1.f;
-		const float ndcY = (2.f * Application::getMouseY())
+		const float ndcY = (2.f * game.getApplication().getMouseY())
 				/ (float)game.getWindow().getHeight() - 1.f;
 
 		Vector4f rawRay = iProjection

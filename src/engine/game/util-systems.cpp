@@ -33,7 +33,7 @@ void RenderSkybox::operator()(Game& game, float deltaTime) {
 }
 
 void ToggleFullscreenSystem::operator()(Game& game, float deltaTime) {
-	if (Application::getKeyPressed(Input::KEY_M)) {
+	if (game.getApplication().getKeyPressed(Input::KEY_M)) {
 		if (game.getWindow().isFullscreen()) {
 			game.getWindow().setFullscreen(false);
 			game.getWindow().resize(1200, 800);
@@ -43,7 +43,7 @@ void ToggleFullscreenSystem::operator()(Game& game, float deltaTime) {
 			game.getWindow().setFullscreen(true);
 		}
 	}
-	else if (Application::getKeyPressed(Input::KEY_ESCAPE)
+	else if (game.getApplication().getKeyPressed(Input::KEY_ESCAPE)
 			&& game.getWindow().isFullscreen()) {
 		game.getWindow().setFullscreen(false);
 		game.getWindow().resize(1200, 800);

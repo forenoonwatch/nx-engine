@@ -17,9 +17,10 @@ class Scene;
 
 class Game {
 	public:
-		inline Game(Window& window, RenderContext* renderContext,
-					bool unlockFPS)
-				: window(&window)
+		inline Game(Application& application, Window& window,
+					RenderContext* renderContext, bool unlockFPS)
+				: application(&application)
+				, window(&window)
 				, renderContext(renderContext)
 				, assetManager(renderContext)
 				, currentScene(nullptr)
@@ -29,6 +30,7 @@ class Game {
 
 		void loadScene(Memory::SharedPointer<Scene> scene);
 
+		inline Application& getApplication() { return *application; }
 		inline Window& getWindow() { return *window; }
 
 		inline RenderContext* getRenderContext() { return renderContext; }
@@ -40,6 +42,7 @@ class Game {
 	private:
 		NULL_COPY_AND_ASSIGN(Game);
 
+		Application* application;
 		Window* window;
 
 		RenderContext* renderContext;

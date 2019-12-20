@@ -1,7 +1,7 @@
 #pragma once
 
-#include "input.hpp"
-#include "monitor.hpp"
+#include <engine/core/input.hpp>
+#include <engine/core/monitor.hpp>
 
 class GLFWwindow;
 class Application;
@@ -10,8 +10,6 @@ typedef GLFWwindow* WindowHandle;
 
 class Window {
 	public:
-		Window(const char* title, uint32 width, uint32 height);
-
 		bool isCloseRequested() const;
 		void render();
 
@@ -36,12 +34,17 @@ class Window {
 	private:
 		NULL_COPY_AND_ASSIGN(Window);
 
+		Window(Application* application, const char* title,
+				uint32 width, uint32 height);
+
 		WindowHandle handle;
 		uint32 width;
 		uint32 height;
 
 		bool fullscreen;
 		Monitor* currentMonitor;
+
+		Application* application;
 
 		friend class Application;
 };

@@ -51,7 +51,7 @@ void Game::run() {
 		shouldRender = unlockFPS;
 		
 		while (updateTimer >= frameTime) {
-			Application::pollEvents();
+			application->pollEvents();
 			
 			currentScene->update(*this, frameTime);
 

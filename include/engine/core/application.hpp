@@ -3,59 +3,63 @@
 #include <engine/core/input.hpp>
 #include <engine/core/window.hpp>
 
-#include <functional>
+#include <engine/core/array-list.hpp>
 
-class Application {
+class ApplicationEventHandler;
+
+class Application final {
 	public:
-		typedef std::function<void(Window&, uint32, uint32)> ResizeCallback;
+		Application();
 
-		static void init();
+		void pollEvents();
 
-		static void pollEvents();
+		Window* createWindow(const char* title, uint32 width, uint32 height);
+		
+		inline void addEventHandler(ApplicationEventHandler& eventHandler);
 
-		static bool isKeyDown(enum Input::KeyCode keyCode);
-		static bool getKeyPressed(enum Input::KeyCode keyCode);
-		static bool getKeyReleased(enum Input::KeyCode keyCode);
+		bool isKeyDown(enum Input::KeyCode keyCode) const;
+		bool getKeyPressed(enum Input::KeyCode keyCode) const;
+		bool getKeyReleased(enum Input::KeyCode keyCode) const;
 
-		static bool isMouseDown(enum Input::MouseButton mouseButton);
-		static bool getMousePressed(enum Input::MouseButton mouseButton);
-		static bool getMouseReleased(enum Input::MouseButton mouseButton);
+		bool isMouseDown(enum Input::MouseButton mouseButton) const;
+		bool getMousePressed(enum Input::MouseButton mouseButton) const;
+		bool getMouseReleased(enum Input::MouseButton mouseButton) const;
 
-		inline static void setResizeCallback(ResizeCallback callback);
+		inline Monitor& getPrimaryMonitor() { return monitors[0]; }
+		inline Monitor& getMonitor(uint32 i) { return monitors[i]; }
 
-		inline static Monitor& getPrimaryMonitor() { return monitors[0]; }
-		inline static Monitor& getMonitor(uint32 i) { return monitors[i]; }
+		inline double getMouseX() const { return mouseX; }
+		inline double getMouseY() const { return mouseY; }
 
-		inline static double getMouseX() { return mouseX; }
-		inline static double getMouseY() { return mouseY; }
+		inline double getScrollX() const { return scrollX; }
+		inline double getScrollY() const { return scrollY; }
 
-		inline static double getScrollX() { return scrollX; }
-		inline static double getScrollY() { return scrollY; }
-
-		static void destroy();
+		~Application();
 	protected:
 		static void bindInputCallbacks(WindowHandle windowHandle);
 
 		friend class Window;
 	private:
 		NULL_COPY_AND_ASSIGN(Application);
-		Application() = delete;
 
-		static Monitor* monitors;
+		bool keys[Input::KEY_LAST + 1];
+		bool mouseButtons[Input::MOUSE_BUTTON_LAST + 1];
 
-		static bool keys[Input::KEY_LAST + 1];
-		static bool mouseButtons[Input::MOUSE_BUTTON_LAST + 1];
+		bool lastKeys[Input::KEY_LAST + 1];
+		bool lastMouseButtons[Input::MOUSE_BUTTON_LAST + 1];
 
-		static bool lastKeys[Input::KEY_LAST + 1];
-		static bool lastMouseButtons[Input::MOUSE_BUTTON_LAST + 1];
+		double mouseX;
+		double mouseY;
 
-		static double mouseX;
-		static double mouseY;
+		double scrollX;
+		double scrollY;
 
-		static double scrollX;
-		static double scrollY;
+		ArrayList<ApplicationEventHandler*> eventHandlers;
+		
+		ArrayList<Window*> windows;
+		Monitor* monitors;
 
-		static ResizeCallback resizeCallback;
+		static Application* instance;
 
 		static void onKeyEvent(WindowHandle, int, int, int, int);
 		static void onMouseClickEvent(WindowHandle, int, int, int);
@@ -64,6 +68,7 @@ class Application {
 		static void onScrollEvent(WindowHandle, double, double);
 };
 
-inline void Application::setResizeCallback(ResizeCallback callback) {
-	resizeCallback = callback;
+inline void Application::addEventHandler(
+		ApplicationEventHandler& eventHandler) {
+	eventHandlers.push_back(&eventHandler);
 }

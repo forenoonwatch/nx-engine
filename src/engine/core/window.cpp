@@ -5,12 +5,14 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
-Window::Window(const char* title, uint32 width, uint32 height)
+Window::Window(Application* application, const char* title, uint32 width,
+			uint32 height)
 		: handle(nullptr)
 		, width(width)
 		, height(height)
 		, fullscreen(false)
-		, currentMonitor(nullptr) {
+		, currentMonitor(&application->getPrimaryMonitor())
+		, application(application) {
 	//glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_API);
 	//glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	//glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
@@ -51,7 +53,7 @@ void Window::setFullscreen(bool fullscreen) {
 	this->fullscreen = fullscreen;
 
 	if (fullscreen) {
-		currentMonitor = &Application::getPrimaryMonitor();
+		currentMonitor = &application->getPrimaryMonitor();
 
 		glfwSetWindowMonitor(handle, currentMonitor->getHandle(),
 				currentMonitor->getX(), currentMonitor->getY(),
@@ -60,11 +62,13 @@ void Window::setFullscreen(bool fullscreen) {
 	}
 	else {
 		currentMonitor = currentMonitor == nullptr ?
-				&Application::getPrimaryMonitor() : currentMonitor;
+				&application->getPrimaryMonitor() : currentMonitor;
 
 		glfwSetWindowMonitor(handle, nullptr,
-				currentMonitor->getX() + currentMonitor->getWidth() / 2 - width / 2,
-				currentMonitor->getY() + currentMonitor->getHeight() / 2 - height / 2,
+				currentMonitor->getX() + currentMonitor->getWidth() / 2
+				- width / 2,
+				currentMonitor->getY() + currentMonitor->getHeight() / 2
+				- height / 2,
 				width, height, GLFW_DONT_CARE);
 	}
 }
@@ -86,8 +90,10 @@ void Window::setFullscreen(bool fullscreen, Monitor& monitor) {
 	}
 	else {
 		glfwSetWindowMonitor(handle, nullptr,
-				currentMonitor->getX() + currentMonitor->getWidth() / 2 - width / 2,
-				currentMonitor->getY() + currentMonitor->getHeight() / 2 - height / 2,
+				currentMonitor->getX() + currentMonitor->getWidth() / 2
+				- width / 2,
+				currentMonitor->getY() + currentMonitor->getHeight() / 2
+				- height / 2,
 				width, height, GLFW_DONT_CARE);
 	}
 }
@@ -97,9 +103,10 @@ void Window::setPosition(uint32 x, uint32 y) {
 }
 
 void Window::moveToCenter() {
-	glfwSetWindowPos(handle,
-			currentMonitor->getX() + currentMonitor->getWidth() / 2 - width / 2,
-			currentMonitor->getY() + currentMonitor->getHeight() / 2 - height / 2);
+	glfwSetWindowPos(handle, currentMonitor->getX()
+			+ currentMonitor->getWidth() / 2
+			- width / 2, currentMonitor->getY()
+			+ currentMonitor->getHeight() / 2 - height / 2);
 }
 
 void Window::setCursorMode(enum Input::CursorMode cursorMode) {
