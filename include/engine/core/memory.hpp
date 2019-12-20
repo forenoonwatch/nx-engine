@@ -4,6 +4,7 @@
 
 #include <memory>
 #include <cstring>
+#include <cstdlib>
 
 namespace Memory {
 	template <typename T>
@@ -28,6 +29,14 @@ namespace Memory {
 			
 			const uint32 id;
 	};
+
+	FORCEINLINE void* malloc(size_t size) {
+		return std::malloc(size);
+	}
+
+	FORCEINLINE void free(void* ptr) {
+		std::free(ptr);
+	}
 
 	FORCEINLINE void* memcpy(void* dest, const void* src, uintptr amt) {
 		return std::memcpy(dest, src, amt);
