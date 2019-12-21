@@ -31,6 +31,9 @@ class Application final {
 		inline double getMouseX() const { return mouseX; }
 		inline double getMouseY() const { return mouseY; }
 
+		inline double getMouseDeltaX() const { return mouseX - lastMouseX; }
+		inline double getMouseDeltaY() const { return mouseY - lastMouseY; }
+
 		inline double getScrollX() const { return scrollX; }
 		inline double getScrollY() const { return scrollY; }
 
@@ -50,6 +53,9 @@ class Application final {
 
 		double mouseX;
 		double mouseY;
+
+		double lastMouseX;
+		double lastMouseY;
 
 		double scrollX;
 		double scrollY;

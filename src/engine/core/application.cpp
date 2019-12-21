@@ -20,6 +20,8 @@ Application::Application()
 		, lastMouseButtons{0}
 		, mouseX(0.0)
 		, mouseY(0.0)
+		, lastMouseX(0.0)
+		, lastMouseY(0.0)
 		, scrollX(0.0)
 		, scrollY(0.0)
 		, monitors(nullptr) {
@@ -50,6 +52,9 @@ Application::Application()
 void Application::pollEvents() {
 	Memory::memcpy(lastKeys, keys, sizeof(keys));
 	Memory::memcpy(lastMouseButtons, mouseButtons, sizeof(mouseButtons));
+
+	lastMouseX = mouseX;
+	lastMouseY = mouseY;
 	
 	glfwPollEvents();
 }
