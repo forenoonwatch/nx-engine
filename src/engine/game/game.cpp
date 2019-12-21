@@ -5,6 +5,19 @@
 #include "engine/core/application.hpp"
 #include "engine/core/time.hpp"
 
+Game::Game(Application& application, Window& window,
+			RenderContext* renderContext, bool unlockFPS)
+		: application(&application)
+		, window(&window)
+		, renderContext(renderContext)
+		, assetManager(renderContext)
+		, currentScene(nullptr)
+		, running(false)
+		, unlockFPS(unlockFPS)
+		, fps(0) {
+	application.addEventHandler(eventHandler);
+}
+
 void Game::loadScene(Memory::SharedPointer<Scene> scene) {
 	if (currentScene) {
 		currentScene->unload(*this);

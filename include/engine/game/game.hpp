@@ -8,6 +8,7 @@
 #include <engine/core/window.hpp>
 
 #include <engine/game/asset-manager.hpp>
+#include <engine/game/game-event-handler.hpp>
 
 #include <engine/rendering/render-context.hpp>
 
@@ -17,16 +18,8 @@ class Scene;
 
 class Game {
 	public:
-		inline Game(Application& application, Window& window,
-					RenderContext* renderContext, bool unlockFPS)
-				: application(&application)
-				, window(&window)
-				, renderContext(renderContext)
-				, assetManager(renderContext)
-				, currentScene(nullptr)
-				, running(false)
-				, unlockFPS(unlockFPS)
-				, fps(0) {}
+		Game(Application& application, Window& window,
+				RenderContext* renderContext, bool unlockFPS);
 
 		void loadScene(Memory::SharedPointer<Scene> scene);
 
@@ -37,6 +30,7 @@ class Game {
 		
 		inline ECS::Registry& getECS() { return ecs; }
 		inline AssetManager& getAssetManager() { return assetManager; }
+		inline GameEventHandler& getEventHandler() { return eventHandler; }
 
 		inline uint32 getFPS() const { return fps; }
 	private:
@@ -49,6 +43,7 @@ class Game {
 		
 		ECS::Registry ecs;
 		AssetManager assetManager;
+		GameEventHandler eventHandler;
 
 		Memory::SharedPointer<Scene> currentScene;
 
