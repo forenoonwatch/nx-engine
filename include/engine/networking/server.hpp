@@ -4,12 +4,14 @@
 #include <engine/networking/client-connection.hpp>
 
 #include <engine/core/common.hpp>
+#include <engine/core/memory.hpp>
 #include <engine/core/array-list.hpp>
 
-class GameServer {
+class NetworkServer {
 	public:
-		GameServer(const char* address, uint32 port,
-				const uint8* privateKey);
+		NetworkServer();
+
+		void start(const char* address, uint32 port, const uint8* privateKey);
 
 		void receiveMessages();
 		void sendMessages();
@@ -24,11 +26,11 @@ class GameServer {
 		template <typename F>
 		inline void forEachClient(const F& func);
 
-		inline double getTime() const { return server.GetTime(); }
+		inline double getTime() const { return server->GetTime(); }
 	private:
 		GameAdapter adapter;
 		GameConnectionConfig config;
-		yojimbo::Server server;
+		Memory::UniquePointer<yojimbo::Server> server;
 
 		// TODO: make compile-time configuration for max clients
 		// and a more elegant way to deal with all of this
@@ -40,7 +42,7 @@ class GameServer {
 };
 
 template <typename F>
-inline void GameServer::forEachClient(const F& func) {
+inline void NetworkServer::forEachClient(const F& func) {
 	for (uint32 i = 0; i < yojimbo::MaxClients; ++i) {
 		if (connections[i].isConnected()) {
 			func(connections[i]);

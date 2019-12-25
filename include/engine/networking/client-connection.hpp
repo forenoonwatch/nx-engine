@@ -4,7 +4,7 @@
 
 #include <engine/core/common.hpp>
 
-class GameServer;
+class NetworkServer;
 
 class ClientConnection {
 	public:
@@ -24,9 +24,9 @@ class ClientConnection {
 
 		bool connected;
 
-		GameServer* server;
+		NetworkServer* server;
 
-		inline void markConnected(GameServer* server, uint32 index,
+		inline void markConnected(NetworkServer* server, uint32 index,
 				uint64 clientID) {
 			this->index = index;
 			this->clientID = clientID;
@@ -38,6 +38,6 @@ class ClientConnection {
 			connected = false;
 		}
 
-		friend class GameServer;
+		friend class NetworkServer;
 };
 

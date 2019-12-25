@@ -2,11 +2,11 @@
 
 #include <yojimbo/yojimbo.h>
 
-class GameServer;
+class NetworkServer;
 
 class GameAdapter : public yojimbo::Adapter {
 	public:
-		inline explicit GameAdapter(GameServer* server)
+		inline explicit GameAdapter(NetworkServer* server)
 				: server(server) {}
 
 		virtual yojimbo::MessageFactory* CreateMessageFactory(
@@ -15,6 +15,6 @@ class GameAdapter : public yojimbo::Adapter {
 		virtual void OnServerClientConnected(int clientIndex) override;
 		virtual void OnServerClientDisconnected(int clientIndex) override;
 	private:
-		GameServer* server;
+		NetworkServer* server;
 };
 

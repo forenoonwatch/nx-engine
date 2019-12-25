@@ -29,15 +29,17 @@ struct NetworkObject {
 	}
 };
 
-class GameClient {
+class NetworkClient {
 	public:
-		GameClient(const char* serverAddress, uint32 serverPort,
+		NetworkClient();
+
+		void connect(const char* serverAddress, uint32 serverPort,
 				const uint8* privateKey);
 
 		void receiveMessages();
 		void sendMessages();
 
-		void stop();
+		void disconnect();
 
 		bool isConnected() const;
 	
@@ -47,8 +49,9 @@ class GameClient {
 		GameAdapter adapter;
 		GameConnectionConfig config;
 
-		yojimbo::Address serverAddress;
 		yojimbo::Client client;
+		
+		yojimbo::Address serverAddress;
 
 		InputState inputState;
 		ArrayList<NetworkObject> priorityBuffer;

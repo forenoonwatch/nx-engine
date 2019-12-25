@@ -4,24 +4,30 @@
 
 #include <algorithm>
 
-GameClient::GameClient(const char* serverIP, uint32_t serverPort,
-			const uint8_t* privateKey)
+NetworkClient::NetworkClient()
 		: adapter(nullptr)
-		, serverAddress(serverIP, serverPort)
 		, client(yojimbo::GetDefaultAllocator(), yojimbo::Address("0.0.0.0"),
-				config, adapter, 0.0) {
-	uint64_t clientID = 0;
-	yojimbo::random_bytes(reinterpret_cast<uint8_t*>(&clientID), 8);
+				config, adapter, 0.0) {}
+
+void NetworkClient::connect(const char* serverIP, uint32 serverPort,
+		const uint8* privateKey) {
+	serverAddress = yojimbo::Address(serverIP, serverPort);
+	
+	// TODO: better handle client ID
+	uint64 clientID = 0;
+	yojimbo::random_bytes(reinterpret_cast<uint8*>(&clientID), 8);
 	printf("ClientID is %.16" PRIx64 "\n", clientID);
 
+	// TODO: see about secure connection
 	client.InsecureConnect(privateKey, clientID, serverAddress);
 
+	// TODO: probably remove/encapsulate this
 	char addressString[256];
 	client.GetAddress().ToString(addressString, sizeof(addressString));
 	printf("Client address: %s\n", addressString);
 }
 
-void GameClient::receiveMessages() {
+void NetworkClient::receiveMessages() {
 	constexpr const double deltaTime = 1.0 / 60.0;
 	
 	client.AdvanceTime(client.GetTime() + deltaTime);
@@ -39,7 +45,7 @@ void GameClient::receiveMessages() {
 	}
 }
 
-void GameClient::sendMessages() {
+void NetworkClient::sendMessages() {
 	if (client.IsConnected()) {
 		accumulatePriorities();
 
@@ -70,31 +76,31 @@ void GameClient::sendMessages() {
 	}
 }
 
-bool GameClient::isConnected() const {
+bool NetworkClient::isConnected() const {
 	return !client.IsDisconnected() && !client.ConnectionFailed();
 }
 
-void GameClient::stop() {
+void NetworkClient::disconnect() {
 	client.Disconnect();
 }
 
-void GameClient::processMessage(yojimbo::Message* msg) {
+void NetworkClient::processMessage(yojimbo::Message* msg) {
 	switch (msg->GetType()) {
 		default:
 			puts("Whatever");
 	}
 }
 
-void GameClient::addInputState(const InputState& is) {
+void NetworkClient::addInputState(const InputState& is) {
 	this->inputState = is;
 }
 
-void GameClient::addNetworkObject(const NetworkObject& netObj) {
+void NetworkClient::addNetworkObject(const NetworkObject& netObj) {
 	priorityBuffer.push_back(netObj);
 	std::push_heap(std::begin(priorityBuffer), std::end(priorityBuffer));
 }
 
-void GameClient::accumulatePriorities() {
+void NetworkClient::accumulatePriorities() {
 	for (auto& n : priorityBuffer) {
 		n.accumulatedPriority += n.networkPriority;
 	}
