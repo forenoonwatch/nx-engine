@@ -1,5 +1,8 @@
 #include "engine/game/game-event-handler.hpp"
 
+#include "engine/core/window.hpp"
+
+#include "engine/game/scene-manager.hpp"
 #include "engine/game/input-control.hpp"
 
 #include <algorithm>
@@ -18,6 +21,10 @@ void GameEventHandler::onMouseDown(enum Input::MouseButton mouseButton) {
 
 void GameEventHandler::onMouseUp(enum Input::MouseButton mouseButton) {
 	updateInput(MOUSE_OFFSET + (uint32)mouseButton, -1.f);
+}
+
+void GameEventHandler::onWindowClosed(Window& window) {
+	SceneManager::getInstance().stop();
 }
 
 void GameEventHandler::addKeyControl(enum Input::KeyCode keyCode,

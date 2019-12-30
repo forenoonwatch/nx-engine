@@ -6,9 +6,7 @@ static void initSkyboxCube(IndexedModel&);
 
 GameRenderContext::GameRenderContext(uint32 width, uint32 height,
 			float fieldOfView, float zNear, float zFar)
-		: game(nullptr)
-		
-		, colorBuffer(*((RenderContext*)this), width, height, GL_RGBA32F)
+		: colorBuffer(*((RenderContext*)this), width, height, GL_RGBA32F)
 		, normalBuffer(*((RenderContext*)this), width, height, GL_RGBA32F)
 		, lightingBuffer(*((RenderContext*)this), width, height, GL_RGBA32F)
 		, brightBuffer(*((RenderContext*)this), width, height, GL_RGBA32F)
@@ -111,53 +109,45 @@ GameRenderContext::~GameRenderContext() {
 	delete bloomBlur;
 }
 
-void GameRenderContext::Clear::operator()(Game& game, float deltaTime) {
-	GameRenderContext* grc = (GameRenderContext*)game.getRenderContext();
-	
-	grc->screen.clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+void GameRenderContext::clear() {
+	screen.clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	grc->target.setDrawBuffers(4);
-	grc->target.clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	target.setDrawBuffers(4);
+	target.clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
-void GameRenderContext::ApplyLighting::operator()(Game& game,
-		float deltaTime) {
-	GameRenderContext* grc = (GameRenderContext*)game.getRenderContext();
-	
-	grc->setWriteDepth(false);
+void GameRenderContext::applyLighting() {
+	setWriteDepth(false);
 
 	// apply lighting
-	grc->lightingShader.setSampler("colorBuffer", grc->colorBuffer,
-			grc->nearestSampler, 0);
-	grc->lightingShader.setSampler("normalBuffer", grc->normalBuffer,
-			grc->nearestSampler, 1);
-	grc->lightingShader.setSampler("lightingBuffer", grc->lightingBuffer,
-			grc->nearestSampler, 2);
+	lightingShader.setSampler("colorBuffer", colorBuffer,
+			nearestSampler, 0);
+	lightingShader.setSampler("normalBuffer", normalBuffer,
+			nearestSampler, 1);
+	lightingShader.setSampler("lightingBuffer", lightingBuffer,
+			nearestSampler, 2);
 	
-	grc->lightingShader.setSampler("depthBuffer", grc->depthBuffer,
-			grc->nearestSampler, 3);
+	lightingShader.setSampler("depthBuffer", depthBuffer,
+			nearestSampler, 3);
 	
-	grc->lightingShader.setSampler("irradianceMap", *grc->diffuseIBL,
-			grc->linearMipmapSampler, 4);
-	grc->lightingShader.setSampler("prefilterMap", *grc->specularIBL,
-			grc->linearSampler, 5);
-	grc->lightingShader.setSampler("brdfLUT", *grc->brdfLUT,
-			grc->nearestSampler, 6);
+	lightingShader.setSampler("irradianceMap", *diffuseIBL,
+			linearMipmapSampler, 4);
+	lightingShader.setSampler("prefilterMap", *specularIBL,
+			linearSampler, 5);
+	lightingShader.setSampler("brdfLUT", *brdfLUT,
+			nearestSampler, 6);
 
-	grc->drawQuad(grc->target, grc->lightingShader);
+	drawQuad(target, lightingShader);
 }
 
-void GameRenderContext::FlushStaticMeshes::operator()(Game& game,
-		float deltaTime) {
-	GameRenderContext* grc = (GameRenderContext*)game.getRenderContext();
-
+void GameRenderContext::flushStaticMeshes() {
 	Material* currentMaterial = nullptr;
 	Material* material;
 
 	VertexArray* vertexArray;
 	uintptr numTransforms;
 
-	for (auto& pair : grc->staticMeshes) {
+	for (auto& pair : staticMeshes) {
 		numTransforms = pair.second.size();
 
 		if (numTransforms == 0) {
@@ -170,49 +160,47 @@ void GameRenderContext::FlushStaticMeshes::operator()(Game& game,
 		if (material != currentMaterial) {
 			currentMaterial = material;
 
-			grc->staticMeshShader.setSampler("diffuse", *material->diffuse,
-					grc->linearMipmapSampler, 0);
-			grc->staticMeshShader.setSampler("normalMap", *material->normalMap,
-					grc->linearMipmapSampler, 1);
-			grc->staticMeshShader.setSampler("materialMap",
-					*material->materialMap, grc->linearMipmapSampler, 2);
+			staticMeshShader.setSampler("diffuse", *material->diffuse,
+					linearMipmapSampler, 0);
+			staticMeshShader.setSampler("normalMap", *material->normalMap,
+					linearMipmapSampler, 1);
+			staticMeshShader.setSampler("materialMap",
+					*material->materialMap, linearMipmapSampler, 2);
 		}
 
 		vertexArray->updateBuffer(4, &pair.second[0],
 				sizeof(Matrix4f) * numTransforms);
 
-		grc->draw(grc->target, grc->staticMeshShader, *vertexArray,
+		draw(target, staticMeshShader, *vertexArray,
 				GL_TRIANGLES, numTransforms);
 	}
 
-	grc->staticMeshes.clear();
+	staticMeshes.clear();
 }
 
-void GameRenderContext::Flush::operator()(Game& game, float deltaTime) {
-	GameRenderContext* grc = (GameRenderContext*)game.getRenderContext();
+void GameRenderContext::flush() {
+	//bloomBlur->update();
 
-	grc->bloomBlur->update();
-
-	grc->target.setDrawBuffers(1);
+	target.setDrawBuffers(1);
 
 	/* Merge bloom with main scene */ 
-	grc->bloomShader.setSampler("scene", grc->colorBuffer,
-			grc->nearestSampler, 0);
-	grc->bloomShader.setSampler("brightBlur", grc->brightBuffer,
-			grc->nearestSampler, 1);
-	grc->drawQuad(grc->target, grc->bloomShader);
+	bloomShader.setSampler("scene", colorBuffer,
+			nearestSampler, 0);
+	bloomShader.setSampler("brightBlur", brightBuffer,
+			nearestSampler, 1);
+	drawQuad(target, bloomShader);
 
 	/* Tone map colors */
-	grc->toneMapShader.setSampler("screen", grc->colorBuffer,
-			grc->nearestSampler, 0);
-	grc->drawQuad(grc->target, grc->toneMapShader);
+	toneMapShader.setSampler("screen", colorBuffer,
+			nearestSampler, 0);
+	drawQuad(target, toneMapShader);
 
 	/* Render to screen */
-	grc->screenRenderShader.setSampler("screen", grc->colorBuffer,
-			grc->nearestSampler, 0);
-	grc->drawQuad(grc->screen, grc->screenRenderShader);
+	screenRenderShader.setSampler("screen", colorBuffer,
+			nearestSampler, 0);
+	drawQuad(screen, screenRenderShader);
 
-	grc->setWriteDepth(true);
+	setWriteDepth(true);
 }
 
 static void initSkyboxCube(IndexedModel& model) {

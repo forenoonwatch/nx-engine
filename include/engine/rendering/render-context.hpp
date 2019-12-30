@@ -5,8 +5,6 @@
 
 #include <GL/glew.h>
 
-class Game;
-
 class Shader;
 
 class VertexArray;

@@ -21,6 +21,7 @@ class ApplicationEventHandler {
 
 		virtual void onWindowResized(Window& window, uint32 newWidth,
 				uint32 newHeight) {}
+		virtual void onWindowClosed(Window& window) {}
 
 		virtual ~ApplicationEventHandler() {}
 	private:

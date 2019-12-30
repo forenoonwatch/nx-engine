@@ -1,21 +1,16 @@
 #pragma once
 
-#include <engine/core/input.hpp>
-#include <engine/core/window.hpp>
+#include <engine/core/singleton.hpp>
 
-#include <engine/core/array-list.hpp>
+#include <engine/core/base-application.hpp>
+#include <engine/game/game-render-context.hpp>
 
-class ApplicationEventHandler;
-
-class Application final {
+class Application final : public Singleton<Application>,
+		public BaseApplication<GameRenderContext> {
 	public:
 		Application();
 
 		void pollEvents();
-
-		Window* createWindow(const char* title, uint32 width, uint32 height);
-		
-		inline void addEventHandler(ApplicationEventHandler& eventHandler);
 
 		bool isKeyDown(enum Input::KeyCode keyCode) const;
 		bool getKeyPressed(enum Input::KeyCode keyCode) const;
@@ -24,9 +19,6 @@ class Application final {
 		bool isMouseDown(enum Input::MouseButton mouseButton) const;
 		bool getMousePressed(enum Input::MouseButton mouseButton) const;
 		bool getMouseReleased(enum Input::MouseButton mouseButton) const;
-
-		inline Monitor& getPrimaryMonitor() { return monitors[0]; }
-		inline Monitor& getMonitor(uint32 i) { return monitors[i]; }
 
 		inline double getMouseX() const { return mouseX; }
 		inline double getMouseY() const { return mouseY; }
@@ -38,10 +30,6 @@ class Application final {
 		inline double getScrollY() const { return scrollY; }
 
 		~Application();
-	protected:
-		static void bindInputCallbacks(WindowHandle windowHandle);
-
-		friend class Window;
 	private:
 		NULL_COPY_AND_ASSIGN(Application);
 
@@ -59,22 +47,12 @@ class Application final {
 
 		double scrollX;
 		double scrollY;
-
-		ArrayList<ApplicationEventHandler*> eventHandlers;
 		
-		ArrayList<Window*> windows;
-		Monitor* monitors;
-
-		static Application* instance;
-
 		static void onKeyEvent(WindowHandle, int, int, int, int);
 		static void onMouseClickEvent(WindowHandle, int, int, int);
 		static void onMouseMoveEvent(WindowHandle, double, double);
 		static void onWindowResizeEvent(WindowHandle, int, int);
 		static void onScrollEvent(WindowHandle, double, double);
+		static void onWindowCloseEvent(WindowHandle);
 };
 
-inline void Application::addEventHandler(
-		ApplicationEventHandler& eventHandler) {
-	eventHandlers.push_back(&eventHandler);
-}

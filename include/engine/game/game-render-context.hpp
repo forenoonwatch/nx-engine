@@ -8,18 +8,17 @@
 #include <engine/rendering/render-target.hpp>
 #include <engine/rendering/material.hpp>
 
-#include <engine/game/game.hpp>
-
-#include <engine/ecs/ecs-system.hpp>
-
 #include <engine/game/camera.hpp>
+
+#include <engine/math/math.hpp>
 
 class GaussianBlur;
 
 class GameRenderContext : public RenderContext {
 	public:
-		GameRenderContext(uint32 width, uint32 height,
-				float fieldOfView, float zNear, float zFar);
+		GameRenderContext(uint32 width = 1200, uint32 height = 800,
+				float fieldOfView = Math::toRadians(70.f), float zNear = 0.1f,
+				float zFar = 100.f);
 
 		void resize(uint32 width, uint32 height);
 
@@ -29,8 +28,14 @@ class GameRenderContext : public RenderContext {
 				const Matrix4f& transform);
 		inline void renderSkybox(CubeMap& skybox, Sampler& sampler);
 
-		inline void setDiffuseIBL(CubeMap& diffuseIBL) { this->diffuseIBL = &diffuseIBL; }
-		inline void setSpecularIBL(CubeMap& specularIBL) { this->specularIBL = &specularIBL; }
+		inline void setDiffuseIBL(CubeMap& diffuseIBL) {
+			this->diffuseIBL = &diffuseIBL;
+		}
+
+		inline void setSpecularIBL(CubeMap& specularIBL) {
+			this->specularIBL = &specularIBL;
+		}
+
 		inline void setBrdfLUT(Texture& brdfLUT) { this->brdfLUT = &brdfLUT; }
 
 		inline RenderTarget& getTarget() { return target; }
@@ -41,7 +46,9 @@ class GameRenderContext : public RenderContext {
 
 		inline Sampler& getNearestSampler() { return nearestSampler; }
 		inline Sampler& getLinearSampler() { return linearSampler; }
-		inline Sampler& getLinearMipmapSampler() { return linearMipmapSampler; }
+		inline Sampler& getLinearMipmapSampler() {
+			return linearMipmapSampler;
+		}
 
 		inline VertexArray& getSkyboxCube() { return *skyboxCube; }
 
@@ -50,29 +57,15 @@ class GameRenderContext : public RenderContext {
 		virtual ~GameRenderContext();
 		
 		/* Pipeline Systems */
-		class Clear : public ECS::System {
-			public:
-				virtual void operator()(Game& game, float deltaTime) override;
-		};
+		void clear();
 
-		class ApplyLighting : public ECS::System {
-			public:
-				virtual void operator()(Game& game, float deltaTime) override;
-		};
+		void applyLighting();
 
-		class FlushStaticMeshes : public ECS::System {
-			public:
-				virtual void operator()(Game& game, float deltaTime) override;
-		};
+		void flushStaticMeshes();
 
-		class Flush : public ECS::System {
-			public:
-				virtual void operator()(Game& game, float deltaTime) override;
-		};
+		void flush();
 	private:
 		NULL_COPY_AND_ASSIGN(GameRenderContext);
-
-		Game* game;
 
 		Texture colorBuffer;
 		Texture normalBuffer;
@@ -125,12 +118,13 @@ inline void GameRenderContext::updateCameraBuffer() {
 			+ sizeof(Matrix4f), sizeof(Matrix4f));
 }
 
-inline void GameRenderContext::renderMesh(VertexArray& vertexArray, Material& material,
-		const Matrix4f& transform) {
+inline void GameRenderContext::renderMesh(VertexArray& vertexArray,
+		Material& material, const Matrix4f& transform) {
 	staticMeshes[std::make_pair(&vertexArray, &material)].push_back(transform);
 }
 
-inline void GameRenderContext::renderSkybox(CubeMap& skybox, Sampler& sampler) {
+inline void GameRenderContext::renderSkybox(CubeMap& skybox,
+		Sampler& sampler) {
 	skyboxShader.setSampler("skybox", skybox, sampler, 0);
 	draw(target, skyboxShader, *skyboxCube, GL_TRIANGLES);
 }

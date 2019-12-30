@@ -1,5 +1,7 @@
 #pragma once
 
+#include <engine/core/singleton.hpp>
+
 #include <engine/core/array-list.hpp>
 #include <engine/core/hash-map.hpp>
 
@@ -7,7 +9,8 @@
 
 class InputControl;
 
-class GameEventHandler final : public ApplicationEventHandler {
+class GameEventHandler final : public ApplicationEventHandler,
+		public Singleton<GameEventHandler>  {
 	public:
 		inline explicit GameEventHandler()
 				: ApplicationEventHandler() {}
@@ -17,6 +20,8 @@ class GameEventHandler final : public ApplicationEventHandler {
 
 		virtual void onMouseDown(enum Input::MouseButton mouseButton) override;
 		virtual void onMouseUp(enum Input::MouseButton mouseButton) override;
+
+		virtual void onWindowClosed(Window& window) override;
 
 		void addKeyControl(enum Input::KeyCode keyCode,
 				InputControl& inputControl, float weight = 1.f);

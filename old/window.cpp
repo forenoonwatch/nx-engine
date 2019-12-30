@@ -1,6 +1,7 @@
-#include "core/window.hpp"
+#include "engine/core/window.hpp"
 
-#include "core/application.hpp"
+#include "engine/ecs/ecs.hpp"
+#include "engine/core/application.hpp"
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>

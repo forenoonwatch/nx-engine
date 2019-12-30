@@ -3,11 +3,6 @@
 #include <engine/core/input.hpp>
 #include <engine/core/monitor.hpp>
 
-class GLFWwindow;
-class Application;
-
-typedef GLFWwindow* WindowHandle;
-
 class Window {
 	public:
 		bool isCloseRequested() const;
