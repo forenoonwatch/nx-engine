@@ -1,13 +1,15 @@
 #pragma once
 
+#include <engine/core/common.hpp>
+#include <engine/core/memory.hpp>
+#include <engine/core/singleton.hpp>
+
+#include <engine/core/array-list.hpp>
+
 #include <engine/networking/net-common.hpp>
 #include <engine/networking/client-connection.hpp>
 
-#include <engine/core/common.hpp>
-#include <engine/core/memory.hpp>
-#include <engine/core/array-list.hpp>
-
-class NetworkServer {
+class NetworkServer final : public Singleton<NetworkServer> {
 	public:
 		NetworkServer();
 

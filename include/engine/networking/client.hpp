@@ -4,6 +4,7 @@
 
 #include <engine/core/common.hpp>
 #include <engine/core/array-list.hpp>
+#include <engine/core/singleton.hpp>
 
 enum class NetworkRole {
 	ROLE_NONE,
@@ -29,7 +30,7 @@ struct NetworkObject {
 	}
 };
 
-class NetworkClient {
+class NetworkClient final : public Singleton<NetworkClient> {
 	public:
 		NetworkClient();
 

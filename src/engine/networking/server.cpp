@@ -1,4 +1,4 @@
-#include "engine/networking/server->hpp"
+#include "engine/networking/server.hpp"
 
 #include <engine/math/math.hpp>
 
@@ -11,12 +11,12 @@ NetworkServer::NetworkServer()
 void NetworkServer::start(const char* address, uint32 port,
 		const uint8* privateKey) {
 	if (server) {
-		server->reset();
+		server.reset();
 	}
 
 	server = Memory::make_unique<yojimbo::Server>(
 			yojimbo::GetDefaultAllocator(), privateKey,
-			yojimbo::Address(address, port), config, adapter, 0.0) {}
+			yojimbo::Address(address, port), config, adapter, 0.0);
 
 	server->Start(yojimbo::MaxClients);
 	
