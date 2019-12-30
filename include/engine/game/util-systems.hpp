@@ -1,19 +1,8 @@
 #pragma once
 
-#include <engine/ecs/ecs-system.hpp>
+void renderMesh();
 
-class RenderMesh : public ECS::System {
-	public:
-		virtual void operator()(Game&, float) override;
-};
+void renderSkybox();
 
-class RenderSkybox : public ECS::System {
-	public:
-		virtual void operator()(Game&, float) override;
-};
-
-class ToggleFullscreenSystem : public ECS::System {
-	public:
-		virtual void operator()(Game&, float) override;
-};
+void toggleFullscreenSystem(float deltaTime);
 

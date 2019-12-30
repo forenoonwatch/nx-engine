@@ -2,12 +2,13 @@
 
 #include "engine/game/util-components.hpp"
 
+#include <engine/ecs/ecs.hpp>
 #include <engine/core/application.hpp>
-#include <engine/game/game.hpp>
 
-void UpdateCameraSystem::operator()(Game& game, float deltaTime) {
-	game.getECS().view<TransformComponent, CameraComponent>().each([&](
-			TransformComponent& transform, CameraComponent& cc) {
+void updateCameraSystem(float deltaTime) {
+	ECS::Registry::getInstance().view<TransformComponent,
+			CameraComponent>().each([&](TransformComponent& transform,
+			CameraComponent& cc) {
 		Camera& camera = *cc.camera;
 
 		camera.iView = Math::inverse(camera.view);
@@ -18,10 +19,12 @@ void UpdateCameraSystem::operator()(Game& game, float deltaTime) {
 		camera.iViewProjection = camera.view * iProjection;
 
 		// mouse ray
-		const float ndcX = (2.f * game.getApplication().getMouseX())
-				/ (float)game.getWindow().getWidth() - 1.f;
-		const float ndcY = (2.f * game.getApplication().getMouseY())
-				/ (float)game.getWindow().getHeight() - 1.f;
+		const float ndcX = (2.f * Application::getInstance().getMouseX())
+				/ (float)Application::getInstance().getWidth()
+				- 1.f;
+		const float ndcY = (2.f * Application::getInstance().getMouseY())
+				/ (float)Application::getInstance().getHeight()
+				- 1.f;
 
 		Vector4f rawRay = iProjection
 				* Vector4f(ndcX, -ndcY, -1.f, 1.f);

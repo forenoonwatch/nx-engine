@@ -5,49 +5,51 @@
 
 #include "engine/game/util-components.hpp"
 
-#include "engine/game/game-render-context.hpp"
-
 #include <engine/ecs/ecs.hpp>
 
 #include <engine/core/application.hpp>
 
-void RenderMesh::operator()(Game& game, float deltaTime) {
-	game.getECS().view<TransformComponent, RenderableMesh>().each([&](
-			TransformComponent& transform, RenderableMesh& mesh) {
+#include <engine/game/game-render-context.hpp>
+
+void renderMesh() {
+	ECS::Registry::getInstance().view<TransformComponent,
+			RenderableMesh>().each([&](TransformComponent& transform,
+			RenderableMesh& mesh) {
 		if (mesh.render) {
-			((GameRenderContext*)game.getRenderContext())->renderMesh(
-					*mesh.vertexArray, *mesh.material,
-					transform.transform.toMatrix());
+			Application::getInstance().renderMesh(*mesh.vertexArray,
+					*mesh.material, transform.transform.toMatrix());
 		}
 	});
 }
 
-void RenderSkybox::operator()(Game& game, float deltaTime) {
-	GameRenderContext* grc = (GameRenderContext*)game.getRenderContext();
+void renderSkybox() {
+	Matrix4f mvp = Math::translate(
+			Application::getInstance().getCamera().viewProjection,
+			Vector3f(Application::getInstance().getCamera().view[3]));
 
-	Matrix4f mvp = Math::translate(grc->getCamera().viewProjection,
-			Vector3f(grc->getCamera().view[3]));
-
-	grc->getSkyboxCube().updateBuffer(1, &mvp, sizeof(Matrix4f));
-	grc->renderSkybox(grc->getSpecularIBL(), grc->getLinearMipmapSampler());
+	Application::getInstance().getSkyboxCube().updateBuffer(1, &mvp,
+			sizeof(Matrix4f));
+	Application::getInstance().renderSkybox(
+			Application::getInstance().getSpecularIBL(),
+			Application::getInstance().getLinearMipmapSampler());
 }
 
-void ToggleFullscreenSystem::operator()(Game& game, float deltaTime) {
-	if (game.getApplication().getKeyPressed(Input::KEY_M)) {
-		if (game.getWindow().isFullscreen()) {
-			game.getWindow().setFullscreen(false);
-			game.getWindow().resize(1200, 800);
-			game.getWindow().moveToCenter();
+void toggleFullscreenSystem(float deltaTime) {
+	if (Application::getInstance().getKeyPressed(Input::KEY_M)) {
+		if (Application::getInstance().isFullscreen()) {
+			Application::getInstance().setFullscreen(false);
+			Application::getInstance().resizeWindow(1200, 800);
+			Application::getInstance().moveToCenter();
 		}
 		else {
-			game.getWindow().setFullscreen(true);
+			Application::getInstance().setFullscreen(true);
 		}
 	}
-	else if (game.getApplication().getKeyPressed(Input::KEY_ESCAPE)
-			&& game.getWindow().isFullscreen()) {
-		game.getWindow().setFullscreen(false);
-		game.getWindow().resize(1200, 800);
-		game.getWindow().moveToCenter();
+	else if (Application::getInstance().getKeyPressed(Input::KEY_ESCAPE)
+			&& Application::getInstance().isFullscreen()) {
+		Application::getInstance().setFullscreen(false);
+		Application::getInstance().resizeWindow(1200, 800);
+		Application::getInstance().moveToCenter();
 	}
 }
 
