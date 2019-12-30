@@ -1,61 +1,36 @@
 #pragma once
 
-#include <engine/core/array-list.hpp>
-#include <engine/core/memory.hpp>
+#include <engine/core/common.hpp>
+#include <engine/core/time.hpp>
 
-#include <engine/ecs/ecs-system.hpp>
-
-class Scene {
+class BaseScene {
 	public:
-		inline Scene() {}
+		virtual void virtualUnload() = 0;
 
-		virtual void load(Game& game) = 0;
-		virtual void unload(Game& game) = 0;
-
-		inline void update(Game& game, float deltaTime);
-		inline void render(Game& game, float deltaTime);
-
-		inline void addUpdateSystem(ECS::System* callback);
-		inline void addRenderSystem(ECS::System* callback);
-
-		inline void insertUpdateSystem(ECS::System* callback, uint32 position);
-		inline void insertRenderSystem(ECS::System* callback, uint32 position);
-
-		virtual ~Scene() {}
-	private:
-		NULL_COPY_AND_ASSIGN(Scene);
-
-		ArrayList<Memory::SharedPointer<ECS::System>> updatePipeline;
-		ArrayList<Memory::SharedPointer<ECS::System>> renderPipeline;
+		virtual ~BaseScene() = default;
 };
 
-inline void Scene::update(Game& game, float deltaTime) {
-	for (auto& updateCallback : updatePipeline) {
-		(*updateCallback)(game, deltaTime);
-	}
-}
+template <typename DerivedScene>
+class Scene : public BaseScene {
+	public:
+		Scene();
 
-inline void Scene::render(Game& game, float deltaTime) {
-	for (auto& renderCallback : renderPipeline) {
-		(*renderCallback)(game, deltaTime);
-	}
-}
+		void load();
 
-inline void Scene::addUpdateSystem(ECS::System* callback) {
-	updatePipeline.emplace_back(callback);
-}
+		void update(float deltaTime);
+		void render();
 
-inline void Scene::addRenderSystem(ECS::System* callback) {
-	renderPipeline.emplace_back(callback);
-}
+		void unload();
 
-inline void Scene::insertUpdateSystem(ECS::System* callback,
-		uint32 position) {
-	updatePipeline.emplace(updatePipeline.begin() + position, callback);
-}
+		virtual void virtualUnload() override final;
+	private:
+		bool running;
 
-inline void Scene::insertRenderSystem(ECS::System* callback,
-		uint32 position) {
-	renderPipeline.emplace(renderPipeline.begin() + position, callback);
-}
+		void run();
+		void stop();
+
+		friend class SceneManager;
+};
+
+#include "engine/game/scene.inl"
 
