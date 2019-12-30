@@ -4,8 +4,9 @@
 #include <engine/physics/dynamics/island.hpp>
 #include <engine/physics/collision/collider.hpp>
 
-#include <engine/game/game.hpp>
 #include <engine/game/util-components.hpp>
+
+#include <engine/ecs/ecs.hpp>
 
 Physics::PhysicsEngine::PhysicsEngine()
 		: contactManager(*this)
@@ -18,7 +19,7 @@ Physics::Body* Physics::PhysicsEngine::addBody(const BodyHints& hints) {
 	return body;
 }
 
-void Physics::PhysicsEngine::operator()(Game& game, float deltaTime) {
+void Physics::PhysicsEngine::step(float deltaTime) {
 	if (newCollider) {
 		newCollider = false;
 		contactManager.getBroadphase().updatePairs();
@@ -97,8 +98,9 @@ void Physics::PhysicsEngine::operator()(Game& game, float deltaTime) {
 		body->torque = Vector3f();
 	}
 
-	game.getECS().view<TransformComponent, Physics::BodyHandle>().each([&](
-			TransformComponent& tf, Physics::BodyHandle& handle) {
+	ECS::Registry::getInstance().view<TransformComponent,
+			Physics::BodyHandle>().each([&](TransformComponent& tf,
+			Physics::BodyHandle& handle) {
 		tf.transform = handle.body->transform;
 	});
 }
