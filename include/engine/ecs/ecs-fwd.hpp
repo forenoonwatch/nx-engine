@@ -4,6 +4,7 @@
 
 namespace ECS {
 	using Entity = entt::entity;
-	using Registry = entt::registry;
+
+	class Registry;
 };
 
