@@ -3,6 +3,8 @@
 #include <engine/core/common.hpp>
 #include <engine/core/memory.hpp>
 
+#include <engine/game/resource-fwd.hpp>
+
 template <typename Loader, typename Resource>
 class ResourceLoader {
 	public:
@@ -12,7 +14,6 @@ class ResourceLoader {
 					->load(std::forward<Args>(args)...);
 		}
 	private:
-
 		friend class ResourceCache<Resource>;
 };
 

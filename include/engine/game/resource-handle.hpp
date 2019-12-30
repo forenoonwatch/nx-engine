@@ -3,6 +3,8 @@
 #include <engine/core/common.hpp>
 #include <engine/core/memory.hpp>
 
+#include <engine/game/resource-fwd.hpp>
+
 #include <utility>
 
 template <typename Resource>
@@ -14,12 +16,13 @@ class ResourceHandle {
 
 		Resource& get() noexcept {
 			return const_cast<Resource&>(std::as_const(*this).get());
+		}
 
-		operator const Resource&() const noexcept { return get(); }
-		operator Resource&() noexcept { return get(); }
+		operator const Resource & () const noexcept { return get(); }
+		operator Resource & () noexcept { return get(); }
 
-		const Resource& operator*() const noexcept { return get(); }
-		Resource& operator*() noexcept { return get(); }
+		const Resource& operator *() const noexcept { return get(); }
+		Resource& operator *() noexcept { return get(); }
 
 		const Resource* operator->() const noexcept { return resource.get(); }
 

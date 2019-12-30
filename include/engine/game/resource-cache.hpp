@@ -3,15 +3,18 @@
 #include <engine/core/common.hpp>
 #include <engine/core/memory.hpp>
 
+#include <engine/core/singleton.hpp>
+
 #include <engine/core/hash-map.hpp>
 
-#include <engine/game/resource-loader.hpp>
 #include <engine/game/resource-handle.hpp>
+#include <engine/game/resource-loader.hpp>
+#include <engine/game/resource-fwd.hpp>
 
 #include <utility>
 
 template <typename Resource>
-class ResourceCache {
+class ResourceCache final : public Singleton<ResourceCache<Resource>> {
 	public:
 		ResourceCache() = default;
 		ResourceCache(ResourceCache&&) = default;
@@ -22,10 +25,12 @@ class ResourceCache {
 		ResourceHandle<Resource> load(const uint32 id, Args&&... args) {
 			ResourceHandle<Resource> resource {};
 
-			if (auto instance = Loader{}.get(std::forward<Args>(args)...);
-					instance) {
-				resources[id] = instance;
-				resource = std::move(instance);
+			if (auto it = resources.find(id); it == resources.cend()) {
+				if (auto instance = Loader{}.get(std::forward<Args>(args)...);
+						instance) {
+					resources[id] = instance;
+					resource = std::move(instance);
+				}
 			}
 			else {
 				resource = it->second;
@@ -57,7 +62,7 @@ class ResourceCache {
 		}
 
 		void discard(const uint32 id) const noexcept {
-			if (auto it = resources.find(id0); it != resources.end()) {
+			if (auto it = resources.find(id); it != resources.end()) {
 				resources.erase(it);
 			}
 		}
