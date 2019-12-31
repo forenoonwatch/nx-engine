@@ -4,6 +4,16 @@
 #include <cstdio>
 #include <stdexcept>
 
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(_WIN64) || defined(WIN64)
+	#define OPERATING_SYSTEM_WINDOWS
+#elif defined(__linux__)
+	#define OPERATING_SYSTEM_LINUX
+#elif defined(__APPLE__)
+	#define OPERATING_SYSTEM_MACOS
+#else
+	#define OPERATING_SYSTEM_OTHER
+#endif
+
 #if defined(__clang__)
 	#define COMPILER_CLANG
 #elif defined(__GNUC__) || defined(__GNUG__)
