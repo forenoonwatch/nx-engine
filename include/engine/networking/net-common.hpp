@@ -26,3 +26,26 @@ struct GameConnectionConfig : public yojimbo::ClientServerConfig {
 	}
 };
 
+class NetworkInitializer {
+	public:
+		NetworkInitializer() {
+			if (!initialized) {
+				initialized = true;
+
+				InitializeYojimbo();
+				//yojimbo_log_level(YOJIMBO_LOG_LEVEL_INFO);
+				yojimbo_log_level(YOJIMBO_LOG_LEVEL_DEBUG);
+			}
+		}
+
+		virtual ~NetworkInitializer() {
+			if (initialized) {
+				initialized = false;
+
+				ShutdownYojimbo();
+			}
+		}
+	private:
+		static inline bool initialized = false;
+};
+

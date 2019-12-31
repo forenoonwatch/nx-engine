@@ -9,7 +9,8 @@
 #include <engine/networking/net-common.hpp>
 #include <engine/networking/client-connection.hpp>
 
-class NetworkServer final : public Singleton<NetworkServer> {
+class NetworkServer final : public Singleton<NetworkServer>,
+		public NetworkInitializer {
 	public:
 		NetworkServer();
 
