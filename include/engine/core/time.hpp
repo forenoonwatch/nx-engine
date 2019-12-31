@@ -1,11 +1,20 @@
 #pragma once
 
-#include "engine/core/common.hpp"
+#include <engine/core/common.hpp>
+#include <engine/core/singleton.hpp>
 
-#include <GLFW/glfw3.h>
+class Time final : public Singleton<Time> {
+	public:
+		Time();
 
-namespace Time {
-	FORCEINLINE double getTime() {
-		return glfwGetTime();
-	}
-}
+		static FORCEINLINE double getTime() noexcept {
+			return getInstance().getTimeInternal();
+		}
+		
+		static void sleep(double time) noexcept;
+	private:
+		double start;
+
+		double getTimeInternal() const noexcept;
+};
+
