@@ -33,8 +33,8 @@ class NetworkInitializer {
 				initialized = true;
 
 				InitializeYojimbo();
-				//yojimbo_log_level(YOJIMBO_LOG_LEVEL_INFO);
-				yojimbo_log_level(YOJIMBO_LOG_LEVEL_DEBUG);
+				yojimbo_log_level(YOJIMBO_LOG_LEVEL_INFO);
+				//yojimbo_log_level(YOJIMBO_LOG_LEVEL_DEBUG);
 			}
 		}
 

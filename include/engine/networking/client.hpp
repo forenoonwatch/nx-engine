@@ -1,11 +1,8 @@
 #pragma once
 
 #include <engine/networking/net-common.hpp>
-#include <engine/networking/network-object.hpp>
 
 #include <engine/core/common.hpp>
-#include <engine/core/memory.hpp>
-#include <engine/core/array-list.hpp>
 #include <engine/core/singleton.hpp>
 
 class NetworkClient final : public Singleton<NetworkClient>,
@@ -22,9 +19,13 @@ class NetworkClient final : public Singleton<NetworkClient>,
 		void disconnect();
 
 		bool isConnected() const;
-	
-		void addInputState(const InputState& is);	
-		void addNetworkObject(const NetworkObject& netObj);
+		bool canSendMessage(enum GameChannelType channel) const;
+
+		inline uint64 getClientID() const { return client.GetClientId(); } 
+
+		template <typename Message_, typename System>
+		inline void sendMessageWithSystem(enum GameMessageType messageID,
+				enum GameChannelType channel, const System& system);
 	private:
 		GameAdapter adapter;
 		GameConnectionConfig config;
@@ -33,11 +34,18 @@ class NetworkClient final : public Singleton<NetworkClient>,
 		
 		yojimbo::Address serverAddress;
 
-		InputState inputState;
-		ArrayList<NetworkObject> priorityBuffer;
-
 		void processMessage(yojimbo::Message*);
-
-		void accumulatePriorities();
 };
+
+template <typename Message_, typename System>
+inline void NetworkClient::sendMessageWithSystem(
+		enum GameMessageType messageID, enum GameChannelType channel,
+		const System& system) {
+	Message_* msg = static_cast<Message_*>(client.CreateMessage(
+			static_cast<int>(messageID)));
+
+	system(msg);
+
+	client.SendMessage(static_cast<int>(channel), msg);
+}
 

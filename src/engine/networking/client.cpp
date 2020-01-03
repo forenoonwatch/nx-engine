@@ -1,5 +1,9 @@
 #include "engine/networking/client.hpp"
 
+#include <engine/networking/network-object.hpp>
+
+#include <engine/ecs/registry.hpp>
+
 #include <engine/math/math.hpp>
 
 #include <algorithm>
@@ -46,42 +50,19 @@ void NetworkClient::receiveMessages() {
 }
 
 void NetworkClient::sendMessages() {
-	if (client.IsConnected()) {
-		accumulatePriorities();
+	client.SendPackets();
+}
 
-		if (client.CanSendMessage((int)GameChannelType::UNRELIABLE)) {
-			StateUpdateMessage* sum
-					= (StateUpdateMessage*)client.CreateMessage(
-					(int)GameMessageType::STATE_UPDATE_MESSAGE);
-
-			sum->stateUpdate.inputState = inputState;
-			sum->stateUpdate.numBodies = Math::min(
-					(size_t)StateUpdate::MAX_BODIES,
-					priorityBuffer.size());
-
-			for (uint32 i = 0; i < sum->stateUpdate.numBodies; ++i) {
-				sum->stateUpdate.networkIDs[i]
-						= priorityBuffer.front().networkID;
-				// TODO: set contents of bodyStates[i]
-
-				std::pop_heap(std::begin(priorityBuffer),
-						std::end(priorityBuffer));
-				priorityBuffer.back().accumulatedPriority = 0;
-			}
-
-			client.SendMessage((int)GameChannelType::UNRELIABLE, sum);
-		}
-
-		client.SendPackets();
-	}
+void NetworkClient::disconnect() {
+	client.Disconnect();
 }
 
 bool NetworkClient::isConnected() const {
 	return !client.IsDisconnected() && !client.ConnectionFailed();
 }
 
-void NetworkClient::disconnect() {
-	client.Disconnect();
+bool NetworkClient::canSendMessage(enum GameChannelType channel) const {
+	return client.CanSendMessage(static_cast<int>(channel));
 }
 
 void NetworkClient::processMessage(yojimbo::Message* msg) {
@@ -89,22 +70,5 @@ void NetworkClient::processMessage(yojimbo::Message* msg) {
 		default:
 			puts("Whatever");
 	}
-}
-
-void NetworkClient::addInputState(const InputState& is) {
-	this->inputState = is;
-}
-
-void NetworkClient::addNetworkObject(const NetworkObject& netObj) {
-	priorityBuffer.push_back(netObj);
-	std::push_heap(std::begin(priorityBuffer), std::end(priorityBuffer));
-}
-
-void NetworkClient::accumulatePriorities() {
-	for (auto& n : priorityBuffer) {
-		n.accumulatedPriority += n.networkPriority;
-	}
-
-	std::make_heap(std::begin(priorityBuffer), std::end(priorityBuffer));
 }
 

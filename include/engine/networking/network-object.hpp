@@ -2,6 +2,8 @@
 
 #include <engine/core/common.hpp>
 
+#include <engine/ecs/ecs-fwd.hpp>
+
 enum class NetworkRole {
 	ROLE_NONE,
 	ROLE_SYNCHRONIZED,
@@ -13,16 +15,12 @@ enum class NetworkRole {
 
 struct NetworkObject {
 	uint64 networkOwner; // TODO: replace with wrapper for a client
-	uint32 networkID; // TODO: match this to entt::entity
+	uint32 networkID; 
 	uint32 networkPriority;
-	
+
 	uint32 accumulatedPriority;
 
 	NetworkRole role;
 	NetworkRole remoteRole;
-
-	inline bool operator<(const NetworkObject& n) const {
-		return accumulatedPriority < n.accumulatedPriority;
-	}
 };
 
