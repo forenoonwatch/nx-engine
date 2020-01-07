@@ -6,7 +6,10 @@
 
 NetworkServer::NetworkServer()
 		: adapter(this)
-		, server(nullptr) {}
+		, server(nullptr)
+		, recvCallback(nullptr)
+		, connectCallback(nullptr)
+		, disconnectCallback(nullptr) {}
 
 void NetworkServer::start(const char* address, uint32 port,
 		const uint8* privateKey) {
@@ -36,15 +39,10 @@ void NetworkServer::receiveMessages() {
 	for (uint32 i = 0; i < server->GetMaxClients(); ++i) {
 		if (server->IsClientConnected(i)) {
 			for (uint32 j = 0; j < config.numChannels; ++j) {
-				uint32 numRecvd = 0;
-
 				while ((msg = server->ReceiveMessage(i, j)) != nullptr) {
-					processMessage(i, msg);
+					recvCallback(connections[i], msg);
 					server->ReleaseMessage(i, msg);
-					++numRecvd;
 				}
-
-				DEBUG_LOG_TEMP("++GOT %d MSGS FROM CLIENT %d", numRecvd, i);
 			}
 		}
 	}
@@ -66,28 +64,17 @@ bool NetworkServer::isRunning() const {
 void NetworkServer::onClientConnected(uint32 clientIndex) {
 	connections[clientIndex].markConnected(this, clientIndex,
 			server->GetClientId(clientIndex));
-}
 
-void NetworkServer::onClientDisconnected(uint32 clientIndex) {
-	connections[clientIndex].markDisconnected();
-}
-
-void NetworkServer::processMessage(uint32 client, yojimbo::Message* msg) {
-	switch (msg->GetType()) {
-		case (int)GameMessageType::STATE_UPDATE_MESSAGE:
-		{
-			StateUpdateMessage* sum = static_cast<StateUpdateMessage*>(msg);
-			receive(client, sum);
-		}
-			break;
-		default:
-			puts("Got an unknown message!");
+	if (connectCallback) {
+		connectCallback(connections[clientIndex]);
 	}
 }
 
-void NetworkServer::receive(uint32 client, StateUpdateMessage* msg) {
-	msg->stateUpdate.sequence = msg->GetId();
-	connections[client].jitterBuffer.addStateUpdate(server->GetTime(),
-			msg->GetId(), msg->stateUpdate);
+void NetworkServer::onClientDisconnected(uint32 clientIndex) {
+	if (disconnectCallback) {
+		disconnectCallback(connections[clientIndex]);
+	}
+
+	connections[clientIndex].markDisconnected();
 }
 

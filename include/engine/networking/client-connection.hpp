@@ -11,7 +11,15 @@ class ClientConnection {
 		inline ClientConnection()
 				: connected(false) {}
 
+		inline void addStateUpdate(double time, uint16 sequence,
+				const StateUpdate& stateUpdate) {
+			jitterBuffer.addStateUpdate(time, sequence, stateUpdate);
+		}	
+
 		bool getStateUpdate(StateUpdate& stateUpdate);
+
+		inline uint32 getIndex() const { return index; }
+		inline uint64 getClientID() const { return clientID; }
 
 		inline bool isConnected() const { return connected; }
 	private:

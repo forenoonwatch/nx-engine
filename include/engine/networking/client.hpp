@@ -8,6 +8,8 @@
 class NetworkClient final : public Singleton<NetworkClient>,
 		public NetworkInitializer {
 	public:
+		typedef void (*MessageCallback)(yojimbo::Message*);
+
 		NetworkClient();
 
 		void connect(const char* serverAddress, uint32 serverPort,
@@ -17,6 +19,10 @@ class NetworkClient final : public Singleton<NetworkClient>,
 		void sendMessages();
 
 		void disconnect();
+
+		inline void setMessageCallback(MessageCallback callback) {
+			recvCallback = callback;
+		}
 
 		bool isConnected() const;
 		bool canSendMessage(enum GameChannelType channel) const;
@@ -31,10 +37,10 @@ class NetworkClient final : public Singleton<NetworkClient>,
 		GameConnectionConfig config;
 
 		yojimbo::Client client;
+
+		MessageCallback recvCallback;
 		
 		yojimbo::Address serverAddress;
-
-		void processMessage(yojimbo::Message*);
 };
 
 template <typename Message_, typename System>

@@ -11,7 +11,8 @@
 NetworkClient::NetworkClient()
 		: adapter(nullptr)
 		, client(yojimbo::GetDefaultAllocator(), yojimbo::Address("0.0.0.0"),
-				config, adapter, 0.0) {}
+				config, adapter, 0.0)
+		, recvCallback(nullptr) {}
 
 void NetworkClient::connect(const char* serverIP, uint32 serverPort,
 		const uint8* privateKey) {
@@ -42,7 +43,7 @@ void NetworkClient::receiveMessages() {
 
 		for (uint32 i = 0; i < config.numChannels; ++i) {
 			while ((msg = client.ReceiveMessage(i)) != nullptr) {
-				processMessage(msg);
+				recvCallback(msg);
 				client.ReleaseMessage(msg);
 			}
 		}
@@ -63,12 +64,5 @@ bool NetworkClient::isConnected() const {
 
 bool NetworkClient::canSendMessage(enum GameChannelType channel) const {
 	return client.CanSendMessage(static_cast<int>(channel));
-}
-
-void NetworkClient::processMessage(yojimbo::Message* msg) {
-	switch (msg->GetType()) {
-		default:
-			puts("Whatever");
-	}
 }
 
