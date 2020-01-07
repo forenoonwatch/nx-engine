@@ -22,5 +22,7 @@ struct NetworkObject {
 
 	NetworkRole role;
 	NetworkRole remoteRole;
+
+	static inline uint32 counter = 0;
 };
 

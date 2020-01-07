@@ -49,8 +49,6 @@ class SequenceBuffer {
 				return nullptr;
 			}
 
-			DEBUG_LOG_TEMP("INSERTING SEQUENCE %d", sequence);
-
 			const size_t index = sequence % size;
 
 			entryFlags.setBit(index);
