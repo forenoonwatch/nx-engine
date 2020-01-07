@@ -7,16 +7,7 @@
 #include <engine/math/vector.hpp>
 #include <engine/math/quaternion.hpp>
 
-struct InputState {
-	enum {
-		INPUT_FORWARD = 1,
-		INPUT_BACK = 2,
-		INPUT_LEFT = 4,
-		INPUT_RIGHT = 8
-	};
-
-	uint32 data;
-};
+#include <engine/networking/input-state.hpp>
 
 struct BodyState {
 	Vector3f position;
@@ -56,4 +47,7 @@ struct StateUpdate {
 
 	uint16 sequence;
 };
+
+void serializeBodyStates(StateUpdate& stateUpdate);
+void deserializeBodyStates(const StateUpdate& stateUpdate);
 

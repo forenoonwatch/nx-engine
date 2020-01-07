@@ -4,7 +4,7 @@
 
 #include <yojimbo/yojimbo.h>
 
-struct StateUpdateMessage : public yojimbo::Message {
+struct StateUpdateMessage final : public yojimbo::Message {
 	StateUpdate stateUpdate;
 
 	template <typename Stream>
