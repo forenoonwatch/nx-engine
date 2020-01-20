@@ -28,6 +28,7 @@ class NetworkClient final : public Singleton<NetworkClient>,
 		bool canSendMessage(enum GameChannelType channel) const;
 
 		inline uint64 getClientID() const { return client.GetClientId(); } 
+		inline double getTime() const { return client.GetTime(); }
 
 		template <typename Message_, typename System>
 		inline void sendMessageWithSystem(enum GameMessageType messageID,

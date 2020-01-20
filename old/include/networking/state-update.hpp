@@ -10,6 +10,8 @@
 #include <engine/networking/input-state.hpp>
 
 struct BodyState {
+	uint32 networkID;
+
 	Vector3f position;
 	Quaternion rotation;
 
@@ -20,6 +22,8 @@ struct BodyState {
 
 	template <typename Stream>
 	bool Serialize(Stream& stream) {
+		serialize_uint32(stream, networkID);
+
 		serialize_bytes(stream, (uint8*)&position, sizeof(Vector3f));
 		serialize_bytes(stream, (uint8*)&rotation, sizeof(Quaternion));
 
@@ -42,12 +46,13 @@ struct StateUpdate {
 
 	uint32 numBodies;
 
-	uint32 networkIDs[MAX_BODIES];
 	BodyState bodyStates[MAX_BODIES];
 
 	uint16 sequence;
 };
 
 void serializeBodyStates(StateUpdate& stateUpdate);
-void deserializeBodyStates(const StateUpdate& stateUpdate);
+void serializeBodyStates(StateUpdate& stateUpdate, uint64 clientID);
+
+void deserializeBodyStates(StateUpdate& stateUpdate);
 

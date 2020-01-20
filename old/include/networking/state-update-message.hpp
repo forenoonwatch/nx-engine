@@ -15,10 +15,6 @@ struct StateUpdateMessage final : public yojimbo::Message {
 		serialize_bits(stream, stateUpdate.numBodies, 32);
 
 		for (uint32 i = 0; i < stateUpdate.numBodies; ++i) {
-			serialize_bits(stream, stateUpdate.networkIDs[i], 32);
-		}
-
-		for (uint32 i = 0; i < stateUpdate.numBodies; ++i) {
 			serialize_object(stream, stateUpdate.bodyStates[i]);
 		}
 
