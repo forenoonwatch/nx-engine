@@ -2,8 +2,8 @@
 
 #include <engine/core/common.hpp>
 
-#include <GLM/glm.hpp>
-#include <GLM/gtc/type_ptr.hpp>
+#include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 #define Vector2f glm::vec2
 #define Vector3f glm::vec3

@@ -1,7 +1,8 @@
 #pragma once
 
-#include "engine/core/common.hpp"
-#include "engine/core/string.hpp"
+#include <engine/core/common.hpp>
+#include <engine/core/string.hpp>
+#include <engine/core/service.hpp>
 
 #include <GL/glew.h>
 
@@ -15,7 +16,7 @@ class RenderTarget;
 
 class RenderQuery;
 
-class RenderContext {
+class RenderContext final : public Service<RenderContext> {
 	public:
 		enum BlendFunc {
 			BLEND_FUNC_NONE,
@@ -77,7 +78,7 @@ class RenderContext {
 
 		void setRenderTarget(uint32 fbo, uint32 bufferType = GL_FRAMEBUFFER);
 
-		virtual ~RenderContext();
+		~RenderContext();
 
 		static uint32 calcInternalFormat(uint32 pixelFormat, bool compressed);
 		static uint32 calcBaseFormat(uint32 pixelFormat);

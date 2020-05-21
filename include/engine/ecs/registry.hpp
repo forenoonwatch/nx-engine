@@ -7,10 +7,4 @@
 
 #include <entt/entity/registry.hpp>
 
-namespace ECS {
-	class Registry final : public entt::registry, public Singleton<Registry> {
-		public:
-		private:
-	};
-};
-
+class Registry final : public entt::registry, public Singleton<Registry> {};

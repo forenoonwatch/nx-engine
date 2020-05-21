@@ -8,7 +8,7 @@ class Time final : public Singleton<Time> {
 		Time();
 
 		static FORCEINLINE double getTime() noexcept {
-			return getInstance().getTimeInternal();
+			return ref().getTimeInternal();
 		}
 		
 		static void sleep(double time) noexcept;

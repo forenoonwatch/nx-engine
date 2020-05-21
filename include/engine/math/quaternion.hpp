@@ -2,7 +2,7 @@
 
 #include <engine/math/matrix.hpp>
 
-#include <GLM/gtc/quaternion.hpp>
+#include <glm/gtc/quaternion.hpp>
 
 #define Quaternion glm::quat
 
