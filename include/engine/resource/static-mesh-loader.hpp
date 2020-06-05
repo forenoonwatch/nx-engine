@@ -3,11 +3,13 @@
 #include <engine/resource/resource-loader.hpp>
 #include <engine/resource/asset-loader.hpp>
 
-#include <engine/rendering/indexed-model.hpp>
+#include <engine/rendering/vertex-array.hpp>
 
-class ModelLoader final : public ResourceLoader<ModelLoader, IndexedModel> {
+class StaticMeshLoader final : public ResourceLoader<StaticMeshLoader, VertexArray> {
 	public:
-		Memory::SharedPointer<IndexedModel> load(const StringView& fileName) const {
+		Memory::SharedPointer<VertexArray> load(const StringView& fileName) const {
+			auto& context = RenderContext::ref();
+
 			ArrayList<IndexedModel> models;
 
 			if (!AssetLoader::loadStaticMeshes(fileName, models)) {
@@ -15,8 +17,7 @@ class ModelLoader final : public ResourceLoader<ModelLoader, IndexedModel> {
 				return nullptr;
 			}
 
-			return Memory::make_shared<IndexedModel>(models[0]);
+			return Memory::make_shared<VertexArray>(context, models[0], GL_STATIC_DRAW);
 		}
 	private:
 };
-

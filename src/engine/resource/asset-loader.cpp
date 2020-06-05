@@ -1,4 +1,4 @@
-#include "core/asset-loader.hpp"
+#include "engine/resource/asset-loader.hpp"
 
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
@@ -6,25 +6,31 @@
 
 static void initStaticMesh(IndexedModel& newModel, const aiMesh* mesh);
 
-bool AssetLoader::loadAssets(const String& fileName,
-		const IndexedModel::AllocationHints& staticAllocHints,
-		ArrayList<IndexedModel>& models) {
+bool AssetLoader::loadStaticMeshes(const StringView& fileName, ArrayList<IndexedModel>& models) {
 	Assimp::Importer importer;
 
-	const aiScene* scene = importer.ReadFile(fileName.c_str(),
+	const aiScene* scene = importer.ReadFile(fileName.data(),
 			aiProcess_Triangulate | aiProcess_GenSmoothNormals
 			| aiProcess_FlipUVs | aiProcess_CalcTangentSpace
 			| aiProcess_JoinIdenticalVertices);
 
 	if (!scene) {
-		DEBUG_LOG("Asset Loader", LOG_ERROR,
-				"Failed to load assets from %s", fileName.c_str());
+		DEBUG_LOG("Asset Loader", LOG_ERROR, "Failed to load assets from %s", fileName.data());
 		return false;
 	}
 
+	IndexedModel::AllocationHints hints;
+		hints.elementSizes.push_back(3);
+		hints.elementSizes.push_back(2);
+		hints.elementSizes.push_back(3);
+		hints.elementSizes.push_back(3);
+		hints.elementSizes.push_back(3);
+		hints.elementSizes.push_back(16);
+		hints.instancedElementStartIndex = 5;
+
 	for (uint32 i = 0; i < scene->mNumMeshes; ++i) {
 		const aiMesh* mesh = scene->mMeshes[i];
-		IndexedModel newModel(staticAllocHints);
+		IndexedModel newModel(hints);
 
 		initStaticMesh(newModel, mesh);
 
