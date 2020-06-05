@@ -199,6 +199,8 @@ void RenderSystem::flushStaticMeshes() {
 					linearMipmapSampler, 1);
 			staticMeshShader.setSampler("materialMap",
 					*material->materialMap, linearMipmapSampler, 2);
+			staticMeshShader.setSampler("depthMap", *material->displacementMap,
+					linearMipmapSampler, 3);
 		}
 
 		vertexArray->updateBuffer(4, &pair.second[0],
@@ -212,7 +214,7 @@ void RenderSystem::flushStaticMeshes() {
 }
 
 void RenderSystem::flush() {
-	//bloomBlur->update();
+	bloomBlur->update();
 
 	target.setDrawBuffers(1);
 

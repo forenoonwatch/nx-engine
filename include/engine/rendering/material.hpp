@@ -7,6 +7,7 @@ class Material {
 		Texture* diffuse;
 		Texture* normalMap;
 		Texture* materialMap;
+		Texture* displacementMap;
 	private:
 };
 
