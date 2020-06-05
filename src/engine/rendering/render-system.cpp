@@ -203,7 +203,7 @@ void RenderSystem::flushStaticMeshes() {
 					linearMipmapSampler, 3);
 		}
 
-		vertexArray->updateBuffer(4, &pair.second[0],
+		vertexArray->updateBuffer(5, &pair.second[0],
 				sizeof(Matrix4f) * numTransforms);
 
 		context->draw(target, staticMeshShader, *vertexArray,

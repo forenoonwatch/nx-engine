@@ -50,10 +50,12 @@ static void initStaticMesh(IndexedModel& newModel, const aiMesh* mesh) {
 		const aiVector3D texCoord = mesh->HasTextureCoords(0)
 				? mesh->mTextureCoords[0][i] : aiZeroVector;
 		const aiVector3D tangent = mesh->mTangents[i];
+		const aiVector3D biTangent = mesh->mBitangents[i];
 
 		newModel.addElement3f(0, pos.x, pos.y, pos.z);
 		newModel.addElement2f(1, texCoord.x, texCoord.y);
 		newModel.addElement3f(2, normal.x, normal.y, normal.z);
 		newModel.addElement3f(3, tangent.x, tangent.y, tangent.z);
+		newModel.addElement3f(4, biTangent.x, biTangent.y, biTangent.z);
 	}
 }
