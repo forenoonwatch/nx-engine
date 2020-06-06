@@ -143,9 +143,23 @@ void IndexedModel::initStaticMesh() {
 	allocateElement(2); // TexCoords
 	allocateElement(3); // Normals
 	allocateElement(3); // Tangents
-	allocateElement(2 * 16); // MVP, model matrix
+	allocateElement(3); // Bitangents
+	allocateElement(16); // Transform
 
-	setInstancedElementStartIndex(4); // Begin instanced data
+	setInstancedElementStartIndex(5); // Begin instanced data
+}
+
+void IndexedModel::initRiggedMesh() {
+	allocateElement(3); // Positions
+	allocateElement(2); // TexCoords
+	allocateElement(3); // Normals
+	allocateElement(3); // Tangents
+	allocateElement(3); // Bitangents
+	allocateElement(3); // Bone Indices
+	allocateElement(3); // Bone Weights
+	allocateElement(16); // Transform
+
+	setInstancedElementStartIndex(7); // Begin instanced data
 }
 
 void IndexedModel::addElement1f(uint32 elementIndex, float e0) {

@@ -30,6 +30,7 @@ class IndexedModel {
 				const Vector3f& planeNormal, Vector3f& centroidSum) const;
 
 		void initStaticMesh();
+		void initRiggedMesh();
 
 		inline void allocateElement(uint32 elementSize);
 		inline void setInstancedElementStartIndex(uint32 elementIndex);
