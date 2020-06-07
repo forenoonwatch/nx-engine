@@ -9,11 +9,6 @@ static bool addShader(GLuint program, const String& text,
 static bool checkShaderError(uint32 shader, GLenum flag,
 		bool isProgram, const String& errorMessage);
 
-static void addShaderUniforms(GLuint program,
-		HashMap<String, int32>& uniformBlockMap,
-		HashMap<String, int32>& samplerMap,
-		HashMap<String, int32>& uniformMap); 
-
 bool Shader::load(const String& fileName, const char** feedbackVaryings,
 		uintptr numFeedbackVaryings, uint32 varyingCaptureMode) {
 	StringStream ss;
@@ -107,15 +102,15 @@ bool Shader::load(const String& fileName, const char** feedbackVaryings,
 	}
 
 	// TODO: add attributes
-	addShaderUniforms(programID, uniformBlockMap,
-			samplerMap, uniformMap);
+	addUniforms();
 
 	return true;
 }
 
-void Shader::setUniformBuffer(const String& name, UniformBuffer& buffer) {
-	glUniformBlockBinding(programID, uniformBlockMap[name],
-			buffer.getBlockBinding());
+void Shader::setUniformBuffer(const String& name,
+		Memory::SharedPointer<UniformBuffer> buffer) {
+	glUniformBlockBinding(programID, uniformBlockMap[name], buffer->getBlockBinding());
+	uniformBuffers[name] = buffer;
 }
 
 void Shader::setShaderStorageBuffer(const String& name,
@@ -176,11 +171,15 @@ void Shader::setMatrix4f(const String& name, const Matrix4f& value) {
 	glUniformMatrix4fv(uniformMap[name], 1, false, (const float*)&value);
 }
 
+Memory::SharedPointer<UniformBuffer> Shader::getUniformBuffer(const String& name) {
+	return uniformBuffers[name];
+}
+
 Shader::~Shader() {
 	cleanUp();
 }
 
-inline void Shader::cleanUp() {
+void Shader::cleanUp() {
 	for (auto& shader : shaders) {
 		glDetachShader(programID, shader);
 		glDeleteShader(shader);
@@ -195,6 +194,104 @@ inline void Shader::cleanUp() {
 	uniformBlockMap.clear();
 	samplerMap.clear();
 	uniformMap.clear();
+}
+
+void Shader::addUniforms() {
+	GLint numBlocks;
+	glGetProgramiv(programID, GL_ACTIVE_UNIFORM_BLOCKS, &numBlocks);
+
+	ArrayList<GLchar> nameBuffer;
+	ArrayList<GLchar> uniformName(256);
+
+	for (int32 block = 0; block < numBlocks; ++block) {
+		GLint nameLen;
+
+		glGetActiveUniformBlockiv(programID, block,
+				GL_UNIFORM_BLOCK_NAME_LENGTH, &nameLen);
+		nameBuffer.reserve(nameLen);
+
+		glGetActiveUniformBlockName(programID, block,
+				nameLen, nullptr, nameBuffer.data());
+
+		String uniformBlockName(nameBuffer.data(), nameLen - 1);
+
+		uniformBlockMap[uniformBlockName] = glGetUniformBlockIndex(programID, nameBuffer.data());
+
+		if (auto ptr = context->getUniformBuffer(uniformBlockName); ptr.expired()) {
+			GLint numUniforms;
+			GLint bufferSize;
+
+			glGetActiveUniformBlockiv(programID, block,
+					GL_UNIFORM_BLOCK_ACTIVE_UNIFORMS, &numUniforms);
+			glGetActiveUniformBlockiv(programID, block,
+					GL_UNIFORM_BLOCK_DATA_SIZE, &bufferSize);
+
+			ArrayList<GLint> uniformIndices(numUniforms);
+
+			glGetActiveUniformBlockiv(programID, block,
+					GL_UNIFORM_BLOCK_ACTIVE_UNIFORM_INDICES, uniformIndices.data());
+
+			auto ubo = context->addUniformBuffer(uniformBlockName, bufferSize, GL_DYNAMIC_DRAW);
+
+			for (auto& uniform : uniformIndices) {
+				const GLuint index = static_cast<GLuint>(uniform);
+
+				GLint offset = 0;
+				GLint arraySize = 0;
+				GLenum type = 0;
+				GLsizei actualLength = 0;
+
+				glGetActiveUniform(programID, uniform, uniformName.size(),
+						&actualLength, &arraySize, &type, uniformName.data());
+
+				glGetActiveUniformsiv(programID, 1, &index,
+						GL_UNIFORM_OFFSET, &offset);
+
+				String name(uniformName.data(), actualLength);
+
+				ubo->addVariableOffset(name, offset);
+			}
+
+			uniformBuffers[uniformBlockName] = ubo;
+			setUniformBuffer(uniformBlockName, ubo);
+		}
+		else {
+			auto ubo = ptr.lock();
+
+			uniformBuffers[uniformBlockName] = ubo;
+			setUniformBuffer(uniformBlockName, ubo);
+		}
+	}
+
+	GLint numUniforms = 0;
+	glGetProgramiv(programID, GL_ACTIVE_UNIFORMS, &numUniforms);
+
+	for (int32 uniform = 0; uniform < numUniforms; ++uniform) {
+		const GLuint iUniform = static_cast<GLuint>(uniform);
+
+		GLint uniformBlockIndex;
+
+		glGetActiveUniformsiv(programID, 1, &iUniform,
+				GL_UNIFORM_BLOCK_INDEX, &uniformBlockIndex);
+
+		if (uniformBlockIndex < 0) {
+			GLint arraySize = 0;
+			GLenum type = 0;
+			GLsizei actualLength = 0;
+
+			glGetActiveUniform(programID, uniform, uniformName.size(),
+					&actualLength, &arraySize, &type, uniformName.data());
+
+			String name(uniformName.data(), actualLength);
+
+			if (type == GL_SAMPLER_2D || type == GL_SAMPLER_CUBE) {
+				samplerMap[name] = glGetUniformLocation(programID, uniformName.data());
+			}
+			else {
+				uniformMap[name] = glGetUniformLocation(programID, uniformName.data());
+			}
+		}
+	}
 }
 
 static bool addShader(GLuint program, const String& text,
@@ -258,48 +355,4 @@ static bool checkShaderError(uint32 shader, GLenum flag,
 	}
 
 	return false;
-}
-
-static void addShaderUniforms(GLuint program,
-		HashMap<String, int32>& uniformBlockMap,
-		HashMap<String, int32>& samplerMap,
-		HashMap<String, int32>& uniformMap) {
-	GLint numBlocks;
-	glGetProgramiv(program, GL_ACTIVE_UNIFORM_BLOCKS, &numBlocks);
-
-	for (int32 block = 0; block < numBlocks; ++block) {
-		GLint nameLen;
-		glGetActiveUniformBlockiv(program, block,
-				GL_UNIFORM_BLOCK_NAME_LENGTH, &nameLen);
-
-		ArrayList<GLchar> name(nameLen);
-		glGetActiveUniformBlockName(program, block,
-				nameLen, nullptr, &name[0]);
-
-		String uniformBlockName((char*)&name[0], nameLen - 1);
-		uniformBlockMap[uniformBlockName] = glGetUniformBlockIndex(program, &name[0]);
-	}
-
-	GLint numUniforms = 0;
-	glGetProgramiv(program, GL_ACTIVE_UNIFORMS, &numUniforms);
-
-	ArrayList<GLchar> uniformName(256);
-
-	for (int32 uniform = 0; uniform < numUniforms; ++uniform) {
-		GLint arraySize = 0;
-		GLenum type = 0;
-		GLsizei actualLength = 0;
-
-		glGetActiveUniform(program, uniform, uniformName.size(),
-				&actualLength, &arraySize, &type, &uniformName[0]);
-
-		String name((char*)&uniformName[0], actualLength);
-
-		if (type == GL_SAMPLER_2D || type == GL_SAMPLER_CUBE) {
-			samplerMap[name] = glGetUniformLocation(program, (char*)&uniformName[0]);
-		}
-		else {
-			uniformMap[name] = glGetUniformLocation(program, (char*)&uniformName[0]);
-		}
-	}
 }

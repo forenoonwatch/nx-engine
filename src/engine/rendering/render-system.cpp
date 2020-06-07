@@ -26,12 +26,6 @@ RenderSystem::RenderSystem(RenderContext& context, uint32 width, uint32 height,
 		, toneMapShader(context)
 		, screenRenderShader(context)
 
-		, sceneDataBuffer(context, sizeof(Vector3f)
-				+ sizeof(Vector2f) + 2 * sizeof(Matrix4f), GL_STREAM_DRAW, 0)
-		, lightDataBuffer(context, 1 * sizeof(Vector3f)
-				+ 3 * sizeof(float) + sizeof(Vector3f)
-				+ 2 * sizeof(float), GL_DYNAMIC_DRAW, 1)
-		
 		, nearestSampler(context, GL_NEAREST, GL_NEAREST)
 		, linearSampler(context, GL_LINEAR, GL_LINEAR,
 				GL_REPEAT, GL_REPEAT)
@@ -75,20 +69,27 @@ RenderSystem::RenderSystem(RenderContext& context, uint32 width, uint32 height,
 			/ (float)height, zNear, zFar);
 	camera.iProjection = Math::inverse(camera.projection);
 
-	float lightData[] = {0.f, 15.f, 128.f};
+	auto lightDataBuffer = context.getUniformBuffer("LightingData").lock();
+
 	Vector3f lightDir = Math::normalize(Vector3f(1, -1, 1));
-	lightDataBuffer.update(&lightDir, sizeof(Vector3f));
-	lightDataBuffer.update(lightData, sizeof(Vector3f), sizeof(lightData));
 
-	float fogData[] = {202.f / 255.f, 243.f / 255.f, 246.f / 255.f,
-		0.001f, 2.f};
+	lightDataBuffer->set("sunlightDir", lightDir);
 
-	lightDataBuffer.update(fogData, sizeof(Vector3f) + sizeof(lightData)
-			+ 2 * sizeof(float), sizeof(fogData));
+	lightDataBuffer->set("ambientLight", 0.f);
+	lightDataBuffer->set("specularStrength", 15.f);
+	lightDataBuffer->set("specularBlend", 128.f);
+
+	Vector3f fogColor(202.f / 255.f, 243.f / 255.f, 246.f / 255.f);
+
+	lightDataBuffer->set("fogColor", fogColor);
+	lightDataBuffer->set("fogDensity", 0.001f);
+	lightDataBuffer->set("fogGradient", 2.f);
+
+	auto sceneDataBuffer = context.getUniformBuffer("SceneData").lock();
 
 	Vector2f sceneDims(width, height);
-	sceneDataBuffer.update(&sceneDims, sizeof(Vector3f)
-			+ sizeof(float), sizeof(Vector2f));
+
+	sceneDataBuffer->set("displaySize", sceneDims);
 }
 
 void RenderSystem::resize(uint32 width, uint32 height) {
@@ -110,12 +111,11 @@ void RenderSystem::resize(uint32 width, uint32 height) {
 void RenderSystem::updateCamera() {
 	camera.update();
 
-	sceneDataBuffer.update(&camera.view[3], sizeof(Vector3f));
-	sceneDataBuffer.update(&camera.viewProjection, sizeof(Vector3f)
-			+ sizeof(Vector2f) + 3 * sizeof(float), sizeof(Matrix4f));
-	sceneDataBuffer.update(&camera.iViewProjection, sizeof(Vector3f)
-			+ sizeof(Vector2f) + 3 * sizeof(float)
-			+ sizeof(Matrix4f), sizeof(Matrix4f));
+	auto sceneDataBuffer = context->getUniformBuffer("SceneData").lock();
+
+	sceneDataBuffer->set("cameraPosition", Vector3f(camera.view[3]));
+	sceneDataBuffer->set("viewProjection", camera.viewProjection);
+	sceneDataBuffer->set("invVP", camera.iViewProjection);
 }
 
 void RenderSystem::drawStaticMesh(VertexArray& vertexArray,

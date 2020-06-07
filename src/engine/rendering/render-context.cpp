@@ -331,8 +331,34 @@ void RenderContext::setRenderTarget(uint32 fbo, uint32 bufferType) {
 	}
 }
 
+Memory::SharedPointer<UniformBuffer> RenderContext::addUniformBuffer(const String& name,
+		uintptr dataSize, uint32 usage) {
+	auto ubo = Memory::make_shared<UniformBuffer>(*this, dataSize, usage, findFreeUBOBinding());
+
+	uniformBuffers[name] = Memory::WeakPointer<UniformBuffer>(ubo);
+
+	return ubo;
+}
+
+Memory::WeakPointer<UniformBuffer> RenderContext::getUniformBuffer(const String& name) {
+	return uniformBuffers[name];
+}
+
 RenderContext::~RenderContext() {
 	delete screenQuad;
+}
+
+uint32 RenderContext::findFreeUBOBinding() {
+	for (uint32 i = 0; i < uniformBufferBindings.size(); ++i) {
+		if (!uniformBufferBindings[i]) {
+			uniformBufferBindings[i] = true;
+			return i;
+		}
+	}
+
+	uniformBufferBindings.push_back(true);
+
+	return uniformBufferBindings.size() - 1;
 }
 
 uint32 RenderContext::calcInternalFormat(uint32 pixelFormat, bool compressed) {

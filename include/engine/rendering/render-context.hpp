@@ -3,10 +3,13 @@
 #include <engine/core/common.hpp>
 #include <engine/core/string.hpp>
 #include <engine/core/service.hpp>
+#include <engine/core/array-list.hpp>
+#include <engine/core/hash-map.hpp>
 
 #include <GL/glew.h>
 
 class Shader;
+class UniformBuffer;
 
 class VertexArray;
 class TransformFeedback;
@@ -78,6 +81,11 @@ class RenderContext final : public Service<RenderContext> {
 
 		void setRenderTarget(uint32 fbo, uint32 bufferType = GL_FRAMEBUFFER);
 
+		Memory::SharedPointer<UniformBuffer> addUniformBuffer(const String& name,
+				uintptr dataSize, uint32 usage);
+
+		Memory::WeakPointer<UniformBuffer> getUniformBuffer(const String& name);
+
 		~RenderContext();
 
 		static uint32 calcInternalFormat(uint32 pixelFormat, bool compressed);
@@ -103,5 +111,12 @@ class RenderContext final : public Service<RenderContext> {
 		uint32 currentRenderSource;
 		uint32 currentRenderTarget;
 
+		HashMap<String, Memory::WeakPointer<UniformBuffer>> uniformBuffers;
+		ArrayList<bool> uniformBufferBindings;
+
 		static uint32 attachments[4];
+
+		friend class UniformBuffer;
+
+		uint32 findFreeUBOBinding();
 };

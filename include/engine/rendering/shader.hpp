@@ -22,7 +22,8 @@ class Shader {
 				uintptr numFeedbackVaryings = 0,
 				uint32 varyingCaptureMode = GL_INTERLEAVED_ATTRIBS);
 
-		void setUniformBuffer(const String& name, UniformBuffer& buffer);
+		void setUniformBuffer(const String& name,
+				Memory::SharedPointer<UniformBuffer> buffer);
 
 		void setShaderStorageBuffer(const String& name,
 				ShaderStorageBuffer& buffer);
@@ -43,9 +44,12 @@ class Shader {
 
 		void setMatrix4f(const String& name, const Matrix4f& value);
 
-		inline int32 getUniform(const String& name) { return uniformMap[name]; }
-
 		inline uint32 getID() { return programID; }
+
+		inline int32 getUniform(const String& name) { return uniformMap[name]; }
+		inline int32 getUniformBlock(const String& name) { return uniformBlockMap[name]; }
+
+		Memory::SharedPointer<UniformBuffer> getUniformBuffer(const String& name);
 
 		~Shader();
 	private:
@@ -59,7 +63,10 @@ class Shader {
 		HashMap<String, int32> uniformBlockMap;
 		HashMap<String, int32> samplerMap;
 		HashMap<String, int32> uniformMap;
+		HashMap<String, Memory::SharedPointer<UniformBuffer>> uniformBuffers;
 
 		void cleanUp();
+
+		void addUniforms();
 };
 

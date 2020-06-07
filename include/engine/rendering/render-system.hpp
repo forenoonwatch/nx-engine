@@ -83,9 +83,6 @@ class RenderSystem final : public Service<RenderSystem> {
 		Shader toneMapShader;
 		Shader screenRenderShader;
 
-		UniformBuffer sceneDataBuffer;
-		UniformBuffer lightDataBuffer;
-
 		Sampler nearestSampler;
 		Sampler linearSampler;
 		Sampler linearMipmapSampler;
