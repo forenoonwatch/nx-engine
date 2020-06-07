@@ -113,9 +113,12 @@ void RenderSystem::updateCamera() {
 
 	auto sceneDataBuffer = context->getUniformBuffer("SceneData").lock();
 
-	sceneDataBuffer->set("cameraPosition", Vector3f(camera.view[3]));
-	sceneDataBuffer->set("viewProjection", camera.viewProjection);
-	sceneDataBuffer->set("invVP", camera.iViewProjection);
+	//sceneDataBuffer->set("cameraPosition", Vector3f(camera.view[3]));
+	//sceneDataBuffer->set("viewProjection", camera.viewProjection);
+	//sceneDataBuffer->set("invVP", camera.iViewProjection);
+
+	sceneDataBuffer->set({"cameraPosition", "viewProjection", "invVP"},
+			Vector3f(camera.view[3]), camera.viewProjection, camera.iViewProjection);
 }
 
 void RenderSystem::drawStaticMesh(VertexArray& vertexArray,

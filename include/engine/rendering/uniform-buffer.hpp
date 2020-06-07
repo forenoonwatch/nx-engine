@@ -3,8 +3,14 @@
 #include <engine/core/common.hpp>
 #include <engine/core/hash-map.hpp>
 #include <engine/core/string.hpp>
+#include <engine/core/string-view.hpp>
+#include <engine/core/memory.hpp>
 
 #include <engine/math/matrix.hpp>
+
+#include <engine/rendering/render-context.hpp>
+
+#include <initializer_list>
 
 class RenderContext;
 
@@ -32,6 +38,10 @@ class UniformBuffer {
 
 		void set(const String& name, const Matrix4f& value);
 
+		template <typename... Args>
+		void set(std::initializer_list<StringView> keys,
+				const Args&... args);
+
 		inline uint32 getID() { return bufferID; }
 		inline uint32 getBlockBinding() { return blockBinding; }
 
@@ -49,3 +59,25 @@ class UniformBuffer {
 
 		HashMap<String, uintptr> variableOffsets;
 };
+
+template <typename... Args>
+void UniformBuffer::set(std::initializer_list<StringView> keys,
+		const Args&... args) {
+    std::initializer_list<std::pair<const void*, size_t>> memoryInfo {getObjectMemoryData(args)...};
+
+	auto mi = memoryInfo.begin();
+
+	glBindBuffer(GL_UNIFORM_BUFFER, bufferID);
+	
+	void* bufferBase = glMapBuffer(GL_UNIFORM_BUFFER, GL_WRITE_ONLY);
+
+	for (auto key : keys) {
+		void* dest = reinterpret_cast<void*>(reinterpret_cast<uintptr>(bufferBase)
+				+ variableOffsets[String(key.data(), key.size())]);
+		Memory::memcpy(dest, mi->first, mi->second);
+
+		++mi;
+	}
+
+	glUnmapBuffer(GL_UNIFORM_BUFFER);
+}

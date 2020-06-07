@@ -2,7 +2,9 @@
 
 #include <cstdint>
 #include <cstdio>
+
 #include <stdexcept>
+#include <utility>
 
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(_WIN64) || defined(WIN64)
 	#define OPERATING_SYSTEM_WINDOWS
@@ -70,3 +72,7 @@ constexpr size_t countof(const T(&)[N]) {
 	return N;
 }
 
+template <typename T>
+std::pair<const void*, size_t> getObjectMemoryData(const T& obj) {
+	return {static_cast<const void*>(&obj), sizeof(T)};
+}
