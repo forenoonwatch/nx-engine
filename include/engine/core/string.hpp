@@ -12,7 +12,7 @@ class String : public std::string {
 		inline String()
 				: std::string() {}
 
-		inline String(char* cStr, size_t len)
+		inline String(const char* cStr, size_t len)
 				: std::string(cStr, len) {}
 
 		inline String(const char* cStr)
