@@ -50,6 +50,11 @@ namespace Math {
 		return glm::mix(a, b, c);
 	}
 
+	FORCEINLINE Quaternion slerp(const Quaternion& a, const Quaternion& b,
+			float c) {
+		return glm::slerp(a, b, c);
+	}
+
 	FORCEINLINE Matrix3f quatToMat3(const Quaternion& q) {
 		return glm::mat3_cast(q);
 	}

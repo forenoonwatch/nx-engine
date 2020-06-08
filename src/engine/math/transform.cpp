@@ -7,7 +7,7 @@ Matrix4f Transform::inverse() const {
 Transform& Transform::mix(const Transform& dest, float amt,
 		Transform& result) const {
 	result.setPosition(Math::mix(position, dest.getPosition(), amt));
-	result.setRotation(Math::mix(rotation, dest.getRotation(), amt));
+	result.setRotation(Math::slerp(rotation, dest.getRotation(), amt));
 	result.setScale(Math::mix(scale, dest.getScale(), amt));
 
 	return result;
