@@ -8,8 +8,8 @@
 void renderRiggedMeshes(Registry& registry, RenderSystem& renderer) {
     registry.view<TransformComponent, RiggedMesh>().each([&](auto& tfc, auto& rm) {
         if (rm.render) {
-            //renderer.drawRiggedMesh(*sm.vertexArray, *sm.material, *sm.rig, 
-            //        tfc.transform.toMatrix());
+            renderer.drawRiggedMesh(*rm.vertexArray, *rm.material, *rm.rig, 
+                    tfc.transform.toMatrix());
         }
     });
 }

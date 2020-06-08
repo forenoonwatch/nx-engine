@@ -166,7 +166,7 @@ namespace {
 	void convertMatrix(Matrix4f& dest, const aiMatrix4x4& src) {
 		for (uint32 y = 0; y < 4; ++y) {
 			for (uint32 x = 0; x < 4; ++x) {
-				dest[y][x] = src[y][x];
+				dest[y][x] = src[x][y];
 			}
 		}
 	}

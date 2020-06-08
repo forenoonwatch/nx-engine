@@ -1,5 +1,9 @@
 #include "engine/rendering/render-system.hpp"
 
+#include <engine/animation/rig.hpp>
+
+#include <engine/rendering/vertex-array.hpp>
+#include <engine/rendering/material.hpp>
 #include <engine/rendering/gaussian-blur.hpp>
 
 static void initSkyboxCube(IndexedModel&);
@@ -19,6 +23,8 @@ RenderSystem::RenderSystem(RenderContext& context, uint32 width, uint32 height,
 		, screen(context, width, height)
 
 		, staticMeshShader(context)
+		, riggedMeshShader(context)
+
 		, skyboxShader(context)
 		, lightingShader(context)
 		, blurShader(context)
@@ -49,6 +55,8 @@ RenderSystem::RenderSystem(RenderContext& context, uint32 width, uint32 height,
 	target.addTextureTarget(depthBuffer, GL_DEPTH_ATTACHMENT);
 
 	staticMeshShader.load("./res/shaders/static-mesh-deferred.glsl");
+	riggedMeshShader.load("./res/shaders/rigged-mesh-deferred.glsl");
+
 	skyboxShader.load("./res/shaders/skybox-deferred.glsl");
 	lightingShader.load("./res/shaders/deferred-lighting.glsl");
 	blurShader.load("./res/shaders/gaussian-blur-shader.glsl");
@@ -113,10 +121,6 @@ void RenderSystem::updateCamera() {
 
 	auto sceneDataBuffer = context->getUniformBuffer("SceneData").lock();
 
-	//sceneDataBuffer->set("cameraPosition", Vector3f(camera.view[3]));
-	//sceneDataBuffer->set("viewProjection", camera.viewProjection);
-	//sceneDataBuffer->set("invVP", camera.iViewProjection);
-
 	sceneDataBuffer->set({"cameraPosition", "viewProjection", "invVP"},
 			Vector3f(camera.view[3]), camera.viewProjection, camera.iViewProjection);
 }
@@ -124,6 +128,11 @@ void RenderSystem::updateCamera() {
 void RenderSystem::drawStaticMesh(VertexArray& vertexArray,
 		Material& material, const Matrix4f& transform) {
 	staticMeshes[std::make_pair(&vertexArray, &material)].push_back(transform);
+}
+
+void RenderSystem::drawRiggedMesh(VertexArray& vertexArray,
+		Material& material, Rig& rig, const Matrix4f& transform) {
+	riggedMeshes[std::make_pair(&vertexArray, &material)].push_back(std::make_pair(&rig, transform));
 }
 
 void RenderSystem::renderSkybox(CubeMap& skybox,
@@ -216,8 +225,53 @@ void RenderSystem::flushStaticMeshes() {
 	staticMeshes.clear();
 }
 
+void RenderSystem::flushRiggedMeshes() {
+	Material* currentMaterial = nullptr;
+	Material* material;
+
+	VertexArray* vertexArray;
+
+	uintptr numTransforms;
+
+	auto animBuf = context->getUniformBuffer("AnimationData").lock();
+
+	for (auto& pair : riggedMeshes) {
+		numTransforms = pair.second.size();
+
+		if (numTransforms == 0) {
+			continue;
+		}
+
+		vertexArray = pair.first.first;
+		material = pair.first.second;
+
+		if (material != currentMaterial) {
+			currentMaterial = material;
+
+			riggedMeshShader.setSampler("diffuse", *material->diffuse,
+					linearMipmapSampler, 0);
+			riggedMeshShader.setSampler("normalMap", *material->normalMap,
+					linearMipmapSampler, 1);
+			riggedMeshShader.setSampler("materialMap",
+					*material->materialMap, linearMipmapSampler, 2);
+			riggedMeshShader.setSampler("depthMap", *material->displacementMap,
+					linearMipmapSampler, 3);
+		}
+
+		for (auto& rigTF : pair.second) {
+			animBuf->update(rigTF.first->getTransformSet(), Rig::MAX_JOINTS * sizeof(Matrix4f));
+
+			vertexArray->updateBuffer(7, &rigTF.second, sizeof(Matrix4f));
+			context->draw(target, riggedMeshShader, *vertexArray,
+					GL_TRIANGLES);
+		}
+	}
+
+	riggedMeshes.clear();
+}
+
 void RenderSystem::flush() {
-	bloomBlur->update();
+	//bloomBlur->update();
 
 	target.setDrawBuffers(1);
 

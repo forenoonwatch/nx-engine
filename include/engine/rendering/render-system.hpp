@@ -5,15 +5,16 @@
 #include <engine/core/tree-map.hpp>
 #include <engine/core/array-list.hpp>
 
-#include <engine/rendering/vertex-array.hpp>
 #include <engine/rendering/shader.hpp>
 #include <engine/rendering/render-target.hpp>
-#include <engine/rendering/material.hpp>
 #include <engine/rendering/camera.hpp>
 
 #include <engine/math/math.hpp>
 
 class GaussianBlur;
+class VertexArray;
+class Material;
+class Rig;
 
 class RenderSystem final : public Service<RenderSystem> {
 	public:
@@ -26,6 +27,9 @@ class RenderSystem final : public Service<RenderSystem> {
 
 		void drawStaticMesh(VertexArray& vertexArray, Material& material,
 				const Matrix4f& transform);
+		void drawRiggedMesh(VertexArray& vertexArray, Material& material,
+				Rig& rig, const Matrix4f& transform);
+
 		void renderSkybox(CubeMap& skybox, Sampler& sampler);
 		void renderSkybox();
 
@@ -60,6 +64,7 @@ class RenderSystem final : public Service<RenderSystem> {
 		void clear();
 		void applyLighting();
 		void flushStaticMeshes();
+		void flushRiggedMeshes();
 		void flush();
 	private:
 		NULL_COPY_AND_ASSIGN(RenderSystem);
@@ -76,6 +81,8 @@ class RenderSystem final : public Service<RenderSystem> {
 		RenderTarget screen;
 
 		Shader staticMeshShader;
+		Shader riggedMeshShader;
+
 		Shader skyboxShader;
 		Shader lightingShader;
 		Shader blurShader;
@@ -103,4 +110,5 @@ class RenderSystem final : public Service<RenderSystem> {
 		Camera camera;
 
 		TreeMap<Pair<VertexArray*, Material*>, ArrayList<Matrix4f>> staticMeshes;
+		TreeMap<Pair<VertexArray*, Material*>, ArrayList<Pair<Rig*, Matrix4f>>> riggedMeshes;
 };

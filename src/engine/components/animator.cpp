@@ -44,7 +44,7 @@ namespace {
 			float lerpAmt, Bone* bone, const Matrix4f& parentTransform) {
 		Transform res;
 
-		frame0.getJointTransform(bone->name).mix(frame1.getJointTransform(bone->name), lerpAmt, res);
+		frame0.getBoneTransform(bone->name).mix(frame1.getBoneTransform(bone->name), lerpAmt, res);
 		
 		Matrix4f globalTransform = parentTransform * res.toMatrix();
 
