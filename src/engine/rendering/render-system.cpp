@@ -213,6 +213,8 @@ void RenderSystem::flushStaticMeshes() {
 					*material->materialMap, linearMipmapSampler, 2);
 			staticMeshShader.setSampler("depthMap", *material->displacementMap,
 					linearMipmapSampler, 3);
+
+			staticMeshShader.setFloat("heightScale", material->displacementScale);
 		}
 
 		vertexArray->updateBuffer(5, &pair.second[0],
@@ -256,6 +258,8 @@ void RenderSystem::flushRiggedMeshes() {
 					*material->materialMap, linearMipmapSampler, 2);
 			riggedMeshShader.setSampler("depthMap", *material->displacementMap,
 					linearMipmapSampler, 3);
+
+			riggedMeshShader.setFloat("heightScale", material->displacementScale);
 		}
 
 		for (auto& rigTF : pair.second) {

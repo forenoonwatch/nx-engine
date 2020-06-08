@@ -8,6 +8,8 @@ class Material {
 		Texture* normalMap;
 		Texture* materialMap;
 		Texture* displacementMap;
+
+		float displacementScale;
 	private:
 };
 
