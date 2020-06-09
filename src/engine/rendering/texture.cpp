@@ -115,6 +115,21 @@ void Texture::resize(uint32 width, uint32 height) {
 			width, height, 0, pixelFormat, dataType, nullptr);
 }
 
+// TODO: make a full implementation of these matching all the different options in the constructor
+
+void Texture::setImage(uint32 width, uint32 height, const void* data) {
+	this->width = width;
+	this->height = height;
+
+	glBindTexture(GL_TEXTURE_2D, textureID);
+	glTexImage2D(GL_TEXTURE_2D, 0, internalFormat,
+			width, height, 0, pixelFormat, dataType, data);
+}
+
+void Texture::setImage(const Bitmap& bitmap) {
+	setImage(bitmap.getWidth(), bitmap.getHeight(), bitmap.getPixels());
+}
+
 Texture::~Texture() {
 	glDeleteTextures(1, &textureID);
 }

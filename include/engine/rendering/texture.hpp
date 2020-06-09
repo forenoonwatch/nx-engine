@@ -19,6 +19,10 @@ class Texture {
 
 		void resize(uint32 width, uint32 height);
 
+		void setImage(uint32 width, uint32 height, const void* data);
+		void setImage(const Bitmap& bitmap);
+		// TODO: setImage(const DDSTexture& ddsTexture);
+
 		inline uint32 getID() { return textureID; }
 
 		inline uint32 getWidth() const { return width; }
