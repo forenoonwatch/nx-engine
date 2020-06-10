@@ -17,7 +17,7 @@ OBJS := $(SRCS:%=$(BUILD_DIR)/%.o)
 UNAME := $(shell uname -s)
 
 ifeq ($(UNAME), Linux)
-	CXXFLAGS := -I$(CURDIR)/include/engine -I$(CURDIR)/include -msse2 $(CXXFLAGS)
+	CXXFLAGS := -I$(CURDIR)/include/engine -I$(CURDIR)/include $(shell pkg-config freetype2 --cflags) -msse2 $(CXXFLAGS)
 else
 	CXXFLAGS := -I$(CURDIR)/include/engine -I$(CURDIR)/include -I$(LIB_DIR)/include -msse2 $(CXXFLAGS)
 endif

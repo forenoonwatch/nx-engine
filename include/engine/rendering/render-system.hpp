@@ -15,6 +15,7 @@ class GaussianBlur;
 class VertexArray;
 class Material;
 class Rig;
+class Font;
 
 class RenderSystem final : public Service<RenderSystem> {
 	public:
@@ -31,6 +32,8 @@ class RenderSystem final : public Service<RenderSystem> {
 				Rig& rig, const Matrix4f& transform);
 		void drawTextureQuad(Texture& texture, const Vector4f& positions,
 				const Vector4f& scales);
+		void drawText(Font& font, const char* text, uint32 textLength,
+				float x, float y);
 
 		void renderSkybox(CubeMap& skybox, Sampler& sampler);
 		void renderSkybox();

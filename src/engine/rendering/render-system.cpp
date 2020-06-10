@@ -5,6 +5,7 @@
 #include <engine/rendering/vertex-array.hpp>
 #include <engine/rendering/material.hpp>
 #include <engine/rendering/gaussian-blur.hpp>
+#include <engine/rendering/font.hpp>
 
 static void initSkyboxCube(IndexedModel&);
 static void initScreenQuad(IndexedModel&);
@@ -155,6 +156,19 @@ void RenderSystem::drawTextureQuad(Texture& texture, const Vector4f& positions,
 
 	qd.positionPairs.push_back(positions);
 	qd.scalePairs.push_back(scales);
+}
+
+void RenderSystem::drawText(Font& font, const char* text, uint32 textLength,
+		float x, float y) {
+	for (uint32 i = 0; i < textLength; ++i) {
+		auto& cd = font.getCharacter(text[i]);
+
+		drawTextureQuad(font.getTexture(), 
+				Vector4f(x + cd.bearingX, y - cd.sizeY + cd.bearingY, cd.texCoordData[0], cd.texCoordData[1]),
+				Vector4f(static_cast<float>(cd.sizeX), static_cast<float>(cd.sizeY), cd.texCoordData[2], cd.texCoordData[3]));
+
+		x += cd.advance;
+	}
 }
 
 void RenderSystem::renderSkybox(CubeMap& skybox,
@@ -392,16 +406,21 @@ static void initSkyboxCube(IndexedModel& model) {
 }
 
 static void initScreenQuad(IndexedModel& screenQuadModel) {
-	screenQuadModel.allocateElement(2); // vertex
+	screenQuadModel.allocateElement(4); // vertex
 	screenQuadModel.allocateElement(4); // quad position
 	screenQuadModel.allocateElement(4); // quad scale
 
 	screenQuadModel.setInstancedElementStartIndex(1);
 
-	screenQuadModel.addElement2f(0, -1.f, -1.f);
-	screenQuadModel.addElement2f(0, -1.f,  1.f);
-	screenQuadModel.addElement2f(0,  1.f, -1.f);
-	screenQuadModel.addElement2f(0,  1.f,  1.f);
+	//screenQuadModel.addElement2f(0, -1.f, -1.f);
+	//screenQuadModel.addElement2f(0, -1.f,  1.f);
+	//screenQuadModel.addElement2f(0,  1.f, -1.f);
+	//screenQuadModel.addElement2f(0,  1.f,  1.f);
+
+	screenQuadModel.addElement4f(0, -1.f, -1.f, 0.f, 1.f);
+	screenQuadModel.addElement4f(0, -1.f,  1.f, 0.f, 0.f);
+	screenQuadModel.addElement4f(0,  1.f, -1.f, 1.f, 1.f);
+	screenQuadModel.addElement4f(0,  1.f,  1.f, 1.f, 0.f);
 
 	screenQuadModel.addIndices3i(2, 1, 0);
 	screenQuadModel.addIndices3i(1, 2, 3);
