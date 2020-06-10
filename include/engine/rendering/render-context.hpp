@@ -6,6 +6,8 @@
 #include <engine/core/array-list.hpp>
 #include <engine/core/hash-map.hpp>
 
+#include <engine/rendering/draw-params.hpp>
+
 #include <GL/glew.h>
 
 class Shader;
@@ -21,54 +23,40 @@ class RenderQuery;
 
 class RenderContext final : public Service<RenderContext> {
 	public:
-		enum BlendFunc {
-			BLEND_FUNC_NONE,
-			BLEND_FUNC_ZERO = GL_ZERO,
-			BLEND_FUNC_ONE = GL_ONE,
-			BLEND_FUNC_SRC_ALPHA = GL_SRC_ALPHA,
-			BLEND_FUNC_ONE_MINUS_SRC_ALPHA = GL_ONE_MINUS_SRC_ALPHA,
-			BLEND_FUNC_ONE_MINUS_DST_ALPHA = GL_ONE_MINUS_DST_ALPHA,
-			BLEND_FUNC_DST_ALPHA = GL_DST_ALPHA
-		};
-
 		RenderContext();
 
 		void awaitFinish();
 
 		void draw(RenderTarget& target, Shader& shader, VertexArray& vertexArray,
-				uint32 primitive, uint32 numInstances = 1);
+				const DrawParams& drawParams, uint32 primitive, uint32 numInstances = 1);
 
 		void drawArray(RenderTarget& target, Shader& shader, VertexArray& vertexArray,
+				const DrawParams& drawParams,
 				uint32 bufferIndex, uint32 primitive, uint32 numInstances = 1,
 				uint32 numElements = 0);
-		void drawArray(Shader& shader, VertexArray& vertexArray,
+		void drawArray(Shader& shader, VertexArray& vertexArray, const DrawParams& drawParams,
 				uint32 bufferIndex, uint32 primitive, uint32 numInstances = 1,
 				uint32 numElements = 0);
-		void drawArray(Shader& shader, InputStreamBuffer& isb, uint32 numElements,
-				uint32 primitive);
+		void drawArray(Shader& shader, InputStreamBuffer& isb, const DrawParams& drawParams,
+				uint32 numElements, uint32 primitive);
 
 		void drawTransformFeedback(RenderTarget& target, Shader& shader,
-				TransformFeedback& transformFeedback, uint32 primitive);
-		void drawTransformFeedback(Shader& shader, TransformFeedback& transformFeedback,
+				TransformFeedback& transformFeedback, const DrawParams& drawParams,
 				uint32 primitive);
+		void drawTransformFeedback(Shader& shader, TransformFeedback& transformFeedback,
+				const DrawParams& drawParams, uint32 primitive);
 		
-		void drawQuad(RenderTarget& target, Shader& shader);
+		void drawQuad(RenderTarget& target, Shader& shader, const DrawParams& drawParams);
 
 		void compute(Shader& shader, uint32 numGroupsX,
 				uint32 numGroupsY = 1, uint32 numGroupsZ = 1);
 
 		void beginTransformFeedback(Shader& shader, TransformFeedback& tfb,
-				uint32 primitive);
+				const DrawParams& drawParams, uint32 primitive);
 		void endTransformFeedback();
 
 		void beginQuery(RenderQuery& query);
 		void endQuery(RenderQuery& query);
-
-		void setDrawBuffers(uint32 numBuffers);
-
-		void setWriteDepth(bool writeDepth);
-		void setRasterizerDiscard(bool discard);
-		void setBlending(enum BlendFunc srcBlend, enum BlendFunc destBlend);
 
 		uint32 getVersion();
 		String getShaderVersion();
@@ -101,8 +89,7 @@ class RenderContext final : public Service<RenderContext> {
 		uint32 viewportWidth;
 		uint32 viewportHeight;
 
-		enum BlendFunc currentSourceBlend;
-		enum BlendFunc currentDestBlend;
+		DrawParams drawState;
 
 		uint32 currentShader;
 		uint32 currentVertexArray;
@@ -117,6 +104,30 @@ class RenderContext final : public Service<RenderContext> {
 		static uint32 attachments[4];
 
 		friend class UniformBuffer;
+
+		void setDrawParams(const DrawParams& params);
+
+		void setFaceCullMode(enum DrawParams::FaceCullMode mode);
+
+		void setDrawBuffers(uint32 numBuffers);
+
+		void setWriteDepth(bool writeDepth);
+		void setDepthFunc(enum DrawParams::DrawFunc depthFunc);
+
+		void setRasterizerDiscard(bool discard);
+		void setBlending(enum DrawParams::BlendFunc srcBlend,
+				enum DrawParams::BlendFunc destBlend);
+
+		void setScissorTest(bool enable, uint32 startX, uint32 startY,
+				uint32 width, uint32 height);
+
+		void setStencilTest(bool enabled);
+		void setStencilFunc(enum DrawParams::DrawFunc stencilFunc,
+				uint32 stencilTestMask, int32 stencilComparisonVal);
+		void setStencilOp(enum DrawParams::StencilOp stencilFail,
+				enum DrawParams::StencilOp stencilPass,
+				enum DrawParams::StencilOp stencilPassDepthFail);
+		void setStencilWriteMask(uint32 mask);
 
 		uint32 findFreeUBOBinding();
 };

@@ -25,19 +25,11 @@ RenderContext::RenderContext()
 		, shaderVersion("")
 		, viewportWidth(0)
 		, viewportHeight(0)
-		, currentSourceBlend(BLEND_FUNC_NONE)
-		, currentDestBlend(BLEND_FUNC_NONE)
 		, currentShader(0)
 		, currentVertexArray(0)
 		, currentTFB(0)
 		, currentRenderSource(0)
 		, currentRenderTarget(0) {
-	glEnable(GL_CULL_FACE);
-	glCullFace(GL_BACK);
-	
-	glEnable(GL_DEPTH_TEST);
-	glDepthFunc(GL_LEQUAL);
-
 	glEnable(GL_TEXTURE_2D);
 
 	//glEnable(GL_DEBUG_OUTPUT);
@@ -54,12 +46,15 @@ void RenderContext::awaitFinish() {
 }
 
 void RenderContext::draw(RenderTarget& target, Shader& shader,
-		VertexArray& vertexArray, uint32 primitive, uint32 numInstances) {
+		VertexArray& vertexArray, const DrawParams& drawParams, uint32 primitive,
+		uint32 numInstances) {
 	setRenderTarget(target.getID());
 	setViewport(target.getWidth(), target.getHeight());
 
 	setShader(shader.getID());
 	setVertexArray(vertexArray.getID());
+
+	setDrawParams(drawParams);
 
 	switch (numInstances) {
 		case 0:
@@ -74,13 +69,15 @@ void RenderContext::draw(RenderTarget& target, Shader& shader,
 }
 
 void RenderContext::drawArray(RenderTarget& target, Shader& shader,
-		VertexArray& vertexArray, uint32 bufferIndex, uint32 primitive,
-		uint32 numInstances, uint32 numElements) {
+		VertexArray& vertexArray, const DrawParams& drawParams,
+		uint32 bufferIndex, uint32 primitive, uint32 numInstances, uint32 numElements) {
 	setRenderTarget(target.getID());
 	setViewport(target.getWidth(), target.getHeight());
 
 	setShader(shader.getID());
 	setVertexArray(vertexArray.getID());
+
+	setDrawParams(drawParams);
 
 	glBindBuffer(GL_ARRAY_BUFFER, vertexArray.getBuffer(bufferIndex));
 
@@ -100,10 +97,13 @@ void RenderContext::drawArray(RenderTarget& target, Shader& shader,
 }
 
 void RenderContext::drawArray(Shader& shader, VertexArray& vertexArray,
+		const DrawParams& drawParams,
 		uint32 bufferIndex, uint32 primitive, uint32 numInstances,
 		uint32 numElements) {
 	setShader(shader.getID());
 	setVertexArray(vertexArray.getID());
+
+	setDrawParams(drawParams);
 
 	glBindBuffer(GL_ARRAY_BUFFER, vertexArray.getBuffer(bufferIndex));
 
@@ -123,9 +123,11 @@ void RenderContext::drawArray(Shader& shader, VertexArray& vertexArray,
 }
 
 void RenderContext::drawArray(Shader& shader, InputStreamBuffer& isb,
-		uint32 numElements, uint32 primitive) {
+		const DrawParams& drawParams, uint32 numElements, uint32 primitive) {
 	setShader(shader.getID());
 	setVertexArray(isb.getReadArray());
+
+	setDrawParams(drawParams);
 
 	glBindBuffer(GL_ARRAY_BUFFER, isb.getReadBuffer());
 
@@ -133,30 +135,38 @@ void RenderContext::drawArray(Shader& shader, InputStreamBuffer& isb,
 }
 
 void RenderContext::drawTransformFeedback(RenderTarget& target, Shader& shader,
-		TransformFeedback& transformFeedback, uint32 primitive) {
+		TransformFeedback& transformFeedback, const DrawParams& drawParams, uint32 primitive) {
 	setRenderTarget(target.getID());
 	setViewport(target.getWidth(), target.getHeight());
 
 	setShader(shader.getID());
 	setVertexArray(transformFeedback.getReadArray());
+
+	setDrawParams(drawParams);
 
 	glDrawTransformFeedback(primitive, transformFeedback.getReadFeedback());
 }
 
 void RenderContext::drawTransformFeedback(Shader& shader,
-		TransformFeedback& transformFeedback, uint32 primitive) {
+		TransformFeedback& transformFeedback,
+		const DrawParams& drawParams, uint32 primitive) {
 	setShader(shader.getID());
 	setVertexArray(transformFeedback.getReadArray());
+
+	setDrawParams(drawParams);
 
 	glDrawTransformFeedback(primitive, transformFeedback.getReadFeedback());
 }
 
-void RenderContext::drawQuad(RenderTarget& target, Shader& shader) {
+void RenderContext::drawQuad(RenderTarget& target, Shader& shader,
+		const DrawParams& drawParams) {
 	setRenderTarget(target.getID());
 	setViewport(target.getWidth(), target.getHeight());
 
 	setShader(shader.getID());
 	setVertexArray(screenQuad->getID());
+
+	setDrawParams(drawParams);
 
 	glDrawElements(GL_TRIANGLES, (GLsizei)screenQuad->getNumElements(),
 			GL_UNSIGNED_INT, 0);
@@ -169,9 +179,11 @@ void RenderContext::compute(Shader& shader, uint32 numGroupsX,
 }
 
 void RenderContext::beginTransformFeedback(Shader& shader, TransformFeedback& tfb,
-		uint32 primitive) {
+		const DrawParams& drawParams, uint32 primitive) {
 	setShader(shader.getID());
 	setTransformFeedback(tfb.getWriteFeedback());
+
+	setDrawParams(drawParams);
 
 	glBeginTransformFeedback(primitive);
 }
@@ -186,45 +198,6 @@ void RenderContext::beginQuery(RenderQuery& query) {
 
 void RenderContext::endQuery(RenderQuery& query) {
 	glEndQuery(query.getType());
-}
-
-void RenderContext::setDrawBuffers(uint32 numBuffers) {
-	glDrawBuffers(numBuffers, attachments);
-}
-
-void RenderContext::setWriteDepth(bool writeDepth) {
-	glDepthMask(writeDepth);
-}
-
-void RenderContext::setRasterizerDiscard(bool discard) {
-	if (discard) {
-		glEnable(GL_RASTERIZER_DISCARD);
-	}
-	else {
-		glDisable(GL_RASTERIZER_DISCARD);
-	}
-}
-
-void RenderContext::setBlending(enum BlendFunc srcBlend,
-		enum BlendFunc destBlend) {
-	if (srcBlend == currentSourceBlend && destBlend == currentDestBlend) {
-		return;
-	}
-
-	if (srcBlend == BLEND_FUNC_NONE || destBlend == BLEND_FUNC_NONE) {
-		glDisable(GL_BLEND);
-	}
-	else if (currentSourceBlend == BLEND_FUNC_NONE 
-			|| currentDestBlend == BLEND_FUNC_NONE) {
-		glEnable(GL_BLEND);
-		glBlendFunc(srcBlend, destBlend);
-	}
-	else {
-		glBlendFunc(srcBlend, destBlend);
-	}
-
-	currentSourceBlend = srcBlend;
-	currentDestBlend = destBlend;
 }
 
 uint32 RenderContext::getVersion() {
@@ -346,6 +319,190 @@ Memory::WeakPointer<UniformBuffer> RenderContext::getUniformBuffer(const String&
 
 RenderContext::~RenderContext() {
 	delete screenQuad;
+}
+
+void RenderContext::setDrawParams(const DrawParams& params) {
+	setFaceCullMode(params.faceCullMode);
+	
+	setDrawBuffers(params.numDrawBuffers);
+
+	setWriteDepth(params.writeDepth);
+	setDepthFunc(params.depthFunc);
+
+	setRasterizerDiscard(params.discardRasterizer);
+	setBlending(params.sourceBlend, params.destBlend);
+
+	setScissorTest(params.scissorTest, params.scissorStartX, params.scissorStartY,
+			params.scissorWidth, params.scissorHeight);
+
+	setStencilTest(params.stencilTest);
+	setStencilFunc(params.stencilFunc, params.stencilTestMask,
+			params.stencilComparisonVal);
+	setStencilOp(params.stencilFail, params.stencilPass,
+			params.stencilPassDepthFail);
+	setStencilWriteMask(params.stencilWriteMask);
+}
+
+void RenderContext::setFaceCullMode(enum DrawParams::FaceCullMode mode) {
+	if (mode == drawState.faceCullMode) {
+		return;
+	}
+
+	if (mode == DrawParams::FACE_CULL_NONE) {
+		glDisable(GL_CULL_FACE);
+	}
+	else if (drawState.faceCullMode == DrawParams::FACE_CULL_NONE) {
+		glEnable(GL_CULL_FACE);
+		glCullFace(mode);
+	}
+	else {
+		glCullFace(mode);
+	}
+
+	drawState.faceCullMode = mode;
+}
+
+void RenderContext::setDrawBuffers(uint32 numBuffers) {
+	if (numBuffers == drawState.numDrawBuffers) {
+		return;
+	}
+
+	glDrawBuffers(numBuffers, attachments);
+
+	drawState.numDrawBuffers = numBuffers;
+}
+
+void RenderContext::setWriteDepth(bool writeDepth) {
+	if (writeDepth == drawState.writeDepth) {
+		return;
+	}
+
+	glDepthMask(writeDepth);
+
+	drawState.writeDepth = writeDepth;
+}
+
+void RenderContext::setDepthFunc(enum DrawParams::DrawFunc depthFunc) {
+	if (depthFunc == drawState.depthFunc) {
+		return;
+	}
+
+	glDepthFunc(depthFunc);
+
+	drawState.depthFunc = depthFunc;
+}
+
+void RenderContext::setRasterizerDiscard(bool discard) {
+	if (discard == drawState.discardRasterizer) {
+		return;
+	}
+
+	if (discard) {
+		glEnable(GL_RASTERIZER_DISCARD);
+	}
+	else {
+		glDisable(GL_RASTERIZER_DISCARD);
+	}
+
+	drawState.discardRasterizer = discard;
+}
+
+void RenderContext::setBlending(enum DrawParams::BlendFunc srcBlend,
+		enum DrawParams::BlendFunc destBlend) {
+	if (srcBlend == drawState.sourceBlend && destBlend == drawState.destBlend) {
+		return;
+	}
+
+	if (srcBlend == DrawParams::BLEND_FUNC_NONE
+			|| destBlend == DrawParams::BLEND_FUNC_NONE) {
+		glDisable(GL_BLEND);
+	}
+	else if (drawState.sourceBlend == DrawParams::BLEND_FUNC_NONE 
+			|| drawState.destBlend == DrawParams::BLEND_FUNC_NONE) {
+		glEnable(GL_BLEND);
+		glBlendFunc(srcBlend, destBlend);
+	}
+	else {
+		glBlendFunc(srcBlend, destBlend);
+	}
+
+	drawState.sourceBlend = srcBlend;
+	drawState.destBlend = destBlend;
+}
+
+void RenderContext::setScissorTest(bool enable, uint32 startX, uint32 startY,
+		uint32 width, uint32 height) {
+	if (!enable) {
+		if (drawState.scissorTest) {
+			glDisable(GL_SCISSOR_TEST);
+			drawState.scissorTest = false;
+		}
+
+		return;
+	}
+
+	if (!drawState.scissorTest) {
+		glEnable(GL_SCISSOR_TEST);
+		drawState.scissorTest = true;
+	}
+
+	glScissor(startX, startY, width, height);
+}
+
+void RenderContext::setStencilTest(bool enabled) {
+	if (enabled == drawState.stencilTest) {
+		return;
+	}
+
+	if (enabled) {
+		glEnable(GL_STENCIL_TEST);
+	}
+	else {
+		glDisable(GL_STENCIL_TEST);
+	}
+
+	drawState.stencilTest = enabled;
+}
+
+void RenderContext::setStencilFunc(enum DrawParams::DrawFunc stencilFunc,
+		uint32 stencilTestMask, int32 stencilComparisonVal) {
+	if (stencilFunc == drawState.stencilFunc
+			&& stencilTestMask == drawState.stencilTestMask
+			&& stencilComparisonVal == drawState.stencilComparisonVal) {
+		return;
+	}
+
+	glStencilFunc(stencilFunc, stencilTestMask, stencilComparisonVal);
+
+	drawState.stencilFunc = stencilFunc;
+	drawState.stencilTestMask = stencilTestMask;
+	drawState.stencilComparisonVal = stencilComparisonVal;
+}
+
+void RenderContext::setStencilOp(enum DrawParams::StencilOp stencilFail,
+		enum DrawParams::StencilOp stencilPass,
+		enum DrawParams::StencilOp stencilPassDepthFail) {
+	if (stencilFail == drawState.stencilFail
+			&& stencilPass == drawState.stencilPass
+			&& stencilPassDepthFail == drawState.stencilPassDepthFail) {
+		return;
+	}
+
+	glStencilOp(stencilFail, stencilPassDepthFail, stencilPass);
+
+	drawState.stencilFail = stencilFail;
+	drawState.stencilPass = stencilPass;
+	drawState.stencilPassDepthFail = stencilPassDepthFail;
+}
+
+void RenderContext::setStencilWriteMask(uint32 mask) {
+	if (mask == drawState.stencilWriteMask) {
+		return;
+	}
+
+	glStencilMask(mask);
+
+	drawState.stencilWriteMask = mask;
 }
 
 uint32 RenderContext::findFreeUBOBinding() {
