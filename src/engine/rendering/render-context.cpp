@@ -12,8 +12,6 @@
 
 #include "engine/rendering/indexed-model.hpp"
 
-inline static void initScreenQuad(IndexedModel&);
-
 static void GLAPIENTRY errorCallback(GLenum source, GLenum type, GLuint id,
 		GLenum severity, GLsizei length, const GLchar* message, const void* userParam);
 
@@ -30,15 +28,12 @@ RenderContext::RenderContext()
 		, currentTFB(0)
 		, currentRenderSource(0)
 		, currentRenderTarget(0) {
+	glEnable(GL_DEPTH_TEST);
+
 	glEnable(GL_TEXTURE_2D);
 
 	//glEnable(GL_DEBUG_OUTPUT);
 	//glDebugMessageCallback(errorCallback, 0);
-
-	IndexedModel screenQuadModel;
-	initScreenQuad(screenQuadModel);
-
-	screenQuad = new VertexArray(*this, screenQuadModel, GL_STATIC_DRAW);
 }
 
 void RenderContext::awaitFinish() {
@@ -156,20 +151,6 @@ void RenderContext::drawTransformFeedback(Shader& shader,
 	setDrawParams(drawParams);
 
 	glDrawTransformFeedback(primitive, transformFeedback.getReadFeedback());
-}
-
-void RenderContext::drawQuad(RenderTarget& target, Shader& shader,
-		const DrawParams& drawParams) {
-	setRenderTarget(target.getID());
-	setViewport(target.getWidth(), target.getHeight());
-
-	setShader(shader.getID());
-	setVertexArray(screenQuad->getID());
-
-	setDrawParams(drawParams);
-
-	glDrawElements(GL_TRIANGLES, (GLsizei)screenQuad->getNumElements(),
-			GL_UNSIGNED_INT, 0);
 }
 
 void RenderContext::compute(Shader& shader, uint32 numGroupsX,
@@ -318,13 +299,12 @@ Memory::WeakPointer<UniformBuffer> RenderContext::getUniformBuffer(const String&
 }
 
 RenderContext::~RenderContext() {
-	delete screenQuad;
 }
 
 void RenderContext::setDrawParams(const DrawParams& params) {
 	setFaceCullMode(params.faceCullMode);
 	
-	setDrawBuffers(params.numDrawBuffers);
+	//setDrawBuffers(params.numDrawBuffers);
 
 	setWriteDepth(params.writeDepth);
 	setDepthFunc(params.depthFunc);
@@ -558,18 +538,6 @@ uint32 RenderContext::calcBaseFormat(uint32 pixelFormat) {
 					"%d is not a valid pixel format", pixelFormat);
 			return 0;
 	}
-}
-
-inline static void initScreenQuad(IndexedModel& screenQuadModel) {
-	screenQuadModel.allocateElement(2); // position
-
-	screenQuadModel.addElement2f(0, -1.f, -1.f);
-	screenQuadModel.addElement2f(0, -1.f,  1.f);
-	screenQuadModel.addElement2f(0,  1.f, -1.f);
-	screenQuadModel.addElement2f(0,  1.f,  1.f);
-
-	screenQuadModel.addIndices3i(2, 1, 0);
-	screenQuadModel.addIndices3i(1, 2, 3);
 }
 
 static void GLAPIENTRY errorCallback(GLenum source, GLenum type, GLuint id,

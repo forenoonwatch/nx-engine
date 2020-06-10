@@ -46,8 +46,6 @@ class RenderContext final : public Service<RenderContext> {
 		void drawTransformFeedback(Shader& shader, TransformFeedback& transformFeedback,
 				const DrawParams& drawParams, uint32 primitive);
 		
-		void drawQuad(RenderTarget& target, Shader& shader, const DrawParams& drawParams);
-
 		void compute(Shader& shader, uint32 numGroupsX,
 				uint32 numGroupsY = 1, uint32 numGroupsZ = 1);
 
@@ -68,42 +66,6 @@ class RenderContext final : public Service<RenderContext> {
 		void setTransformFeedback(uint32);
 
 		void setRenderTarget(uint32 fbo, uint32 bufferType = GL_FRAMEBUFFER);
-
-		Memory::SharedPointer<UniformBuffer> addUniformBuffer(const String& name,
-				uintptr dataSize, uint32 usage);
-
-		Memory::WeakPointer<UniformBuffer> getUniformBuffer(const String& name);
-
-		~RenderContext();
-
-		static uint32 calcInternalFormat(uint32 pixelFormat, bool compressed);
-		static uint32 calcBaseFormat(uint32 pixelFormat);
-	private:
-		NULL_COPY_AND_ASSIGN(RenderContext);
-
-		VertexArray* screenQuad;
-
-		uint32 version;
-		String shaderVersion;
-
-		uint32 viewportWidth;
-		uint32 viewportHeight;
-
-		DrawParams drawState;
-
-		uint32 currentShader;
-		uint32 currentVertexArray;
-		uint32 currentTFB;
-
-		uint32 currentRenderSource;
-		uint32 currentRenderTarget;
-
-		HashMap<String, Memory::WeakPointer<UniformBuffer>> uniformBuffers;
-		ArrayList<bool> uniformBufferBindings;
-
-		static uint32 attachments[4];
-
-		friend class UniformBuffer;
 
 		void setDrawParams(const DrawParams& params);
 
@@ -128,6 +90,41 @@ class RenderContext final : public Service<RenderContext> {
 				enum DrawParams::StencilOp stencilPass,
 				enum DrawParams::StencilOp stencilPassDepthFail);
 		void setStencilWriteMask(uint32 mask);
+
+		Memory::SharedPointer<UniformBuffer> addUniformBuffer(const String& name,
+				uintptr dataSize, uint32 usage);
+
+		Memory::WeakPointer<UniformBuffer> getUniformBuffer(const String& name);
+
+		~RenderContext();
+
+		static uint32 calcInternalFormat(uint32 pixelFormat, bool compressed);
+		static uint32 calcBaseFormat(uint32 pixelFormat);
+	private:
+		NULL_COPY_AND_ASSIGN(RenderContext);
+
+		uint32 version;
+		String shaderVersion;
+
+		uint32 viewportWidth;
+		uint32 viewportHeight;
+
+		DrawParams drawState;
+
+		uint32 currentShader;
+		uint32 currentVertexArray;
+		uint32 currentTFB;
+
+		uint32 currentRenderSource;
+		uint32 currentRenderTarget;
+
+		HashMap<String, Memory::WeakPointer<UniformBuffer>> uniformBuffers;
+		ArrayList<bool> uniformBufferBindings;
+
+		static uint32 attachments[4];
+
+		friend class UniformBuffer;
+		friend class RenderTarget;
 
 		uint32 findFreeUBOBinding();
 };

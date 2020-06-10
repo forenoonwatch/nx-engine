@@ -29,6 +29,8 @@ class RenderSystem final : public Service<RenderSystem> {
 				const Matrix4f& transform);
 		void drawRiggedMesh(VertexArray& vertexArray, Material& material,
 				Rig& rig, const Matrix4f& transform);
+		void drawTextureQuad(Texture& texture, const Vector4f& positions,
+				const Vector4f& scales);
 
 		void renderSkybox(CubeMap& skybox, Sampler& sampler);
 		void renderSkybox();
@@ -62,14 +64,26 @@ class RenderSystem final : public Service<RenderSystem> {
 		~RenderSystem();
 		
 		void clear();
+
 		void applyLighting();
+
 		void flushStaticMeshes();
 		void flushRiggedMeshes();
+
 		void flush();
+
+		void flushTexturedQuads();
 	private:
 		NULL_COPY_AND_ASSIGN(RenderSystem);
 
+		struct QuadData {
+			ArrayList<Vector4f> positionPairs;
+			ArrayList<Vector4f> scalePairs;
+		};
+
 		RenderContext* context;
+
+		DrawParams drawParams;
 
 		Texture colorBuffer;
 		Texture normalBuffer;
@@ -89,12 +103,14 @@ class RenderSystem final : public Service<RenderSystem> {
 		Shader bloomShader;
 		Shader toneMapShader;
 		Shader screenRenderShader;
+		Shader textureQuadShader;
 
 		Sampler nearestSampler;
 		Sampler linearSampler;
 		Sampler linearMipmapSampler;
 
 		VertexArray* skyboxCube;
+		VertexArray* quad;
 
 		GaussianBlur* bloomBlur;
 
@@ -111,4 +127,7 @@ class RenderSystem final : public Service<RenderSystem> {
 
 		TreeMap<Pair<VertexArray*, Material*>, ArrayList<Matrix4f>> staticMeshes;
 		TreeMap<Pair<VertexArray*, Material*>, ArrayList<Pair<Rig*, Matrix4f>>> riggedMeshes;
+		TreeMap<Texture*, QuadData> textureQuads; // TODO: color, sampler?
+
+		void drawQuad(RenderTarget&, Shader&, uint32 numInstances = 1);
 };

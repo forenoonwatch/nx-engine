@@ -7,6 +7,7 @@
 #include <engine/rendering/gaussian-blur.hpp>
 
 static void initSkyboxCube(IndexedModel&);
+static void initScreenQuad(IndexedModel&);
 
 RenderSystem::RenderSystem(RenderContext& context, uint32 width, uint32 height,
 			float fieldOfView, float zNear, float zFar)
@@ -32,6 +33,8 @@ RenderSystem::RenderSystem(RenderContext& context, uint32 width, uint32 height,
 		, toneMapShader(context)
 		, screenRenderShader(context)
 
+		, textureQuadShader(context)
+
 		, nearestSampler(context, GL_NEAREST, GL_NEAREST)
 		, linearSampler(context, GL_LINEAR, GL_LINEAR,
 				GL_REPEAT, GL_REPEAT)
@@ -47,6 +50,10 @@ RenderSystem::RenderSystem(RenderContext& context, uint32 width, uint32 height,
 		, zFar(zFar)
 		, camera({Matrix4f(1.f), Matrix4f(1.f), Matrix4f(1.f),
 				Matrix4f(1.f), Matrix4f(1.f)}) {
+	drawParams.faceCullMode = DrawParams::FACE_CULL_BACK;
+	drawParams.depthFunc = DrawParams::DRAW_FUNC_LEQUAL;
+	drawParams.writeDepth = true;
+
 	target.addTextureTarget(normalBuffer, GL_COLOR_ATTACHMENT0, 1);
 	target.addTextureTarget(lightingBuffer, GL_COLOR_ATTACHMENT0, 2);
 
@@ -64,11 +71,18 @@ RenderSystem::RenderSystem(RenderContext& context, uint32 width, uint32 height,
 	toneMapShader.load("./res/shaders/tone-map-shader.glsl");
 	screenRenderShader.load("./res/shaders/screen-render-shader.glsl");
 
+	textureQuadShader.load("./res/shaders/textured-quad-shader.glsl");
+
 	IndexedModel cube;
 	initSkyboxCube(cube);
 
+	IndexedModel quadModel;
+	initScreenQuad(quadModel);
+
 	skyboxCube = new VertexArray(context, cube,
 			GL_STATIC_DRAW);
+
+	quad = new VertexArray(context, quadModel, DrawParams::USAGE_STATIC_READ);
 
 	bloomBlur = new GaussianBlur(context, blurShader,
 			brightBuffer);
@@ -135,6 +149,14 @@ void RenderSystem::drawRiggedMesh(VertexArray& vertexArray,
 	riggedMeshes[std::make_pair(&vertexArray, &material)].push_back(std::make_pair(&rig, transform));
 }
 
+void RenderSystem::drawTextureQuad(Texture& texture, const Vector4f& positions,
+		const Vector4f& scales) {
+	auto& qd = textureQuads[&texture];
+
+	qd.positionPairs.push_back(positions);
+	qd.scalePairs.push_back(scales);
+}
+
 void RenderSystem::renderSkybox(CubeMap& skybox,
 		Sampler& sampler) {
 	const Matrix4f mvp = Math::translate(camera.viewProjection, camera.getPosition());
@@ -142,7 +164,7 @@ void RenderSystem::renderSkybox(CubeMap& skybox,
 	skyboxCube->updateBuffer(1, &mvp, sizeof(Matrix4f));
 
 	skyboxShader.setSampler("skybox", skybox, sampler, 0);
-	context->draw(target, skyboxShader, *skyboxCube, GL_TRIANGLES);
+	context->draw(target, skyboxShader, *skyboxCube, drawParams, GL_TRIANGLES);
 }
 
 void RenderSystem::renderSkybox() {
@@ -151,6 +173,7 @@ void RenderSystem::renderSkybox() {
 
 RenderSystem::~RenderSystem() {
 	delete skyboxCube;
+	delete quad;
 	delete bloomBlur;
 }
 
@@ -162,7 +185,8 @@ void RenderSystem::clear() {
 }
 
 void RenderSystem::applyLighting() {
-	context->setWriteDepth(false);
+	drawParams.writeDepth = false;
+	context->setWriteDepth(drawParams.writeDepth);
 
 	// apply lighting
 	lightingShader.setSampler("colorBuffer", colorBuffer,
@@ -182,7 +206,7 @@ void RenderSystem::applyLighting() {
 	lightingShader.setSampler("brdfLUT", *brdfLUT,
 			nearestSampler, 6);
 
-	context->drawQuad(target, lightingShader);
+	drawQuad(target, lightingShader);
 }
 
 void RenderSystem::flushStaticMeshes() {
@@ -221,7 +245,7 @@ void RenderSystem::flushStaticMeshes() {
 				sizeof(Matrix4f) * numTransforms);
 
 		context->draw(target, staticMeshShader, *vertexArray,
-				GL_TRIANGLES, numTransforms);
+				drawParams, GL_TRIANGLES, numTransforms);
 	}
 
 	staticMeshes.clear();
@@ -267,7 +291,7 @@ void RenderSystem::flushRiggedMeshes() {
 
 			vertexArray->updateBuffer(7, &rigTF.second, sizeof(Matrix4f));
 			context->draw(target, riggedMeshShader, *vertexArray,
-					GL_TRIANGLES);
+					drawParams, GL_TRIANGLES);
 		}
 	}
 
@@ -284,19 +308,48 @@ void RenderSystem::flush() {
 			nearestSampler, 0);
 	bloomShader.setSampler("brightBlur", brightBuffer,
 			nearestSampler, 1);
-	context->drawQuad(target, bloomShader);
+	drawQuad(target, bloomShader);
 
 	/* Tone map colors */
 	toneMapShader.setSampler("screen", colorBuffer,
 			nearestSampler, 0);
-	context->drawQuad(target, toneMapShader);
+	drawQuad(target, toneMapShader);
 
 	/* Render to screen */
 	screenRenderShader.setSampler("screen", colorBuffer,
 			nearestSampler, 0);
-	context->drawQuad(screen, screenRenderShader);
+	drawQuad(screen, screenRenderShader);
 
-	context->setWriteDepth(true);
+	drawParams.writeDepth = true;
+	context->setWriteDepth(drawParams.writeDepth);
+	// TODO: Take note that this causes rendering issues when not present
+	// assumingly because its setting the write depth while the screen framebuffer is set
+}
+
+void RenderSystem::flushTexturedQuads() {
+	size_t numInstances;
+
+	for (auto& pair : textureQuads) {
+		numInstances = pair.second.positionPairs.size();
+
+		if (numInstances == 0) {
+			continue;
+		}
+
+		textureQuadShader.setSampler("diffuse", *pair.first, linearSampler, 0);
+		
+		quad->updateBuffer(1, pair.second.positionPairs.data(), numInstances * sizeof(Vector4f));
+		quad->updateBuffer(2, pair.second.scalePairs.data(), numInstances * sizeof(Vector4f));
+
+		context->draw(screen, textureQuadShader, *quad, drawParams, GL_TRIANGLES, numInstances);
+
+		pair.second.positionPairs.clear();
+		pair.second.scalePairs.clear();
+	}
+}
+
+void RenderSystem::drawQuad(RenderTarget& target, Shader& shader, uint32 numInstances) {
+	context->draw(target, shader, *quad, drawParams, GL_TRIANGLES, numInstances);
 }
 
 static void initSkyboxCube(IndexedModel& model) {
@@ -336,4 +389,20 @@ static void initSkyboxCube(IndexedModel& model) {
 	// right
 	model.addIndices3i(1, 5, 7);
 	model.addIndices3i(7, 3, 1);
+}
+
+static void initScreenQuad(IndexedModel& screenQuadModel) {
+	screenQuadModel.allocateElement(2); // vertex
+	screenQuadModel.allocateElement(4); // quad position
+	screenQuadModel.allocateElement(4); // quad scale
+
+	screenQuadModel.setInstancedElementStartIndex(1);
+
+	screenQuadModel.addElement2f(0, -1.f, -1.f);
+	screenQuadModel.addElement2f(0, -1.f,  1.f);
+	screenQuadModel.addElement2f(0,  1.f, -1.f);
+	screenQuadModel.addElement2f(0,  1.f,  1.f);
+
+	screenQuadModel.addIndices3i(2, 1, 0);
+	screenQuadModel.addIndices3i(1, 2, 3);
 }
