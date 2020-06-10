@@ -4,6 +4,7 @@
 
 #include <engine/core/tree-map.hpp>
 #include <engine/core/array-list.hpp>
+#include <engine/core/string-view.hpp>
 
 #include <engine/rendering/shader.hpp>
 #include <engine/rendering/render-target.hpp>
@@ -31,9 +32,9 @@ class RenderSystem final : public Service<RenderSystem> {
 		void drawRiggedMesh(VertexArray& vertexArray, Material& material,
 				Rig& rig, const Matrix4f& transform);
 		void drawTextureQuad(Texture& texture, const Vector4f& positions,
-				const Vector4f& scales);
-		void drawText(Font& font, const char* text, uint32 textLength,
-				float x, float y);
+				const Vector4f& scales, const Vector3f& color);
+		void drawText(Font& font, const StringView& text, float x, float y,
+				const Vector3f& color = Vector3f(1, 1, 1));
 
 		void renderSkybox(CubeMap& skybox, Sampler& sampler);
 		void renderSkybox();
@@ -82,6 +83,7 @@ class RenderSystem final : public Service<RenderSystem> {
 		struct QuadData {
 			ArrayList<Vector4f> positionPairs;
 			ArrayList<Vector4f> scalePairs;
+			ArrayList<Vector3f> colors;
 		};
 
 		RenderContext* context;
@@ -113,7 +115,8 @@ class RenderSystem final : public Service<RenderSystem> {
 		Sampler linearMipmapSampler;
 
 		VertexArray* skyboxCube;
-		VertexArray* quad;
+		VertexArray* screenQuad;
+		VertexArray* uiQuad;
 
 		GaussianBlur* bloomBlur;
 
@@ -132,5 +135,6 @@ class RenderSystem final : public Service<RenderSystem> {
 		TreeMap<Pair<VertexArray*, Material*>, ArrayList<Pair<Rig*, Matrix4f>>> riggedMeshes;
 		TreeMap<Texture*, QuadData> textureQuads; // TODO: color, sampler?
 
-		void drawQuad(RenderTarget&, Shader&, uint32 numInstances = 1);
+		void drawScreenQuad(RenderTarget&, Shader&, uint32 numInstances = 1);
+		void drawUIQuad(RenderTarget&, Shader&, uint32 numInstances = 1);
 };

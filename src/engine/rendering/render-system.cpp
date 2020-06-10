@@ -9,6 +9,7 @@
 
 static void initSkyboxCube(IndexedModel&);
 static void initScreenQuad(IndexedModel&);
+static void initUIQuad(IndexedModel&);
 
 RenderSystem::RenderSystem(RenderContext& context, uint32 width, uint32 height,
 			float fieldOfView, float zNear, float zFar)
@@ -77,13 +78,17 @@ RenderSystem::RenderSystem(RenderContext& context, uint32 width, uint32 height,
 	IndexedModel cube;
 	initSkyboxCube(cube);
 
-	IndexedModel quadModel;
-	initScreenQuad(quadModel);
+	IndexedModel screenQuadModel;
+	initScreenQuad(screenQuadModel);
+
+	IndexedModel uiQuadModel;
+	initUIQuad(uiQuadModel);
 
 	skyboxCube = new VertexArray(context, cube,
 			GL_STATIC_DRAW);
 
-	quad = new VertexArray(context, quadModel, DrawParams::USAGE_STATIC_READ);
+	screenQuad = new VertexArray(context, screenQuadModel, DrawParams::USAGE_STATIC_READ);
+	uiQuad = new VertexArray(context, uiQuadModel, DrawParams::USAGE_STATIC_READ);
 
 	bloomBlur = new GaussianBlur(context, blurShader,
 			brightBuffer);
@@ -129,6 +134,12 @@ void RenderSystem::resize(uint32 width, uint32 height) {
 
 	camera.projection = Math::perspective(fieldOfView,
 			(float)width / (float)height, zNear, zFar);
+
+	auto sceneDataBuffer = context->getUniformBuffer("SceneData").lock();
+
+	Vector2f sceneDims(width, height);
+
+	sceneDataBuffer->set("displaySize", sceneDims);
 }
 
 void RenderSystem::updateCamera() {
@@ -151,23 +162,27 @@ void RenderSystem::drawRiggedMesh(VertexArray& vertexArray,
 }
 
 void RenderSystem::drawTextureQuad(Texture& texture, const Vector4f& positions,
-		const Vector4f& scales) {
+		const Vector4f& scales, const Vector3f& color) {
 	auto& qd = textureQuads[&texture];
 
 	qd.positionPairs.push_back(positions);
 	qd.scalePairs.push_back(scales);
+	qd.colors.push_back(color);
 }
 
-void RenderSystem::drawText(Font& font, const char* text, uint32 textLength,
-		float x, float y) {
-	for (uint32 i = 0; i < textLength; ++i) {
-		auto& cd = font.getCharacter(text[i]);
+void RenderSystem::drawText(Font& font, const StringView& text,
+		float x, float y, const Vector3f& color) {
+	for (char c : text) {
+		auto& cd = font.getCharacter(c);
 
-		drawTextureQuad(font.getTexture(), 
-				Vector4f(x + cd.bearingX, y - cd.sizeY + cd.bearingY, cd.texCoordData[0], cd.texCoordData[1]),
-				Vector4f(static_cast<float>(cd.sizeX), static_cast<float>(cd.sizeY), cd.texCoordData[2], cd.texCoordData[3]));
+		float xPos = x + cd.bearingX;
+		float yPos = y - cd.sizeY + cd.bearingY;
 
 		x += cd.advance;
+
+		drawTextureQuad(font.getTexture(), Vector4f(xPos, yPos, cd.texCoordData[0], cd.texCoordData[1]),
+				Vector4f(static_cast<float>(cd.sizeX), static_cast<float>(cd.sizeY), cd.texCoordData[2], cd.texCoordData[3]),
+				color);
 	}
 }
 
@@ -187,7 +202,8 @@ void RenderSystem::renderSkybox() {
 
 RenderSystem::~RenderSystem() {
 	delete skyboxCube;
-	delete quad;
+	delete screenQuad;
+	delete uiQuad;
 	delete bloomBlur;
 }
 
@@ -200,7 +216,6 @@ void RenderSystem::clear() {
 
 void RenderSystem::applyLighting() {
 	drawParams.writeDepth = false;
-	context->setWriteDepth(drawParams.writeDepth);
 
 	// apply lighting
 	lightingShader.setSampler("colorBuffer", colorBuffer,
@@ -220,7 +235,7 @@ void RenderSystem::applyLighting() {
 	lightingShader.setSampler("brdfLUT", *brdfLUT,
 			nearestSampler, 6);
 
-	drawQuad(target, lightingShader);
+	drawScreenQuad(target, lightingShader);
 }
 
 void RenderSystem::flushStaticMeshes() {
@@ -322,26 +337,28 @@ void RenderSystem::flush() {
 			nearestSampler, 0);
 	bloomShader.setSampler("brightBlur", brightBuffer,
 			nearestSampler, 1);
-	drawQuad(target, bloomShader);
+	drawScreenQuad(target, bloomShader);
 
 	/* Tone map colors */
 	toneMapShader.setSampler("screen", colorBuffer,
 			nearestSampler, 0);
-	drawQuad(target, toneMapShader);
+	drawScreenQuad(target, toneMapShader);
 
 	/* Render to screen */
 	screenRenderShader.setSampler("screen", colorBuffer,
 			nearestSampler, 0);
-	drawQuad(screen, screenRenderShader);
+	drawScreenQuad(screen, screenRenderShader);
 
 	drawParams.writeDepth = true;
-	context->setWriteDepth(drawParams.writeDepth);
 	// TODO: Take note that this causes rendering issues when not present
 	// assumingly because its setting the write depth while the screen framebuffer is set
 }
 
 void RenderSystem::flushTexturedQuads() {
 	size_t numInstances;
+
+	drawParams.sourceBlend = DrawParams::BLEND_FUNC_SRC_ALPHA;
+	drawParams.destBlend = DrawParams::BLEND_FUNC_ONE_MINUS_SRC_ALPHA;
 
 	for (auto& pair : textureQuads) {
 		numInstances = pair.second.positionPairs.size();
@@ -351,19 +368,27 @@ void RenderSystem::flushTexturedQuads() {
 		}
 
 		textureQuadShader.setSampler("diffuse", *pair.first, linearSampler, 0);
-		
-		quad->updateBuffer(1, pair.second.positionPairs.data(), numInstances * sizeof(Vector4f));
-		quad->updateBuffer(2, pair.second.scalePairs.data(), numInstances * sizeof(Vector4f));
 
-		context->draw(screen, textureQuadShader, *quad, drawParams, GL_TRIANGLES, numInstances);
+		uiQuad->updateBuffer(1, pair.second.positionPairs.data(), numInstances * sizeof(Vector4f));
+		uiQuad->updateBuffer(2, pair.second.scalePairs.data(), numInstances * sizeof(Vector4f));
+		uiQuad->updateBuffer(3, pair.second.colors.data(), numInstances * sizeof(Vector3f));
+
+		drawUIQuad(screen, textureQuadShader, numInstances);
 
 		pair.second.positionPairs.clear();
 		pair.second.scalePairs.clear();
 	}
+
+	drawParams.sourceBlend = DrawParams::BLEND_FUNC_NONE;
+	drawParams.destBlend = DrawParams::BLEND_FUNC_NONE;
 }
 
-void RenderSystem::drawQuad(RenderTarget& target, Shader& shader, uint32 numInstances) {
-	context->draw(target, shader, *quad, drawParams, GL_TRIANGLES, numInstances);
+void RenderSystem::drawScreenQuad(RenderTarget& target, Shader& shader, uint32 numInstances) {
+	context->draw(target, shader, *screenQuad, drawParams, GL_TRIANGLES, numInstances);
+}
+
+void RenderSystem::drawUIQuad(RenderTarget& target, Shader& shader, uint32 numInstances) {
+	context->draw(target, shader, *uiQuad, drawParams, GL_TRIANGLES, numInstances);
 }
 
 static void initSkyboxCube(IndexedModel& model) {
@@ -406,22 +431,30 @@ static void initSkyboxCube(IndexedModel& model) {
 }
 
 static void initScreenQuad(IndexedModel& screenQuadModel) {
-	screenQuadModel.allocateElement(4); // vertex
-	screenQuadModel.allocateElement(4); // quad position
-	screenQuadModel.allocateElement(4); // quad scale
+	screenQuadModel.allocateElement(2); // vertex
 
-	screenQuadModel.setInstancedElementStartIndex(1);
-
-	//screenQuadModel.addElement2f(0, -1.f, -1.f);
-	//screenQuadModel.addElement2f(0, -1.f,  1.f);
-	//screenQuadModel.addElement2f(0,  1.f, -1.f);
-	//screenQuadModel.addElement2f(0,  1.f,  1.f);
-
-	screenQuadModel.addElement4f(0, -1.f, -1.f, 0.f, 1.f);
-	screenQuadModel.addElement4f(0, -1.f,  1.f, 0.f, 0.f);
-	screenQuadModel.addElement4f(0,  1.f, -1.f, 1.f, 1.f);
-	screenQuadModel.addElement4f(0,  1.f,  1.f, 1.f, 0.f);
+	screenQuadModel.addElement2f(0, -1.f, -1.f);
+	screenQuadModel.addElement2f(0, -1.f,  1.f);
+	screenQuadModel.addElement2f(0,  1.f, -1.f);
+	screenQuadModel.addElement2f(0,  1.f,  1.f);
 
 	screenQuadModel.addIndices3i(2, 1, 0);
 	screenQuadModel.addIndices3i(1, 2, 3);
+}
+
+static void initUIQuad(IndexedModel& uiQuadModel) {
+	uiQuadModel.allocateElement(4); // vertex
+	uiQuadModel.allocateElement(4); // quad position
+	uiQuadModel.allocateElement(4); // quad scale
+	uiQuadModel.allocateElement(3); // color
+
+	uiQuadModel.setInstancedElementStartIndex(1);
+
+	uiQuadModel.addElement4f(0, 0.f, 0.f, 0.f, 1.f);
+	uiQuadModel.addElement4f(0, 0.f, 1.f, 0.f, 0.f);
+	uiQuadModel.addElement4f(0, 1.f, 0.f, 1.f, 1.f);
+	uiQuadModel.addElement4f(0, 1.f, 1.f, 1.f, 0.f);
+
+	uiQuadModel.addIndices3i(2, 1, 0);
+	uiQuadModel.addIndices3i(1, 2, 3);
 }
