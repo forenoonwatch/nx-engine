@@ -46,10 +46,10 @@ void RenderContext::draw(RenderTarget& target, Shader& shader,
 	setRenderTarget(target.getID());
 	setViewport(target.getWidth(), target.getHeight());
 
+	setDrawParams(drawParams);
+
 	setShader(shader.getID());
 	setVertexArray(vertexArray.getID());
-
-	setDrawParams(drawParams);
 
 	switch (numInstances) {
 		case 0:
@@ -69,10 +69,10 @@ void RenderContext::drawArray(RenderTarget& target, Shader& shader,
 	setRenderTarget(target.getID());
 	setViewport(target.getWidth(), target.getHeight());
 
+	setDrawParams(drawParams);
+
 	setShader(shader.getID());
 	setVertexArray(vertexArray.getID());
-
-	setDrawParams(drawParams);
 
 	glBindBuffer(GL_ARRAY_BUFFER, vertexArray.getBuffer(bufferIndex));
 
@@ -95,10 +95,10 @@ void RenderContext::drawArray(Shader& shader, VertexArray& vertexArray,
 		const DrawParams& drawParams,
 		uint32 bufferIndex, uint32 primitive, uint32 numInstances,
 		uint32 numElements) {
+	setDrawParams(drawParams);
+
 	setShader(shader.getID());
 	setVertexArray(vertexArray.getID());
-
-	setDrawParams(drawParams);
 
 	glBindBuffer(GL_ARRAY_BUFFER, vertexArray.getBuffer(bufferIndex));
 
@@ -119,10 +119,10 @@ void RenderContext::drawArray(Shader& shader, VertexArray& vertexArray,
 
 void RenderContext::drawArray(Shader& shader, InputStreamBuffer& isb,
 		const DrawParams& drawParams, uint32 numElements, uint32 primitive) {
+	setDrawParams(drawParams);
+
 	setShader(shader.getID());
 	setVertexArray(isb.getReadArray());
-
-	setDrawParams(drawParams);
 
 	glBindBuffer(GL_ARRAY_BUFFER, isb.getReadBuffer());
 
@@ -134,10 +134,10 @@ void RenderContext::drawTransformFeedback(RenderTarget& target, Shader& shader,
 	setRenderTarget(target.getID());
 	setViewport(target.getWidth(), target.getHeight());
 
+	setDrawParams(drawParams);
+
 	setShader(shader.getID());
 	setVertexArray(transformFeedback.getReadArray());
-
-	setDrawParams(drawParams);
 
 	glDrawTransformFeedback(primitive, transformFeedback.getReadFeedback());
 }
@@ -145,10 +145,10 @@ void RenderContext::drawTransformFeedback(RenderTarget& target, Shader& shader,
 void RenderContext::drawTransformFeedback(Shader& shader,
 		TransformFeedback& transformFeedback,
 		const DrawParams& drawParams, uint32 primitive) {
+	setDrawParams(drawParams);
+
 	setShader(shader.getID());
 	setVertexArray(transformFeedback.getReadArray());
-
-	setDrawParams(drawParams);
 
 	glDrawTransformFeedback(primitive, transformFeedback.getReadFeedback());
 }
@@ -161,10 +161,10 @@ void RenderContext::compute(Shader& shader, uint32 numGroupsX,
 
 void RenderContext::beginTransformFeedback(Shader& shader, TransformFeedback& tfb,
 		const DrawParams& drawParams, uint32 primitive) {
+	setDrawParams(drawParams);
+
 	setShader(shader.getID());
 	setTransformFeedback(tfb.getWriteFeedback());
-
-	setDrawParams(drawParams);
 
 	glBeginTransformFeedback(primitive);
 }
@@ -302,6 +302,11 @@ RenderContext::~RenderContext() {
 }
 
 void RenderContext::setDrawParams(const DrawParams& params) {
+	setBlending(params.sourceBlend, params.destBlend);
+
+	setScissorTest(params.scissorTest, params.scissorStartX, params.scissorStartY,
+			params.scissorWidth, params.scissorHeight);
+
 	setFaceCullMode(params.faceCullMode);
 	
 	//setDrawBuffers(params.numDrawBuffers);
@@ -310,17 +315,13 @@ void RenderContext::setDrawParams(const DrawParams& params) {
 	setDepthFunc(params.depthFunc);
 
 	setRasterizerDiscard(params.discardRasterizer);
-	setBlending(params.sourceBlend, params.destBlend);
 
-	setScissorTest(params.scissorTest, params.scissorStartX, params.scissorStartY,
-			params.scissorWidth, params.scissorHeight);
-
-	setStencilTest(params.stencilTest);
+	/*setStencilTest(params.stencilTest);
 	setStencilFunc(params.stencilFunc, params.stencilTestMask,
 			params.stencilComparisonVal);
 	setStencilOp(params.stencilFail, params.stencilPass,
 			params.stencilPassDepthFail);
-	setStencilWriteMask(params.stencilWriteMask);
+	setStencilWriteMask(params.stencilWriteMask);*/
 }
 
 void RenderContext::setFaceCullMode(enum DrawParams::FaceCullMode mode) {
