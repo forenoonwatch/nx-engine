@@ -61,6 +61,9 @@ class Transform {
 
 		Transform& mix(const Transform& dest, float amt,
 				Transform& result) const;
+
+		void quatLookAt(const Vector3f& position, const Vector3f& axis = Vector3f(0, 1, 0));
+		void matrixLookAt(const Vector3f& position);
 	private:
 		Vector3f position;
 		Quaternion rotation;

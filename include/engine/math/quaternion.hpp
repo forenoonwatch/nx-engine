@@ -70,5 +70,9 @@ namespace Math {
 	FORCEINLINE Quaternion mat4ToQuat(const Matrix4f& mat) {
 		return glm::quat_cast(mat);
 	}
+
+	FORCEINLINE Quaternion angleAxis(float angle, const Vector3f& axis) {
+		return glm::angleAxis(angle, axis);
+	}
 };
 
