@@ -90,8 +90,7 @@ RenderSystem::RenderSystem(RenderContext& context, uint32 width, uint32 height,
 	screenQuad = new VertexArray(context, screenQuadModel, DrawParams::USAGE_STATIC_READ);
 	uiQuad = new VertexArray(context, uiQuadModel, DrawParams::USAGE_STATIC_READ);
 
-	bloomBlur = new GaussianBlur(context, blurShader,
-			brightBuffer);
+	bloomBlur = new GaussianBlur(context, blurShader, brightBuffer);
 
 	camera.projection = Math::perspective(fieldOfView, (float)width
 			/ (float)height, zNear, zFar);
@@ -328,7 +327,7 @@ void RenderSystem::flushRiggedMeshes() {
 }
 
 void RenderSystem::flush() {
-	//bloomBlur->update();
+	bloomBlur->update(*screenQuad, drawParams);
 
 	target.setDrawBuffers(1);
 

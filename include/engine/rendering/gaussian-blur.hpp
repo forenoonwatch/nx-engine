@@ -1,13 +1,17 @@
 #pragma once
 
-#include <engine/rendering/shader.hpp>
+#include <engine/rendering/texture.hpp>
+#include <engine/rendering/render-target.hpp>
+
+class Shader;
+class VertexArray;
 
 class GaussianBlur {
 	public:
 		GaussianBlur(RenderContext& context, Shader& blurShader,
 				Texture& blurTarget);
 
-		void update();
+		void update(VertexArray& screenQuad, DrawParams& drawParams);
 
 		void resize(uint32 width, uint32 height);
 
@@ -17,9 +21,12 @@ class GaussianBlur {
 		RenderContext* context;
 
 		Shader& blurShader;
+		
 		Texture& blurTarget;
-
 		Texture buffer;
+
+		RenderTarget target0;
+		RenderTarget target1;
 
 		bool horizontal;
 };

@@ -139,6 +139,24 @@ void Shader::setSampler(const String& name, CubeMap& cubeMap,
 	glUniform1i(samplerMap[name], textureUnit);
 }
 
+void Shader::setSampler(const String& name, Texture& texture,
+		uint32 textureUnit) {
+	context->setShader(programID);
+
+	glActiveTexture(GL_TEXTURE0 + textureUnit);
+	glBindTexture(GL_TEXTURE_2D, texture.getID());
+	glUniform1i(samplerMap[name], textureUnit);
+}
+
+void Shader::setSampler(const String& name, CubeMap& cubeMap,
+		uint32 textureUnit) {
+	context->setShader(programID);
+
+	glActiveTexture(GL_TEXTURE0 + textureUnit);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, cubeMap.getID());
+	glUniform1i(samplerMap[name], textureUnit);
+}
+
 void Shader::bindComputeTexture(Texture& texture, uint32 unit,
 		uint32 access, uint32 internalFormat) {
 	context->setShader(programID);

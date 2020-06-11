@@ -33,6 +33,11 @@ class Shader {
 		void setSampler(const String& name, CubeMap& cubeMap,
 				Sampler& sampler, uint32 textureUnit);
 
+		void setSampler(const String& name, Texture& texture,
+				uint32 textureUnit);
+		void setSampler(const String& name, CubeMap& cubeMap,
+				uint32 textureUnit);
+
 		void bindComputeTexture(Texture& texture, uint32 unit,
 				uint32 access, uint32 internalFormat);
 
