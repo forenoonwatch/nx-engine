@@ -1,11 +1,12 @@
 #pragma once
 
 #include <engine/core/common.hpp>
-#include <engine/core/singleton.hpp>
+#include <engine/core/service.hpp>
+#include <engine/core/memory.hpp>
 
 #include <engine/scene/scene.hpp>
 
-class SceneManager final : public Singleton<SceneManager> {
+class SceneManager final : public Service<SceneManager> {
 	public:
 		SceneManager();
 
@@ -23,12 +24,14 @@ class SceneManager final : public Singleton<SceneManager> {
 	private:
 		NULL_COPY_AND_ASSIGN(SceneManager);
 
-		BaseScene* currentScene;
+		Memory::SharedPointer<Scene> currentScene;
+
+		bool running;
 
 		uint32 fps;
 		bool unlockFPS;
 
-		friend class BaseScene;
+		void run();
 };
 
 template <typename SceneType>
@@ -36,8 +39,8 @@ void SceneManager::load() {
 	stop();
 
 	SceneType* newScene = new SceneType(); // TODO: custom allocator
-	currentScene = static_cast<BaseScene*>(newScene);
+	currentScene = Memory::SharedPointer<Scene>(newScene);
 
 	newScene->load();
-	newScene->run();
+	run();
 }

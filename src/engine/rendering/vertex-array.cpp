@@ -199,7 +199,10 @@ VertexArray::~VertexArray() {
 	}
 	
 	glDeleteVertexArrays(1, &arrayID);
-	context->setVertexArray(0);
+
+	if (auto ctx = RenderContext::get(); ctx) {
+		ctx->setVertexArray(0);
+	}
 
 	delete[] buffers;
 	delete[] bufferSizes;

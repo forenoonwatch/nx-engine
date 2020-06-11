@@ -1,6 +1,7 @@
 #pragma once
 
 #include <engine/core/common.hpp>
+#include <engine/core/memory.hpp>
 #include <engine/core/string.hpp>
 #include <engine/core/service.hpp>
 #include <engine/core/array-list.hpp>

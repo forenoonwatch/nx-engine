@@ -77,5 +77,7 @@ void UniformBuffer::set(const String& name, const Matrix4f& value) {
 UniformBuffer::~UniformBuffer() {
 	glDeleteBuffers(1, &bufferID);
 
-	context->uniformBufferBindings[blockBinding] = false;
+	if (auto ctx = RenderContext::get(); ctx) {
+		ctx->uniformBufferBindings[blockBinding] = false;
+	}
 }

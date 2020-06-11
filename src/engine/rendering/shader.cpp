@@ -204,7 +204,11 @@ void Shader::cleanUp() {
 	}
 
 	glDeleteProgram(programID);
-	context->setShader(0);
+	
+	// to avoid segfault if render context gets deallocated before shader
+	if (auto ctx = RenderContext::get(); ctx) {
+		ctx->setShader(0);
+	}
 
 	programID = 0;
 

@@ -3,8 +3,6 @@
 #include <engine/core/common.hpp>
 #include <engine/core/memory.hpp>
 
-#include <engine/core/singleton.hpp>
-
 #include <engine/core/hash-map.hpp>
 
 #include <engine/resource/resource-handle.hpp>
@@ -14,7 +12,7 @@
 #include <utility>
 
 template <typename Resource>
-class ResourceCache final : public Singleton<ResourceCache<Resource>> {
+class ResourceCache final {
 	public:
 		ResourceCache() = default;
 		ResourceCache(ResourceCache&&) = default;

@@ -1,38 +1,17 @@
 #pragma once
 
-#include <engine/core/common.hpp>
-#include <engine/core/time.hpp>
-
-class BaseScene {
+class Scene {
 	public:
-		virtual void virtualUnload() = 0;
+		Scene() = default;
 
-		virtual ~BaseScene() = default;
-	protected:
-		void setFPS(uint32 fps);
-		bool isFPSUnlocked() const;
-};
+		virtual void load() = 0;
 
-template <typename DerivedScene>
-class Scene : public BaseScene {
-	public:
-		Scene();
+		virtual void update(float deltaTime) = 0;
+		virtual void render() = 0;
 
-		void load();
+		virtual void unload() = 0;
 
-		void update(float deltaTime);
-		void render();
-
-		void unload();
-
-		virtual void virtualUnload() override final;
+		virtual ~Scene() = default;
 	private:
-		bool running;
-
-		void run();
-		void stop();
-
 		friend class SceneManager;
 };
-
-#include "engine/scene/scene.inl"

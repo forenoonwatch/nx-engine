@@ -205,12 +205,12 @@ void Application::onMouseMoveEvent(WindowHandle window, double xPos,
 
 void Application::onWindowResizeEvent(WindowHandle windowHandle,
 		int width, int height) {
-	if (auto app = Application::get().lock(); app) {
+	if (auto app = Application::get(); app) {
 		app->width = width;
 		app->height = height;
 	}
 
-	if (auto renderer = RenderSystem::get().lock(); renderer) {
+	if (auto renderer = RenderSystem::get(); renderer) {
 		renderer->resize(width, height);
 	}
 }
