@@ -8,6 +8,9 @@ class BaseScene {
 		virtual void virtualUnload() = 0;
 
 		virtual ~BaseScene() = default;
+	protected:
+		void setFPS(uint32 fps);
+		bool isFPSUnlocked() const;
 };
 
 template <typename DerivedScene>

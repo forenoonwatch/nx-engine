@@ -61,13 +61,13 @@ void Scene<DerivedScene>::run() {
 		updateTimer += passedTime;
 
 		if (fpsTimeCounter >= 1.0) {
-			// TODO: emit FPS
+			setFPS(fpsCounter);
 
 			fpsTimeCounter = 0.0;
 			fpsCounter = 0;
 		}
 
-		shouldRender = false; // TODO: set equal to SHOULD_UNLOCK_FPS
+		shouldRender = isFPSUnlocked();
 
 		while (updateTimer >= frameTime) {
 			update(frameTime);

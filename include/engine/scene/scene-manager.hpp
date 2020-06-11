@@ -14,11 +14,21 @@ class SceneManager final : public Singleton<SceneManager> {
 
 		void stop();
 
+		void setFPSUnlocked(bool unlockFPS);
+
+		inline uint32 getFPS() const { return fps; }
+		inline bool isFPSUnlocked() const { return unlockFPS; }
+
 		~SceneManager();
 	private:
 		NULL_COPY_AND_ASSIGN(SceneManager);
 
 		BaseScene* currentScene;
+
+		uint32 fps;
+		bool unlockFPS;
+
+		friend class BaseScene;
 };
 
 template <typename SceneType>

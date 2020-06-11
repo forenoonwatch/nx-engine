@@ -1,7 +1,9 @@
 #include "engine/scene/scene-manager.hpp"
 
 SceneManager::SceneManager()
-		: currentScene(nullptr) {}
+		: currentScene(nullptr)
+		, fps(0)
+		, unlockFPS(false) {}
 
 void SceneManager::stop() {
 	if (currentScene) {
@@ -15,4 +17,3 @@ void SceneManager::stop() {
 SceneManager::~SceneManager() {
 	stop();
 }
-
