@@ -209,8 +209,10 @@ RenderSystem::~RenderSystem() {
 void RenderSystem::clear() {
 	screen.clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	target.setDrawBuffers(4);
+	//target.setDrawBuffers(4);
 	target.clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	drawParams.numDrawBuffers = 4;
 }
 
 void RenderSystem::applyLighting() {
@@ -329,7 +331,7 @@ void RenderSystem::flushRiggedMeshes() {
 void RenderSystem::flush() {
 	bloomBlur->update(*screenQuad, drawParams);
 
-	target.setDrawBuffers(1);
+	drawParams.numDrawBuffers = 1;
 
 	/* Merge bloom with main scene */ 
 	bloomShader.setSampler("scene", colorBuffer,

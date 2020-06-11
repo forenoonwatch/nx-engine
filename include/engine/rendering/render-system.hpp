@@ -52,6 +52,12 @@ class RenderSystem final : public Service<RenderSystem> {
 		inline RenderTarget& getTarget() { return target; }
 		inline RenderTarget& getScreen() { return screen; }
 
+		inline Texture& getColorBuffer() { return colorBuffer; }
+		inline Texture& getNormalBuffer() { return normalBuffer; }
+		inline Texture& getLightingBuffer() { return lightingBuffer; }
+		inline Texture& getBrightBuffer() { return brightBuffer; }
+		inline Texture& getDepthBuffer() { return depthBuffer; }
+
 		inline CubeMap& getDiffuseIBL() { return *diffuseIBL; }
 		inline CubeMap& getSpecularIBL() { return *specularIBL; }
 

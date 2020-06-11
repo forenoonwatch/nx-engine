@@ -302,14 +302,14 @@ RenderContext::~RenderContext() {
 }
 
 void RenderContext::setDrawParams(const DrawParams& params) {
+	setDrawBuffers(params.numDrawBuffers);
+
 	setBlending(params.sourceBlend, params.destBlend);
 
 	setScissorTest(params.scissorTest, params.scissorStartX, params.scissorStartY,
 			params.scissorWidth, params.scissorHeight);
 
 	setFaceCullMode(params.faceCullMode);
-	
-	//setDrawBuffers(params.numDrawBuffers);
 
 	setWriteDepth(params.writeDepth);
 	setDepthFunc(params.depthFunc);
