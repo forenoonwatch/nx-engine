@@ -12,7 +12,7 @@ void updatePlayerInput(Registry& registry, Application& app, float deltaTime) {
 		pic.right = app.isKeyDown(Input::KEY_D);
 		// TODO: up/down for Q/E
 
-		pic.jump = app.isKeyDown(Input::KEY_SPACE);
+		pic.jump = app.getKeyPressed(Input::KEY_SPACE);
 
 		pic.leftMouse = app.isMouseDown(Input::MOUSE_BUTTON_LEFT);
 		pic.rightMouse = app.isMouseDown(Input::MOUSE_BUTTON_RIGHT);
