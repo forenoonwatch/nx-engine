@@ -49,6 +49,8 @@ class RenderSystem final : public Service<RenderSystem> {
 
 		inline void setBrdfLUT(Texture& brdfLUT) { this->brdfLUT = &brdfLUT; }
 
+		inline DrawParams& getDrawParams() { return drawParams; }
+
 		inline RenderTarget& getTarget() { return target; }
 		inline RenderTarget& getScreen() { return screen; }
 
