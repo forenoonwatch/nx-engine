@@ -2,6 +2,8 @@
 
 #include <engine/core/time.hpp>
 
+#define MAX_UPDATE_TIME 1.0
+
 SceneManager::SceneManager()
 		: currentScene(nullptr)
 		, running(false)
@@ -36,7 +38,7 @@ void SceneManager::run() {
 
 	double lastTime = Time::getTime();
 	double fpsTimeCounter = 0.0;
-	double updateTimer = 1.0;
+	double updateTimer = 0.0;
 
 	double currentTime, passedTime;
 	bool shouldRender;
@@ -56,6 +58,10 @@ void SceneManager::run() {
 		fpsTimeCounter += passedTime;
 		updateTimer += passedTime;
 
+		if (updateTimer > MAX_UPDATE_TIME) {
+			updateTimer = frameTime;
+		}
+
 		if (fpsTimeCounter >= 1.0) {
 			fps = fpsCounter;
 
@@ -66,7 +72,9 @@ void SceneManager::run() {
 		shouldRender = unlockFPS;
 
 		while (updateTimer >= frameTime) {
-			currentScene->update(frameTime);
+			if (currentScene) {
+				currentScene->update(frameTime);
+			}
 
 			updateTimer -= frameTime;
 			shouldRender = true;
