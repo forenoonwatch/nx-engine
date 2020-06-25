@@ -17,6 +17,9 @@ PhysicsEngine::PhysicsEngine()
 		, dynamicsWorld(&dispatcher, &broadphase, &solver,
 				&collisionConfiguration) {
 	setGravity(DEFAULT_GRAVITY);
+
+	dynamicsWorld.setDebugDrawer(&debugRenderer);
+	debugRenderer.setDebugMode(btIDebugDraw::DBG_DrawWireframe);
 }
 
 Body PhysicsEngine::createBody(Collider& collider, float mass,
@@ -40,8 +43,37 @@ Body PhysicsEngine::createBody(Collider& collider, float mass,
 	return {btBody};
 }
 
+CharacterController PhysicsEngine::createCharacterController(Collider& collider,
+		float stepHeight, const Vector3f& position, const Quaternion& rotation) {
+	auto* ghostObject = new btPairCachingGhostObject();
+	ghostObject->setWorldTransform(btTransform(Physics::nativeToBtQuat(rotation),
+			Physics::nativeToBtVec3(position)));
+	
+	dynamicsWorld.getPairCache()->setInternalGhostPairCallback(new btGhostPairCallback());
+
+	ghostObject->setCollisionShape(collider.getHandle());
+	ghostObject->setCollisionFlags(btCollisionObject::CF_CHARACTER_OBJECT);
+
+	auto* controller = new KinematicCharacterController(ghostObject, static_cast<btConvexShape*>(collider.getHandle()), stepHeight,
+			btVector3(0, 0, 1));
+	controller->setGravity(dynamicsWorld.getGravity());
+
+	dynamicsWorld.addCollisionObject(ghostObject, btBroadphaseProxy::CharacterFilter,
+			btBroadphaseProxy::StaticFilter | btBroadphaseProxy::DefaultFilter);
+	dynamicsWorld.addAction(controller);
+
+	//controller->reset(&dynamicsWorld);
+
+	return {ghostObject, controller};
+}
+
 void PhysicsEngine::step(float deltaTime) {
 	dynamicsWorld.stepSimulation(deltaTime, NUM_SUB_STEPS);
+}
+
+void PhysicsEngine::debugDrawWorld() {
+	dynamicsWorld.debugDrawWorld();
+	debugRenderer.flush();
 }
 
 void PhysicsEngine::writeTransformComponents(Registry& registry) {

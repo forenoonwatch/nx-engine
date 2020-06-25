@@ -7,6 +7,8 @@
 
 #include <engine/physics/body.hpp>
 #include <engine/physics/collider.hpp>
+#include <engine/physics/character-controller.hpp>
+#include <engine/physics/debug-renderer.hpp>
 
 #include <bullet/btBulletDynamicsCommon.h>
 
@@ -25,7 +27,13 @@ class PhysicsEngine final : public Service<PhysicsEngine> {
 		template <typename ColliderType, typename... Args>
 		ColliderType createCollider(Args&&... args);
 
+		CharacterController createCharacterController(Collider& collider,
+				float stepHeight, const Vector3f& position = Vector3f(0, 0, 0),
+				const Quaternion& rotation = Quaternion(1, 0, 0, 0));
+
 		void step(float deltaTime);
+
+		void debugDrawWorld();
 
 		void writeTransformComponents(Registry& registry);
 
@@ -40,6 +48,7 @@ class PhysicsEngine final : public Service<PhysicsEngine> {
 		btDbvtBroadphase broadphase;
 		btSequentialImpulseConstraintSolver solver;
 		btDiscreteDynamicsWorld dynamicsWorld;
+		PhysicsDebugRenderer debugRenderer;
 
 		btAlignedObjectArray<btCollisionShape*> collisionShapes;
 };
