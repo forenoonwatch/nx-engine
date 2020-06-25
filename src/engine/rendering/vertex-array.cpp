@@ -14,7 +14,7 @@ VertexArray::VertexArray(RenderContext& context,
 		, buffers(new GLuint[numBuffers])
 		, bufferSizes(new uintptr[numBuffers])
 		, usage(usage)
-		, indexed(indexed)
+		, indexed(true)
 		, bufferOwnership(FULLY_OWNED) {
 	glGenVertexArrays(1, &arrayID);
 	context.setVertexArray(arrayID);
@@ -177,7 +177,25 @@ void VertexArray::updateBuffer(uint32 bufferIndex,
 		glBufferData(GL_ARRAY_BUFFER, dataSize, data,
 				bufferIndex >= instancedComponentStartIndex ? GL_DYNAMIC_DRAW 
 				: usage);
+		bufferSizes[bufferIndex] = dataSize;
 	}
+}
+
+void VertexArray::updateIndexBuffer(const uint32* indices, uintptr numIndices) {
+	context->setVertexArray(arrayID);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffers[numBuffers - 1]);
+
+	const uintptr dataSize = numIndices * sizeof(uint32);
+
+	if (dataSize <= bufferSizes[numBuffers - 1]) {
+		glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, dataSize, indices);
+	}
+	else {
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, dataSize, indices, usage);
+		bufferSizes[numBuffers - 1] = dataSize;
+	}
+
+	numElements = numIndices;
 }
 
 VertexArray::~VertexArray() {

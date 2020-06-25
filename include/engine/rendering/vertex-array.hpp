@@ -19,6 +19,7 @@ class VertexArray {
 				VertexArray& vertexArray, TransformFeedback& tfb, uint32 bufferNum);
 
 		void updateBuffer(uint32 bufferIndex, const void* data, uintptr dataSize);
+		void updateIndexBuffer(const uint32* indices, uintptr numIndices);
 
 		inline const uint32 getBuffer(uint32 bufferIndex);
 		inline const uintptr getBufferSize(uint32 bufferIndex) const;
