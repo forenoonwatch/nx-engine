@@ -2,5 +2,8 @@
 
 #include <unordered_map>
 
-#define HashMap std::unordered_map
-#define Pair std::pair
+template <typename K, typename V>
+using HashMap = std::unordered_map<K, V>;
+
+template <typename K, typename V>
+using Pair = std::pair<K, V>;

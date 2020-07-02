@@ -2,4 +2,5 @@
 
 #include <vector>
 
-#define ArrayList std::vector
+template <typename T>
+using ArrayList = std::vector<T>;

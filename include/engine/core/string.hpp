@@ -5,7 +5,7 @@
 #include <string>
 #include <sstream>
 
-#define StringStream std::stringstream
+using StringStream = std::stringstream;
 
 class String : public std::string {
 	public:

@@ -2,8 +2,8 @@
 
 #include <map>
 
-#define TreeMap std::map
+template <typename K, typename V>
+using TreeMap = std::map<K, V>;
 
-#ifndef Pair
-#define Pair std::pair
-#endif
+template <typename K, typename V>
+using Pair = std::pair<K, V>;

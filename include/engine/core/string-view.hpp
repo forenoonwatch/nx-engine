@@ -2,4 +2,4 @@
 
 #include <string_view>
 
-#define StringView std::string_view
+using StringView = std::string_view;

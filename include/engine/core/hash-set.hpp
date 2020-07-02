@@ -2,5 +2,4 @@
 
 #include <unordered_set>
 
-#define HashSet std::unordered_set
-
+using HashSet = std::unordered_set<T>;
