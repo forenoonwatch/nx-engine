@@ -16,6 +16,8 @@ subject to the following restrictions:
 
 #include <engine/core/common.hpp>
 
+#include <engine/physics/physics-engine.hpp>
+
 #include <bullet/LinearMath/btIDebugDraw.h>
 #include <bullet/BulletCollision/CollisionDispatch/btGhostObject.h>
 #include <bullet/BulletCollision/CollisionShapes/btMultiSphereShape.h>
@@ -125,12 +127,14 @@ btVector3 KinematicCharacterController::perpindicularComponent(const btVector3& 
 
 KinematicCharacterController::KinematicCharacterController(btPairCachingGhostObject* ghostObject, btConvexShape* convexShape,
 		btScalar stepHeight, const btVector3& up) {
+	// TODO: initialize this correctly
 	m_ghostObject = ghostObject;
 	m_up.setValue(0.0f, 0.0f, 1.0f);
 	m_jumpAxis.setValue(0.0f, 0.0f, 1.0f);
 	m_addedMargin = 0.02;
 	m_walkDirection.setValue(0.0, 0.0, 0.0);
 	m_AngVel.setValue(0.0, 0.0, 0.0);
+	platformVelocity.setValue(0.0, 0.0, 0.0);
 	m_useGhostObjectSweepTest = true;
 	m_turnAngle = btScalar(0.0);
 	m_convexShape = convexShape;
@@ -230,10 +234,11 @@ bool KinematicCharacterController::recoverFromPenetration(btCollisionWorld* coll
 			//manifold->clearManifold();
 		}
 	}
+
 	btTransform newTrans = m_ghostObject->getWorldTransform();
 	newTrans.setOrigin(m_currentPosition);
 	m_ghostObject->setWorldTransform(newTrans);
-	//	printf("m_touchingNormal = %f,%f,%f\n",m_touchingNormal[0],m_touchingNormal[1],m_touchingNormal[2]);
+
 	return penetration;
 }
 
@@ -297,7 +302,6 @@ void KinematicCharacterController::stepUp(btCollisionWorld* world) {
 			m_touchingContact = true;
 
 			if (numPenetrationLoops > 4) {
-				//printf("character could not recover from penetration = %d\n", numPenetrationLoops);
 				break;
 			}
 		}
@@ -341,24 +345,17 @@ void KinematicCharacterController::updateTargetPositionBasedOnCollision(const bt
 		if (0)  //tangentMag != 0.0) // TODO: !
 		{
 			btVector3 parComponent = parallelDir * btScalar(tangentMag * movementLength);
-			//			printf("parComponent=%f,%f,%f\n",parComponent[0],parComponent[1],parComponent[2]);
 			m_targetPosition += parComponent;
 		}
 
 		if (normalMag != 0.0) {
 			btVector3 perpComponent = perpindicularDir * btScalar(normalMag * movementLength);
-			//			printf("perpComponent=%f,%f,%f\n",perpComponent[0],perpComponent[1],perpComponent[2]);
 			m_targetPosition += perpComponent;
 		}
-	}
-	else {
-		//		printf("movementLength don't normalize a zero vector\n");
 	}
 }
 
 void KinematicCharacterController::stepForwardAndStrafe(btCollisionWorld* collisionWorld, const btVector3& walkMove) {
-	// printf("m_normalizedDirection=%f,%f,%f\n",
-	// 	m_normalizedDirection[0],m_normalizedDirection[1],m_normalizedDirection[2]);
 	// phase 2: forward and strafe
 	btTransform start, end;
 
@@ -369,7 +366,6 @@ void KinematicCharacterController::stepForwardAndStrafe(btCollisionWorld* collis
 
 	btScalar fraction = 1.0;
 	btScalar distance2 = (m_currentPosition - m_targetPosition).length2();
-	//	printf("distance2=%f\n",distance2);
 
 	int maxIter = 10;
 
@@ -435,11 +431,6 @@ void KinematicCharacterController::stepDown(btCollisionWorld* collisionWorld, bt
 	bool runonce = false;
 
 	// phase 3: down
-	/*btScalar additionalDownStep = (m_wasOnGround && !onGround()) ? m_stepHeight : 0.0;
-	btVector3 step_drop = m_up * (m_currentStepOffset + additionalDownStep);
-	btScalar downVelocity = (additionalDownStep == 0.0 && m_verticalVelocity<0.0?-m_verticalVelocity:0.0) * dt;
-	btVector3 gravity_drop = m_up * downVelocity; 
-	m_targetPosition -= (step_drop + gravity_drop);*/
 
 	btVector3 orig_position = m_targetPosition;
 
@@ -532,6 +523,7 @@ void KinematicCharacterController::stepDown(btCollisionWorld* collisionWorld, bt
 			&& (callback.hasHit() && needsCollision(m_ghostObject, callback.m_hitCollisionObject)))
 			|| runonce) {
 		// we dropped a fraction of the height -> hit floor
+		// TODO: move this in
 		btScalar fraction = (m_currentPosition.getY() - callback.m_hitPointWorld.getY()) / 2;
 
 		if (bounce_fix) {
@@ -553,11 +545,12 @@ void KinematicCharacterController::stepDown(btCollisionWorld* collisionWorld, bt
 		m_verticalOffset = 0.0;
 		m_wasJumping = false;
 
-		if (callback.m_hitCollisionObject->getInternalType() == btCollisionObject::CO_RIGID_BODY) {
-			auto rb = static_cast<const btRigidBody*>(callback.m_hitCollisionObject);
-			auto vel = rb->getLinearVelocity();
-
-			DEBUG_LOG_TEMP("%.2f, %.2f, %.2f", vel.x(), vel.y(), vel.z());
+		if (callback.hasHit() && callback.m_hitCollisionObject->getInternalType() == btCollisionObject::CO_GHOST_OBJECT) {
+			auto rb = static_cast<const btGhostObject*>(callback.m_hitCollisionObject);
+			
+			if (auto vc = PhysicsEngine::ref().findVehicleController(rb); vc) {
+				platformVelocity = vc->getLinearVelocity();
+			}
 		}
 	}
 	else {
@@ -686,6 +679,10 @@ void KinematicCharacterController::playerStep(btCollisionWorld* collisionWorld, 
 		m_targetOrientation = m_currentOrientation;
 	}
 
+	btVector3 platformPerp = perpindicularComponent(platformVelocity, m_up);
+
+	m_walkDirection += platformPerp * dt;
+
 	// quick check...
 	if (!m_useWalkDirection && (m_velocityTimeInterval <= 0.0 || m_walkDirection.fuzzyZero())) {
 		return;
@@ -693,11 +690,7 @@ void KinematicCharacterController::playerStep(btCollisionWorld* collisionWorld, 
 
 	m_wasOnGround = onGround();
 
-	//btVector3 lvel = m_walkDirection;
-	//btScalar c = 0.0f;
-
-	if (m_walkDirection.length2() > 0)
-	{
+	if (m_walkDirection.length2() > 0) {
 		// apply damping
 		m_walkDirection *= btPow(btScalar(1) - m_linearDamping, dt);
 	}
@@ -706,48 +699,26 @@ void KinematicCharacterController::playerStep(btCollisionWorld* collisionWorld, 
 
 	// Update fall velocity.
 	m_verticalVelocity -= m_gravity * dt;
-	if (m_verticalVelocity > 0.0 && m_verticalVelocity > m_jumpSpeed)
-	{
+
+	if (m_verticalVelocity > 0.0 && m_verticalVelocity > m_jumpSpeed) {
 		m_verticalVelocity = m_jumpSpeed;
 	}
-	if (m_verticalVelocity < 0.0 && btFabs(m_verticalVelocity) > btFabs(m_fallSpeed))
-	{
+
+	if (m_verticalVelocity < 0.0 && btFabs(m_verticalVelocity) > btFabs(m_fallSpeed)) {
 		m_verticalVelocity = -btFabs(m_fallSpeed);
 	}
+
 	m_verticalOffset = m_verticalVelocity * dt;
 
 	btTransform xform;
 	xform = m_ghostObject->getWorldTransform();
 
-	//	printf("walkDirection(%f,%f,%f)\n",walkDirection[0],walkDirection[1],walkDirection[2]);
-	//	printf("walkSpeed=%f\n",walkSpeed);
-
 	stepUp(collisionWorld);
-	//todo: Experimenting with behavior of controller when it hits a ceiling..
-	//bool hitUp = stepUp (collisionWorld);
-	//if (hitUp)
-	//{
-	//	m_verticalVelocity -= m_gravity * dt;
-	//	if (m_verticalVelocity > 0.0 && m_verticalVelocity > m_jumpSpeed)
-	//	{
-	//		m_verticalVelocity = m_jumpSpeed;
-	//	}
-	//	if (m_verticalVelocity < 0.0 && btFabs(m_verticalVelocity) > btFabs(m_fallSpeed))
-	//	{
-	//		m_verticalVelocity = -btFabs(m_fallSpeed);
-	//	}
-	//	m_verticalOffset = m_verticalVelocity * dt;
 
-	//	xform = m_ghostObject->getWorldTransform();
-	//}
-
-	if (m_useWalkDirection)
-	{
+	if (m_useWalkDirection) {
 		stepForwardAndStrafe(collisionWorld, m_walkDirection);
 	}
-	else
-	{
-		//printf("  time: %f", m_velocityTimeInterval);
+	else {
 		// still have some time left for moving!
 		btScalar dtMoving =
 			(dt < m_velocityTimeInterval) ? dt : m_velocityTimeInterval;
@@ -756,40 +727,23 @@ void KinematicCharacterController::playerStep(btCollisionWorld* collisionWorld, 
 		// how far will we move while we are moving?
 		btVector3 move = m_walkDirection * dtMoving;
 
-		//printf("  dtMoving: %f", dtMoving);
-
 		// okay, step
 		stepForwardAndStrafe(collisionWorld, move);
 	}
+
 	stepDown(collisionWorld, dt);
-
-	//todo: Experimenting with max jump height
-	//if (m_wasJumping)
-	//{
-	//	btScalar ds = m_currentPosition[m_upAxis] - m_jumpPosition[m_upAxis];
-	//	if (ds > m_maxJumpHeight)
-	//	{
-	//		// substract the overshoot
-	//		m_currentPosition[m_upAxis] -= ds - m_maxJumpHeight;
-
-	//		// max height was reached, so potential energy is at max
-	//		// and kinematic energy is 0, thus velocity is 0.
-	//		if (m_verticalVelocity > 0.0)
-	//			m_verticalVelocity = 0.0;
-	//	}
-	//}
-	// printf("\n");
 
 	xform.setOrigin(m_currentPosition);
 	m_ghostObject->setWorldTransform(xform);
 
 	int numPenetrationLoops = 0;
 	m_touchingContact = false;
+
 	while (recoverFromPenetration(collisionWorld)) {
 		numPenetrationLoops++;
 		m_touchingContact = true;
+
 		if (numPenetrationLoops > 4) {
-			//printf("character could not recover from penetration = %d\n", numPenetrationLoops);
 			break;
 		}
 	}

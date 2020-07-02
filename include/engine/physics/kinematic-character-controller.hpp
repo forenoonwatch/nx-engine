@@ -118,10 +118,10 @@ class KinematicCharacterController final : public btCharacterControllerInterface
 		btScalar m_maxPenetrationDepth;
 		btScalar m_verticalVelocity;
 		btScalar m_verticalOffset;
-		btScalar m_fallSpeed;
+		btScalar m_fallSpeed; // redundant/unnecessary?
 		btScalar m_jumpSpeed;
-		btScalar m_SetjumpSpeed;
-		btScalar m_maxJumpHeight;
+		btScalar m_SetjumpSpeed; // wtf is this
+		btScalar m_maxJumpHeight; // redundant/unnecessary given a jump speed?
 		btScalar m_maxSlopeRadians;  // Slope angle that is set (used for returning the exact value)
 		btScalar m_maxSlopeCosine;   // Cosine equivalent of m_maxSlopeRadians (calculated once when set, for optimization)
 		btScalar m_gravity;
@@ -130,12 +130,13 @@ class KinematicCharacterController final : public btCharacterControllerInterface
 
 		btScalar m_stepHeight;
 
-		btScalar m_addedMargin;  //@todo: remove this and fix the code
+		btScalar m_addedMargin;  //@TODO: remove this and fix the code
 
 		///this is the desired walk direction, set by the user
 		btVector3 m_walkDirection;
 		btVector3 m_normalizedDirection;
 		btVector3 m_AngVel;
+		btVector3 platformVelocity;
 
 		btVector3 m_jumpPosition;
 
@@ -162,12 +163,12 @@ class KinematicCharacterController final : public btCharacterControllerInterface
 		bool m_useWalkDirection;
 		btScalar m_velocityTimeInterval;
 		btVector3 m_up;
-		btVector3 m_jumpAxis;
+		btVector3 m_jumpAxis; // potentially redundant
 
-		static btVector3* getUpAxisDirections();
+		static btVector3* getUpAxisDirections(); // TODO: make this static in the soruce file
 		bool m_interpolateUp;
 		bool full_drop;
-		bool bounce_fix;
+		bool bounce_fix; // what is all this, why does the format not match
 
 		btVector3 computeReflectionDirection(const btVector3& direction, const btVector3& normal);
 		btVector3 parallelComponent(const btVector3& direction, const btVector3& normal);

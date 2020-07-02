@@ -20,6 +20,7 @@ PhysicsEngine::PhysicsEngine()
 
 	dynamicsWorld.setDebugDrawer(&debugRenderer);
 	debugRenderer.setDebugMode(btIDebugDraw::DBG_DrawWireframe);
+	dynamicsWorld.getPairCache()->setInternalGhostPairCallback(new btGhostPairCallback());
 }
 
 Body PhysicsEngine::createBody(Collider& collider, float mass,
@@ -48,8 +49,6 @@ CharacterController PhysicsEngine::createCharacterController(Collider& collider,
 	auto* ghostObject = new btPairCachingGhostObject();
 	ghostObject->setWorldTransform(btTransform(Physics::nativeToBtQuat(rotation),
 			Physics::nativeToBtVec3(position)));
-	
-	dynamicsWorld.getPairCache()->setInternalGhostPairCallback(new btGhostPairCallback());
 
 	ghostObject->setCollisionShape(collider.getHandle());
 	ghostObject->setCollisionFlags(btCollisionObject::CF_CHARACTER_OBJECT);
@@ -64,7 +63,31 @@ CharacterController PhysicsEngine::createCharacterController(Collider& collider,
 
 	//controller->reset(&dynamicsWorld);
 
+	charControllers[ghostObject] = controller;
+
 	return {ghostObject, controller};
+}
+
+VehicleController PhysicsEngine::createVehicleController(Collider& collider,
+		const Vector3f& position, const Quaternion& rotation) {
+	auto* ghostObject = new btPairCachingGhostObject();
+	ghostObject->setWorldTransform(btTransform(Physics::nativeToBtQuat(rotation),
+			Physics::nativeToBtVec3(position)));
+	
+	ghostObject->setCollisionShape(collider.getHandle());
+	ghostObject->setCollisionFlags(btCollisionObject::CF_CHARACTER_OBJECT); // TODO: see what this does
+
+	auto* controller = new KinematicVehicleController(ghostObject,
+			collider.getHandle());
+
+	dynamicsWorld.addCollisionObject(ghostObject);
+	//dynamicsWorld.addCollisionObject(ghostObject, btBroadphaseProxy::CharacterFilter,
+	//		btBroadphaseProxy::StaticFilter | btBroadphaseProxy::DefaultFilter);
+	dynamicsWorld.addAction(controller);
+
+	vehicleControllers[ghostObject] = controller;
+
+	return {controller};
 }
 
 void PhysicsEngine::step(float deltaTime) {
@@ -84,6 +107,14 @@ void PhysicsEngine::writeTransformComponents(Registry& registry) {
 
 void PhysicsEngine::setGravity(const Vector3f& gravity) {
 	dynamicsWorld.setGravity(Physics::nativeToBtVec3(gravity));
+}
+
+KinematicVehicleController* PhysicsEngine::findVehicleController(const btGhostObject* ghostObject) {
+	if (auto it = vehicleControllers.find(ghostObject); it != vehicleControllers.end()) {
+		return it->second;
+	}
+
+	return nullptr;
 }
 
 PhysicsEngine::~PhysicsEngine() {
