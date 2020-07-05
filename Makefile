@@ -22,7 +22,9 @@ ifeq ($(UNAME), Linux)
 
 	CXXFLAGS := -I$(CURDIR)/include/engine -I$(CURDIR)/include $(FREETYPE) $(BULLET) -msse2 $(CXXFLAGS)
 else
-	CXXFLAGS := -I$(CURDIR)/include/engine -I$(CURDIR)/include -I$(LIB_DIR)/include -msse2 $(CXXFLAGS)
+	BULLET := -I$(LIB_DIR)/include/bullet
+	FREETYPE := -I$(LIB_DIR)/include/freetype2
+	CXXFLAGS := -I$(CURDIR)/include/engine -I$(CURDIR)/include -I$(LIB_DIR)/include $(FREETYPE) $(BULLET) -msse2 $(CXXFLAGS)
 endif
 
 CPPFLAGS := -std=c++17 -g
