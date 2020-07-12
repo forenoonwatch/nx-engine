@@ -25,9 +25,6 @@ class Shader {
 		void setUniformBuffer(const String& name,
 				Memory::SharedPointer<UniformBuffer> buffer);
 
-		void setShaderStorageBuffer(const String& name,
-				ShaderStorageBuffer& buffer);
-
 		void setSampler(const String& name, Texture& texture,
 				Sampler& sampler, uint32 textureUnit);
 		void setSampler(const String& name, CubeMap& cubeMap,
@@ -73,5 +70,7 @@ class Shader {
 		void cleanUp();
 
 		void addUniforms();
+		void resolveUniformBlocks();
+		void resolveActiveUniforms();
 };
 

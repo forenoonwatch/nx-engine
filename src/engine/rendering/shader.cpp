@@ -113,12 +113,6 @@ void Shader::setUniformBuffer(const String& name,
 	uniformBuffers[name] = buffer;
 }
 
-void Shader::setShaderStorageBuffer(const String& name,
-		ShaderStorageBuffer& buffer) {
-	glUniformBlockBinding(programID, uniformBlockMap[name],
-			buffer.getBlockBinding());
-}
-
 void Shader::setSampler(const String& name, Texture& texture,
 		Sampler& sampler, uint32 textureUnit) {
 	context->setShader(programID);
@@ -218,13 +212,20 @@ void Shader::cleanUp() {
 	uniformMap.clear();
 }
 
-void Shader::addUniforms() {
+void Shader::addUniforms() {	
+	resolveUniformBlocks();
+	resolveActiveUniforms();
+	//resolveShaderStorageBlocks(); // TODO: implement
+}
+
+void Shader::resolveUniformBlocks() {
 	GLint numBlocks;
 	glGetProgramiv(programID, GL_ACTIVE_UNIFORM_BLOCKS, &numBlocks);
 
 	ArrayList<GLchar> nameBuffer;
 	ArrayList<GLchar> uniformName(256);
 
+	// TODO: if the first block isn't 0 and they aren't in order this bugs
 	for (int32 block = 0; block < numBlocks; ++block) {
 		GLint nameLen;
 
@@ -284,6 +285,10 @@ void Shader::addUniforms() {
 			setUniformBuffer(uniformBlockName, ubo);
 		}
 	}
+}
+
+void Shader::resolveActiveUniforms() {
+	ArrayList<GLchar> uniformName(256);
 
 	GLint numUniforms = 0;
 	glGetProgramiv(programID, GL_ACTIVE_UNIFORMS, &numUniforms);
@@ -315,6 +320,24 @@ void Shader::addUniforms() {
 		}
 	}
 }
+
+/*void Shader::resolveShaderStorageBlocks() {
+	GLint numSSBOs;
+	glGetProgramInterfaceiv(programID, GL_SHADER_STORAGE_BLOCK,
+			GL_ACTIVE_RESOURCES, &numSSBOs);
+
+	ArrayList<GLchar> nameBuffer;
+
+	const GLenum props[] = {GL_NAME_LENGTH};
+
+	for (int32 block = 0; block < numSSBOs; ++block) {
+		GLint nameLen;
+		glGetProgramResourceiv(programID, GL_SHADER_STORAGE_BLOCK, block,
+				countof(props), props, 0, nullptr, &nameLen);
+
+		DEBUG_LOG_TEMP("NAME LENGTH = %d", nameLen);
+	}
+}*/
 
 static bool addShader(GLuint program, const String& text,
 		GLenum type, ArrayList<uint32>& shaders) {
