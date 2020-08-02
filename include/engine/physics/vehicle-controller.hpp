@@ -12,9 +12,9 @@ class btCollisionWorld;
 class btCollisionDispatcher;
 class btPairCachingGhostObject;
 
-class KinematicVehicleController : public btActionInterface {
+class VehicleController : public btActionInterface {
 	public:
-		KinematicVehicleController(btPairCachingGhostObject* ghostObject,
+		VehicleController(btPairCachingGhostObject* ghostObject,
 				btCollisionShape* shape, const btVector3& up = btVector3(0, 1, 0));
 
 		virtual void updateAction(btCollisionWorld* collisionWorld,
@@ -29,7 +29,7 @@ class KinematicVehicleController : public btActionInterface {
 		btVector3& getLinearVelocity() { return linearVelocity; }
 		const btVector3& getLinearVelocity() const { return linearVelocity; }
 
-		virtual ~KinematicVehicleController();
+		virtual ~VehicleController();
 	private:
 		btPairCachingGhostObject* ghostObject;
 		btCollisionShape* collisionShape;
@@ -42,12 +42,3 @@ class KinematicVehicleController : public btActionInterface {
 		btVector3 upAxis;
 };
 
-class VehicleController {
-	public:
-		VehicleController(KinematicVehicleController* controller)
-				: controller(controller) {}
-
-		KinematicVehicleController* getController() { return controller; }
-	private:
-		KinematicVehicleController* controller;
-};

@@ -8,8 +8,6 @@
 
 #include <engine/physics/body.hpp>
 #include <engine/physics/collider.hpp>
-#include <engine/physics/character-controller.hpp>
-#include <engine/physics/vehicle-controller.hpp>
 #include <engine/physics/debug-renderer.hpp>
 
 #include <bullet/btBulletDynamicsCommon.h>
@@ -17,6 +15,11 @@
 #include <utility>
 
 class Registry;
+class CharacterController;
+class VehicleController;
+
+class btGhostObject;
+class btActionInterface;
 
 class PhysicsEngine final : public Service<PhysicsEngine> {
 	public:
@@ -29,11 +32,11 @@ class PhysicsEngine final : public Service<PhysicsEngine> {
 		template <typename ColliderType, typename... Args>
 		ColliderType createCollider(Args&&... args);
 
-		CharacterController createCharacterController(Collider& collider,
-				float stepHeight, const Vector3f& position = Vector3f(0, 0, 0),
+		CharacterController* createCharacterController(Collider& collider,
+				const Vector3f& position = Vector3f(0, 0, 0),
 				const Quaternion& rotation = Quaternion(1, 0, 0, 0));
 
-		VehicleController createVehicleController(Collider& collider,
+		VehicleController* createVehicleController(Collider& collider,
 				const Vector3f& position = Vector3f(0, 0, 0),
 				const Quaternion& rotation = Quaternion(1, 0, 0, 0));
 
@@ -45,7 +48,7 @@ class PhysicsEngine final : public Service<PhysicsEngine> {
 
 		void setGravity(const Vector3f& gravity);
 
-		KinematicVehicleController* findVehicleController(const btGhostObject* ghostObject);
+		btActionInterface* findActionInterface(const btGhostObject* ghostObject);
 
 		~PhysicsEngine();
 	private:
@@ -60,8 +63,7 @@ class PhysicsEngine final : public Service<PhysicsEngine> {
 
 		btAlignedObjectArray<btCollisionShape*> collisionShapes;
 
-		HashMap<const btGhostObject*, KinematicCharacterController*> charControllers;
-		HashMap<const btGhostObject*, KinematicVehicleController*> vehicleControllers;
+		HashMap<const btGhostObject*, btActionInterface*> actionInterfaces;
 };
 
 template <typename ColliderType, typename... Args>

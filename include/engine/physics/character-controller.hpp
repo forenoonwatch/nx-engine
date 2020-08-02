@@ -2,24 +2,39 @@
 
 #include <engine/physics/kinematic-character-controller.hpp>
 
+#include <bullet/LinearMath/btVector3.h>
+
 #include <bullet/BulletCollision/CollisionDispatch/btGhostObject.h>
+#include <bullet/BulletDynamics/Character/btCharacterControllerInterface.h>
 
-class Collider;
+class btConvexShape;
+class btCollisionWorld;
+class btPairCachingGhostObject;
 
-class CharacterController {
+class CharacterController final : public btActionInterface {
 	public:
-		inline CharacterController()
-				: ghostObject(nullptr)
-				, controller(nullptr) {}
-		
-		inline CharacterController(btPairCachingGhostObject* ghostObject,
-					KinematicCharacterController* controller)
-				: ghostObject(ghostObject)
-				, controller(controller) {}
+		BT_DECLARE_ALIGNED_ALLOCATOR();
 
-		inline btPairCachingGhostObject* getGhostObject() { return ghostObject; }
-		inline KinematicCharacterController* getController() { return controller; }
+		CharacterController(btPairCachingGhostObject* ghostObject,
+				btConvexShape* convexShape);
+
+		virtual void updateAction(btCollisionWorld* collisionWorld,
+				btScalar deltaTime) override;
+
+		virtual void debugDraw(btIDebugDraw* debugDrawer) override;
+
+		void setWalkDirection(const btVector3& walkDirection);
+
+		btPairCachingGhostObject* getGhostObject();
+
+		const btVector3& getWalkDirection() const;
+
+		virtual ~CharacterController();
 	private:
 		btPairCachingGhostObject* ghostObject;
-		KinematicCharacterController* controller;
+		btConvexShape* convexShape;
+
+		btScalar halfHeight;
+
+		btVector3 walkDirection;
 };

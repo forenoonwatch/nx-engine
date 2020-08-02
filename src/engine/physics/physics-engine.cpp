@@ -1,6 +1,8 @@
 #include "engine/physics/physics-engine.hpp"
 
 #include <engine/physics/physics-util.hpp>
+#include <engine/physics/character-controller.hpp>
+#include <engine/physics/vehicle-controller.hpp>
 
 #include <engine/ecs/registry.hpp>
 
@@ -44,8 +46,8 @@ Body PhysicsEngine::createBody(Collider& collider, float mass,
 	return {btBody};
 }
 
-CharacterController PhysicsEngine::createCharacterController(Collider& collider,
-		float stepHeight, const Vector3f& position, const Quaternion& rotation) {
+CharacterController* PhysicsEngine::createCharacterController(Collider& collider,
+		const Vector3f& position, const Quaternion& rotation) {
 	auto* ghostObject = new btPairCachingGhostObject();
 	ghostObject->setWorldTransform(btTransform(Physics::nativeToBtQuat(rotation),
 			Physics::nativeToBtVec3(position)));
@@ -53,9 +55,9 @@ CharacterController PhysicsEngine::createCharacterController(Collider& collider,
 	ghostObject->setCollisionShape(collider.getHandle());
 	ghostObject->setCollisionFlags(btCollisionObject::CF_CHARACTER_OBJECT);
 
-	auto* controller = new KinematicCharacterController(ghostObject, static_cast<btConvexShape*>(collider.getHandle()), stepHeight,
-			btVector3(0, 0, 1));
-	controller->setGravity(dynamicsWorld.getGravity());
+	auto* controller = new CharacterController(ghostObject,
+			static_cast<btConvexShape*>(collider.getHandle()));
+	//controller->setGravity(dynamicsWorld.getGravity());
 
 	dynamicsWorld.addCollisionObject(ghostObject, btBroadphaseProxy::CharacterFilter,
 			btBroadphaseProxy::StaticFilter | btBroadphaseProxy::DefaultFilter);
@@ -63,12 +65,12 @@ CharacterController PhysicsEngine::createCharacterController(Collider& collider,
 
 	//controller->reset(&dynamicsWorld);
 
-	charControllers[ghostObject] = controller;
+	actionInterfaces[ghostObject] = controller;
 
-	return {ghostObject, controller};
+	return controller;
 }
 
-VehicleController PhysicsEngine::createVehicleController(Collider& collider,
+VehicleController* PhysicsEngine::createVehicleController(Collider& collider,
 		const Vector3f& position, const Quaternion& rotation) {
 	auto* ghostObject = new btPairCachingGhostObject();
 	ghostObject->setWorldTransform(btTransform(Physics::nativeToBtQuat(rotation),
@@ -77,17 +79,16 @@ VehicleController PhysicsEngine::createVehicleController(Collider& collider,
 	ghostObject->setCollisionShape(collider.getHandle());
 	ghostObject->setCollisionFlags(btCollisionObject::CF_CHARACTER_OBJECT); // TODO: see what this does
 
-	auto* controller = new KinematicVehicleController(ghostObject,
-			collider.getHandle());
+	auto* controller = new VehicleController(ghostObject, collider.getHandle());
 
 	dynamicsWorld.addCollisionObject(ghostObject);
 	//dynamicsWorld.addCollisionObject(ghostObject, btBroadphaseProxy::CharacterFilter,
 	//		btBroadphaseProxy::StaticFilter | btBroadphaseProxy::DefaultFilter);
 	dynamicsWorld.addAction(controller);
 
-	vehicleControllers[ghostObject] = controller;
+	actionInterfaces[ghostObject] = controller;
 
-	return {controller};
+	return controller;
 }
 
 void PhysicsEngine::step(float deltaTime) {
@@ -109,8 +110,9 @@ void PhysicsEngine::setGravity(const Vector3f& gravity) {
 	dynamicsWorld.setGravity(Physics::nativeToBtVec3(gravity));
 }
 
-KinematicVehicleController* PhysicsEngine::findVehicleController(const btGhostObject* ghostObject) {
-	if (auto it = vehicleControllers.find(ghostObject); it != vehicleControllers.end()) {
+btActionInterface* PhysicsEngine::findActionInterface(const btGhostObject* ghostObject) {
+	if (auto it = actionInterfaces.find(ghostObject);
+			it != actionInterfaces.end()) {
 		return it->second;
 	}
 

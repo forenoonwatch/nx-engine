@@ -766,8 +766,7 @@ bool KinematicCharacterController::canJump() const {
 	return onGround();
 }
 
-void KinematicCharacterController::jump(const btVector3& v)
-{
+void KinematicCharacterController::jump(const btVector3& v) {
 	m_jumpSpeed = v.length2() == 0 ? m_SetjumpSpeed : v.length();
 	m_verticalVelocity = m_jumpSpeed;
 	m_wasJumping = true;

@@ -31,6 +31,7 @@ RenderContext::RenderContext()
 	glEnable(GL_DEPTH_TEST);
 
 	glEnable(GL_TEXTURE_2D);
+	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 
 	//glEnable(GL_DEBUG_OUTPUT);
 	//glDebugMessageCallback(errorCallback, 0);
